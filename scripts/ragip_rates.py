@@ -3,6 +3,15 @@
 Ragıp Aga — Canlı Faiz & Piyasa Veri Çekici
 Kaynaklar: TCMB EVDS (resmi) + CollectAPI (banka mevduat/kredi oranları)
 
+Taşınabilir tek dosya modülü — herhangi bir repoya kopyala-yapıştır ile taşınabilir.
+Sıfır bağımlılık (sadece stdlib), tek dosya.
+
+Taşıma:
+  1. Bu dosyayı kopyala:  cp ragip_rates.py /yeni-repo/scripts/
+  2. API key tanımla:     export TCMB_API_KEY=xxx
+  3. (Opsiyonel) Cache:   export RAGIP_CACHE_DIR=/yeni-repo/data/cache
+  4. Test:                python3 ragip_rates.py --pretty
+
 Kullanım:
   python3 ragip_rates.py              → JSON çıktı (skill'ler için)
   python3 ragip_rates.py --pretty     → Okunabilir tablo
@@ -19,22 +28,32 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-ROOT = Path(__file__).parent.parent
-CACHE_FILE       = ROOT / "data" / "RAGIP_AGA" / "rates_cache.json"
-MEVDUAT_CACHE    = ROOT / "data" / "RAGIP_AGA" / "mevduat_cache.json"
-KREDI_CACHE      = ROOT / "data" / "RAGIP_AGA" / "kredi_cache.json"
+__all__ = [
+    "FALLBACK_RATES", "SERIES", "CACHE_DIR",
+    "get_rates", "get_mevduat", "get_kredi",
+    "fetch_tcmb", "fetch_series", "fetch_collectapi",
+    "eur_usd_cross", "en_yuksek_mevduat",
+    "format_pretty", "format_mevduat", "format_kredi",
+    "load_cache", "save_cache",
+]
+
+CACHE_DIR = Path(os.environ.get("RAGIP_CACHE_DIR", str(Path(__file__).parent / ".ragip_cache")))
+CACHE_FILE       = CACHE_DIR / "rates_cache.json"
+MEVDUAT_CACHE    = CACHE_DIR / "mevduat_cache.json"
+KREDI_CACHE      = CACHE_DIR / "kredi_cache.json"
 CACHE_TTL_HOURS  = 4    # Faiz oranları 4 saatte bir yenile
 MARKET_TTL_HOURS = 12   # Mevduat/kredi oranları 12 saatte bir yenile
 
-# ─── TCMB EVDS Seri Kodları ───────────────────────────────────────────────────
+# ─── TCMB EVDS3 Seri Kodları ─────────────────────────────────────────────────
+# EVDS3 migration (Şubat 2026): evds2 → evds3.tcmb.gov.tr/igmevdsms-dis/
+# Eski TP.APF.* serileri kaldırıldı, yeni karşılıklar:
 SERIES = {
-    "politika_faizi":       "TP.APF.TRL01",    # 1 haftalık repo faizi
-    "gece_faizi_borcverme": "TP.APF.TRL05",    # Gecelik borç verme faizi
-    "gece_faizi_borclama":  "TP.APF.TRL03",    # Gecelik borçlanma faizi
-    "usd_kuru":             "TP.DK.USD.A.YTL", # USD/TRY
-    "eur_kuru":             "TP.DK.EUR.A.YTL", # EUR/TRY
+    "politika_faizi":       "TP.APIFON4",      # TCMB Ağırlıklı Ort. Fonlama Maliyeti
+    "reeskont_orani":       "TP.REESAVANS.RIO", # Reeskont iskonto oranı
+    "avans_faizi":          "TP.REESAVANS.AFO", # Avans faiz oranı (yasal gecikme ref.)
+    "usd_kuru":             "TP.DK.USD.A.YTL",  # USD/TRY
+    "eur_kuru":             "TP.DK.EUR.A.YTL",  # EUR/TRY
 }
-SERIES_YASAL = "TP.MB.B.AOFAB"  # MB avans/temerrüt faizi
 
 # ─── CollectAPI Endpoints ─────────────────────────────────────────────────────
 COLLECTAPI_BASE = "https://api.collectapi.com/credit"
@@ -45,34 +64,16 @@ COLLECTAPI_ENDPOINTS = {
 
 # ─── Fallback Değerler ────────────────────────────────────────────────────────
 FALLBACK_RATES = {
-    "politika_faizi":       42.50,
-    "gece_faizi_borcverme": 45.00,
-    "gece_faizi_borclama":  41.00,
-    "yasal_gecikme_faizi":  52.00,
-    "usd_kuru":             38.50,
-    "eur_kuru":             40.80,
+    "politika_faizi":       37.00,
+    "reeskont_orani":       38.75,
+    "avans_faizi":          39.75,
+    "yasal_gecikme_faizi":  39.75,
+    "usd_kuru":             43.69,
+    "eur_kuru":             51.48,
     "kaynak":               "fallback",
-    "guncelleme":           "Manuel — Şubat 2026",
-    "uyari":                "TCMB_API_KEY eksik. Kayıt: https://evds2.tcmb.gov.tr"
+    "guncelleme":           "Manuel — 21 Şubat 2026",
+    "uyari":                "TCMB_API_KEY eksik. Kayıt: https://evds3.tcmb.gov.tr"
 }
-
-
-# ─── Yardımcı: .env okuyucu ──────────────────────────────────────────────────
-
-def get_env_key(key_name: str) -> str | None:
-    """Ortam değişkeni veya .env dosyasından key al."""
-    val = os.environ.get(key_name, "").strip()
-    if val:
-        return val
-    env_file = ROOT / ".env"
-    if env_file.exists():
-        for line in env_file.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line.startswith(f"{key_name}="):
-                v = line.split("=", 1)[1].strip().strip('"').strip("'")
-                if v:
-                    return v
-    return None
 
 
 # ─── Cache yardımcıları ───────────────────────────────────────────────────────
@@ -92,17 +93,20 @@ def load_cache(path: Path, ttl_hours: int) -> dict | None:
 
 def save_cache(path: Path, data: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp = path.with_suffix('.tmp')
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.rename(path)
 
 
 # ─── TCMB EVDS ───────────────────────────────────────────────────────────────
 
 def fetch_series(series_code: str, api_key: str) -> float | None:
+    """EVDS3 API'den tek seri verisi çek. Son 30 günün en güncel değerini döndür."""
     today = datetime.date.today()
-    start = (today - datetime.timedelta(days=14)).strftime("%d-%m-%Y")
+    start = (today - datetime.timedelta(days=30)).strftime("%d-%m-%Y")
     end = today.strftime("%d-%m-%Y")
     url = (
-        f"https://evds2.tcmb.gov.tr/service/evds/"
+        f"https://evds3.tcmb.gov.tr/igmevdsms-dis/"
         f"series={series_code}&startDate={start}&endDate={end}&type=json"
     )
     try:
@@ -110,13 +114,15 @@ def fetch_series(series_code: str, api_key: str) -> float | None:
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read().decode())
         for item in reversed(data.get("items", [])):
-            for v in item.values():
+            for k, v in item.items():
+                if k in ("Tarih", "UNIXTIME") or v is None:
+                    continue
                 try:
                     return float(str(v).replace(",", "."))
                 except (ValueError, TypeError):
                     continue
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[rates] EVDS3 hata ({series_code}): {e}", file=sys.stderr)
     return None
 
 
@@ -129,14 +135,13 @@ def fetch_tcmb(api_key: str) -> dict:
             rates[name] = val
         else:
             errors.append(name)
-    # Yasal gecikme faizi
-    val = fetch_series(SERIES_YASAL, api_key)
-    if val is not None:
-        rates["yasal_gecikme_faizi"] = val
-    elif "gece_faizi_borcverme" in rates:
-        rates["yasal_gecikme_faizi"] = rates["gece_faizi_borcverme"] + 30.0
-        rates["yasal_gecikme_notu"] = "Hesaplama: gecelik borç verme + 30 puan"
-    rates["kaynak"] = "TCMB EVDS"
+    # Yasal gecikme faizi = avans faizi (3095 s.K. referansı)
+    if "avans_faizi" in rates:
+        rates["yasal_gecikme_faizi"] = rates["avans_faizi"]
+    else:
+        rates["yasal_gecikme_faizi"] = FALLBACK_RATES["yasal_gecikme_faizi"]
+        rates["yasal_gecikme_notu"] = "Fallback: avans faizi alınamadı"
+    rates["kaynak"] = "TCMB EVDS3"
     rates["guncelleme"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     if errors:
         rates["eksik_seriler"] = errors
@@ -168,7 +173,7 @@ def get_mevduat(force_refresh: bool = False) -> dict:
             cached["_cache_hit"] = True
             return cached
 
-    api_key = get_env_key("COLLECTAPI_KEY")
+    api_key = os.environ.get("COLLECTAPI_KEY", "").strip() or None
     if not api_key:
         return {"hata": "COLLECTAPI_KEY eksik", "kaynak": "fallback"}
 
@@ -192,7 +197,7 @@ def get_kredi(force_refresh: bool = False) -> dict:
             cached["_cache_hit"] = True
             return cached
 
-    api_key = get_env_key("COLLECTAPI_KEY")
+    api_key = os.environ.get("COLLECTAPI_KEY", "").strip() or None
     if not api_key:
         return {"hata": "COLLECTAPI_KEY eksik", "kaynak": "fallback"}
 
@@ -224,6 +229,17 @@ def en_yuksek_mevduat(mevduat_list: list, vade_gun: int = 32) -> dict | None:
     return best
 
 
+def eur_usd_cross(rates: dict = None) -> float:
+    """EUR/USD = EUR/TRY / USD/TRY (TCMB verilerinden)."""
+    if rates is None:
+        rates = get_rates()
+    eur_try = rates.get("eur_kuru", FALLBACK_RATES["eur_kuru"])
+    usd_try = rates.get("usd_kuru", FALLBACK_RATES["usd_kuru"])
+    if usd_try <= 0:
+        return 0.0
+    return round(eur_try / usd_try, 4)
+
+
 # ─── Ana Faiz Çekici ─────────────────────────────────────────────────────────
 
 def get_rates(force_refresh: bool = False) -> dict:
@@ -234,7 +250,7 @@ def get_rates(force_refresh: bool = False) -> dict:
             cached["_cache_hit"] = True
             return cached
 
-    api_key = get_env_key("TCMB_API_KEY")
+    api_key = os.environ.get("TCMB_API_KEY", "").strip() or None
     if api_key:
         try:
             rates = fetch_tcmb(api_key)
@@ -264,9 +280,9 @@ def format_pretty(rates: dict) -> str:
         elif v:
             lines.append(f"  {label:<28}: {v}")
 
-    flt("politika_faizi",       "Politika Faizi (1h repo)")
-    flt("gece_faizi_borcverme", "Gecelik Borç Verme")
-    flt("gece_faizi_borclama",  "Gecelik Borçlanma")
+    flt("politika_faizi",       "Politika Faizi (TCMB fonlama)")
+    flt("reeskont_orani",       "Reeskont Oranı")
+    flt("avans_faizi",          "Avans Faizi")
     flt("yasal_gecikme_faizi",  "Yasal Gecikme Faizi")
     flt("usd_kuru",             "USD/TRY", prefix=" ")
     flt("eur_kuru",             "EUR/TRY", prefix=" ")
@@ -323,12 +339,19 @@ def format_kredi(data: dict) -> str:
 # ─── CLI ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    force   = "--refresh"  in sys.argv
-    pretty  = "--pretty"   in sys.argv
-    mevduat = "--mevduat"  in sys.argv
-    kredi   = "--kredi"    in sys.argv
+    force    = "--refresh"  in sys.argv
+    pretty   = "--pretty"   in sys.argv
+    mevduat  = "--mevduat"  in sys.argv
+    kredi    = "--kredi"    in sys.argv
+    eur_usd  = "--eur-usd"  in sys.argv
 
-    if mevduat:
+    if eur_usd:
+        rates = get_rates(force_refresh=force)
+        out = {k: v for k, v in rates.items() if not k.startswith("_")}
+        out["eur_usd"] = eur_usd_cross(rates)
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+
+    elif mevduat:
         data = get_mevduat(force_refresh=force)
         if pretty or True:  # mevduat always pretty
             print(format_mevduat(data))

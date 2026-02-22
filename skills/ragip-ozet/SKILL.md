@@ -26,6 +26,20 @@ from pathlib import Path
 _ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
 firma_dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
 gorev_dosya = Path(_ROOT) / 'data/RAGIP_AGA/gorevler.jsonl'
+profil_dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
+
+# --- PROFIL ---
+if profil_dosya.exists():
+    p = json.loads(profil_dosya.read_text(encoding='utf-8'))
+    doviz = p.get('doviz_riski', {})
+    doviz_str = ', '.join(doviz.get('para_birimleri', [])) if doviz.get('var') else 'Yok'
+    print(f'FIRMA PROFILI: {p.get(\"firma_adi\", \"-\")}')
+    print(f'  Sektor: {p.get(\"sektor\", \"-\")} | Is: {p.get(\"is_tipi\", \"-\")} | Doviz: {doviz_str}')
+    print(f'  Buyukluk: {p.get(\"firma_buyuklugu\", \"-\")} | Musteri: {p.get(\"musteri_tipi\", \"-\")}')
+    print()
+else:
+    print('FIRMA PROFILI: Tanimlanmamis (/ragip-profil kaydet)')
+    print()
 
 # --- FIRMALAR ---
 firmalar = []
@@ -67,12 +81,12 @@ oncelik_icon = {'yuksek': '!', 'orta': '~', 'dusuk': '+'}
 from datetime import date
 bugun = str(date.today())
 
+geciken = 0
 print(f'AKTIF GOREVLER ({len(aktif)})')
 if not aktif:
     print('  Aktif gorev yok.')
 else:
     print('-' * 40)
-    geciken = 0
     for g in sorted(aktif, key=lambda x: x.get('son_tarih', '')):
         icon = oncelik_icon.get(g.get('oncelik', 'orta'), '?')
         st = g.get('son_tarih', '')
@@ -100,7 +114,7 @@ print(f'  Toplam firma    : {len(firmalar)}')
 print(f'  Yuksek riskli   : {risk_sayac[\"yuksek\"]}')
 print(f'  Aktif gorev     : {len(aktif)}')
 print(f'  Tamamlanan      : {len(tamamlanan)}')
-print(f'  Geciken gorev   : {geciken if aktif else 0}')
+print(f'  Geciken gorev   : {geciken}')
 print()
 print('HIZLI KOMUTLAR')
 print('  /ragip-firma listele       — Tum firma kartlari')

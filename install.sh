@@ -51,7 +51,7 @@ mkdir -p "$HEDEF/.claude/agents"
 cp "$SCRIPT_DIR"/agents/ragip-*.md "$HEDEF/.claude/agents/"
 
 # 2. Skills
-info "Skill dosyalari kopyalaniyor (9 skill)..."
+info "Skill dosyalari kopyalaniyor (11 skill)..."
 for skill_dir in "$SCRIPT_DIR"/skills/ragip-*/; do
     skill_name=$(basename "$skill_dir")
     mkdir -p "$HEDEF/.claude/skills/$skill_name"
@@ -90,9 +90,14 @@ if [ -f "$HEDEF/.gitignore" ]; then
     else
         info ".gitignore zaten data/RAGIP_AGA/ iceriyor"
     fi
+    if ! grep -q "scripts/.ragip_cache/" "$HEDEF/.gitignore" 2>/dev/null; then
+        echo "scripts/.ragip_cache/" >> "$HEDEF/.gitignore"
+        info ".gitignore guncellendi (scripts/.ragip_cache/ eklendi)"
+    fi
 else
     echo "# Ragip Aga runtime data" > "$HEDEF/.gitignore"
     echo "data/RAGIP_AGA/" >> "$HEDEF/.gitignore"
+    echo "scripts/.ragip_cache/" >> "$HEDEF/.gitignore"
     info ".gitignore olusturuldu"
 fi
 
@@ -103,7 +108,7 @@ info "Ragip Aga basariyla kuruldu!"
 echo "================================================"
 echo ""
 echo "  Agents:  4  (.claude/agents/ragip-*.md)"
-echo "  Skills:  9  (.claude/skills/ragip-*/SKILL.md)"
+echo "  Skills:  11 (.claude/skills/ragip-*/SKILL.md)"
 echo "  Scripts: 2  (scripts/ragip_*.py)"
 echo "  Config:  1  (config/ragip_aga.yaml)"
 echo ""
@@ -111,6 +116,8 @@ echo "Kullanim:"
 echo "  /ragip-firma listele          — Firma kartlari"
 echo "  /ragip-gorev listele          — Gorev takibi"
 echo "  /ragip-vade-farki 250000 3 45 — Vade farki hesapla"
+echo "  /ragip-arbitraj               — Arbitraj firsatlari"
+echo "  /ragip-profil ABC Dagitim     — Firma profili"
 echo "  /ragip-ozet                   — Gunluk brifing"
 echo ""
 echo "Dogrulama:"

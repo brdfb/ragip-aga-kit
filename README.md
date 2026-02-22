@@ -25,7 +25,7 @@ python -m pytest tests/test_ragip_subagents.py -v
 | Tip | Sayi | Konum |
 |-----|------|-------|
 | Agent | 4 | `.claude/agents/ragip-*.md` |
-| Skill | 9 | `.claude/skills/ragip-*/SKILL.md` |
+| Skill | 11 | `.claude/skills/ragip-*/SKILL.md` |
 | Script | 2 | `scripts/ragip_*.py` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Test | 3+5 | `tests/` |
@@ -40,6 +40,8 @@ python -m pytest tests/test_ragip_subagents.py -v
 /ragip-gorev ekle Avukata gonder        — Gorev ekle
 /ragip-gorev listele                    — Aktif gorevler
 /ragip-vade-farki 250000 3 45           — Vade farki hesapla
+/ragip-arbitraj                         — Arbitraj firsatlari (CIP, ucgen kur, carry trade)
+/ragip-profil ABC Dagitim               — Sektor-aware firma profili
 /ragip-ozet                             — Gunluk brifing
 /ragip-import dosya.csv                 — CSV/Excel import
 ```
@@ -60,11 +62,13 @@ python -m pytest tests/test_ragip_subagents.py -v
 ragip-aga (orchestrator, sonnet)
   |
   +-- ragip-hesap (haiku) -------- ragip-vade-farki
+  |                                ragip-arbitraj
   |
   +-- ragip-arastirma (sonnet) --- ragip-analiz
   |                                ragip-dis-veri
   |                                ragip-strateji
   |                                ragip-ihtar
+  |                                ragip-profil
   |
   +-- ragip-veri (haiku) --------- ragip-firma
                                    ragip-gorev
@@ -91,7 +95,16 @@ pyyaml>=6.0          # Konfigurasyon
 
 Tum path'ler `git rev-parse --show-toplevel` ile cozumlenir. Herhangi bir git reposuna kurulabilir, hardcoded path yoktur.
 
-Runtime veri (`data/RAGIP_AGA/`) otomatik olusturulur ve `.gitignore`'a eklenir.
+`ragip_rates.py` standalone calisabilir — sifir bagimlilik, tek dosya:
+```bash
+# Sadece TCMB oranlarini kullanmak icin:
+cp scripts/ragip_rates.py /yeni-repo/scripts/
+export TCMB_API_KEY=xxx                    # EVDS API anahtari
+export RAGIP_CACHE_DIR=/yeni-repo/.cache   # Opsiyonel, varsayilan: scripts/.ragip_cache/
+python3 scripts/ragip_rates.py --pretty
+```
+
+Runtime veri (`data/RAGIP_AGA/`, `scripts/.ragip_cache/`) otomatik olusturulur ve `.gitignore`'a eklenir.
 
 ## Lisans
 

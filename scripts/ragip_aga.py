@@ -17,6 +17,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "scripts"))
+
+try:
+    from ragip_rates import FALLBACK_RATES as _FB
+except ImportError:
+    _FB = {"politika_faizi": 37.0, "usd_kuru": 43.69, "eur_kuru": 51.48}
 
 
 # ─── TCMB Faiz Verisi ────────────────────────────────────────────────────────
@@ -38,14 +44,20 @@ def get_tcmb_rates_with_search(force_refresh: bool = False) -> dict:
     except Exception as e:
         print(f"[UYARI] Rate fetcher hatası: {e}", file=sys.stderr)
 
-    # Son çare fallback
-    return {
-        "politika_faizi": 42.5,
-        "yasal_gecikme_faizi": 52.0,
-        "kaynak": "fallback",
-        "guncelleme": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "uyari": "TCMB_API_KEY eksik. Kayıt: https://evds2.tcmb.gov.tr"
-    }
+    # Son çare fallback — ragip_rates.py'deki tek kaynak kullan
+    try:
+        from ragip_rates import FALLBACK_RATES
+        fallback = FALLBACK_RATES.copy()
+        fallback["guncelleme"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        return fallback
+    except ImportError:
+        return {
+            "politika_faizi": 37.00,
+            "yasal_gecikme_faizi": 39.75,
+            "kaynak": "fallback",
+            "guncelleme": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "uyari": "TCMB_API_KEY eksik. Kayıt: https://evds3.tcmb.gov.tr"
+        }
 
 
 # ─── Finansal Hesap Motoru ────────────────────────────────────────────────────
@@ -55,8 +67,8 @@ class FinansalHesap:
 
     @staticmethod
     def _validate_positive(value: float, name: str) -> None:
-        if value < 0:
-            raise ValueError(f"{name} negatif olamaz: {value}")
+        if value <= 0:
+            raise ValueError(f"{name} sifir veya negatif olamaz: {value}")
 
     @staticmethod
     def _validate_non_negative_int(value: int, name: str) -> None:
@@ -107,7 +119,7 @@ class FinansalHesap:
             "yillik_oran_pct": yillik_oran_pct,
             "gun": gun,
             "firsatmaliyeti_tl": round(maliyet, 2),
-            "gunluk_tl": round(maliyet / gun, 2),
+            "gunluk_tl": round(maliyet / gun, 2) if gun > 0 else 0.0,
         }
 
     @staticmethod
@@ -305,6 +317,256 @@ class FinansalHesap:
             "yorum": f"1 USD mal = {birim_maliyet_tl:.4f} TL toplam maliyet",
         }
 
+    # ─── Arbitraj Hesaplamalari ─────────────────────────────────────────────
+
+    @staticmethod
+    def covered_interest_arbitrage(
+        spot: float,
+        market_forward: float,
+        r_tl_pct: float,
+        r_usd_pct: float,
+        gun: int,
+        islem_maliyeti_pct: float = 0.1,
+    ) -> dict:
+        """
+        Covered Interest Parity (CIP) arbitraji.
+        Teorik forward kuru ile piyasa forward kurunu karsilastir.
+
+        spot: Guncel doviz kuru
+        market_forward: Piyasadaki gercek forward kuru
+        r_tl_pct: TL yillik faiz orani %
+        r_usd_pct: USD yillik faiz orani %
+        gun: Vade gun sayisi
+        islem_maliyeti_pct: Islem maliyeti % (spread+komisyon, varsayilan 0.1)
+        """
+        FinansalHesap._validate_positive(spot, "spot")
+        FinansalHesap._validate_positive(market_forward, "market_forward")
+        FinansalHesap._validate_rate(r_tl_pct, "r_tl_pct")
+        FinansalHesap._validate_rate(r_usd_pct, "r_usd_pct")
+        FinansalHesap._validate_non_negative_int(gun, "gun")
+
+        t = gun / 365
+        r_tl = r_tl_pct / 100
+        r_usd = r_usd_pct / 100
+        denom = 1 + r_usd * t
+        if denom == 0:
+            raise ValueError("Payda sifir: r_usd ve gun kombinasyonu gecersiz")
+        teorik = spot * (1 + r_tl * t) / denom
+        sapma_pct = ((market_forward - teorik) / teorik) * 100 if teorik != 0 else 0.0
+        arbitraj_var = abs(sapma_pct) > islem_maliyeti_pct
+        tahmini_kar_pct = round(abs(sapma_pct) - islem_maliyeti_pct, 4) if arbitraj_var else 0.0
+
+        if sapma_pct > 0:
+            yon = "TL'ye yatir, forward sat"
+        elif sapma_pct < 0:
+            yon = "USD'ye yatir, forward al"
+        else:
+            yon = "Denge — yon yok"
+
+        return {
+            "spot_kur": spot,
+            "market_forward": market_forward,
+            "teorik_forward": round(teorik, 4),
+            "sapma_pct": round(sapma_pct, 4),
+            "islem_maliyeti_pct": islem_maliyeti_pct,
+            "arbitraj_var": arbitraj_var,
+            "yon": yon,
+            "tahmini_kar_pct": tahmini_kar_pct,
+            "yorum": (
+                f"Piyasa forward ({market_forward:.4f}) teorikten "
+                f"{'yuksek' if sapma_pct > 0 else 'dusuk'} (%{abs(sapma_pct):.3f} sapma). "
+                + (f"Arbitraj firsati: {yon}, tahmini kar %{tahmini_kar_pct:.3f}" if arbitraj_var
+                   else f"Sapma islem maliyetinden (%{islem_maliyeti_pct}) kucuk — arbitraj yok")
+            ),
+        }
+
+    @staticmethod
+    def ucgen_kur_arbitraji(
+        usd_try: float,
+        eur_try: float,
+        eur_usd: float,
+        islem_maliyeti_pct: float = 0.15,
+    ) -> dict:
+        """
+        Ucgen kur arbitraji: EUR-USD-TRY ucgeninde tutarsizlik tespiti.
+
+        usd_try: USD/TRY kuru
+        eur_try: EUR/TRY kuru
+        eur_usd: EUR/USD kuru
+        islem_maliyeti_pct: Bacak basina islem maliyeti % (varsayilan 0.15)
+        """
+        FinansalHesap._validate_positive(usd_try, "usd_try")
+        FinansalHesap._validate_positive(eur_try, "eur_try")
+        FinansalHesap._validate_positive(eur_usd, "eur_usd")
+
+        dolayli_eur_try = eur_usd * usd_try
+        sapma_pct = ((eur_try - dolayli_eur_try) / dolayli_eur_try) * 100
+
+        baslangic = 1_000_000  # 1M EUR
+        # Yol A: EUR→USD→TRY→EUR
+        usd_a = baslangic * eur_usd
+        tl_a = usd_a * usd_try
+        son_eur_a = tl_a / eur_try
+        kar_a_pct = ((son_eur_a - baslangic) / baslangic) * 100
+
+        # Yol B: EUR→TRY→USD→EUR
+        tl_b = baslangic * eur_try
+        usd_b = tl_b / usd_try
+        son_eur_b = usd_b / eur_usd
+        kar_b_pct = ((son_eur_b - baslangic) / baslangic) * 100
+
+        toplam_islem_maliyeti = islem_maliyeti_pct * 3  # 3 bacak
+        if kar_a_pct >= kar_b_pct:
+            brut_kar = kar_a_pct
+            en_iyi_yol = "EUR→USD→TRY→EUR"
+        else:
+            brut_kar = kar_b_pct
+            en_iyi_yol = "EUR→TRY→USD→EUR"
+
+        net_kar_pct = brut_kar - toplam_islem_maliyeti
+        arbitraj_var = net_kar_pct > 0
+
+        return {
+            "usd_try": usd_try,
+            "eur_try": eur_try,
+            "eur_usd": eur_usd,
+            "dolayli_eur_try": round(dolayli_eur_try, 4),
+            "sapma_pct": round(sapma_pct, 4),
+            "yol_a_kar_pct": round(kar_a_pct, 4),
+            "yol_b_kar_pct": round(kar_b_pct, 4),
+            "en_iyi_yol": en_iyi_yol,
+            "brut_kar_pct": round(brut_kar, 4),
+            "islem_maliyeti_toplam_pct": round(toplam_islem_maliyeti, 4),
+            "net_kar_pct": round(net_kar_pct, 4),
+            "arbitraj_var": arbitraj_var,
+            "yorum": (
+                f"Dogrudan EUR/TRY ({eur_try:.4f}) vs dolayli ({dolayli_eur_try:.4f}): "
+                f"%{abs(sapma_pct):.3f} sapma. "
+                + (f"Arbitraj firsati: {en_iyi_yol}, net kar %{net_kar_pct:.3f}"
+                   if arbitraj_var
+                   else f"Net kar ({net_kar_pct:.3f}%) islem maliyetini karsilamiyor")
+            ),
+        }
+
+    @staticmethod
+    def vade_mevduat_arbitraji(
+        anapara: float,
+        vade_farki_oran_pct: float,
+        gun: int,
+        mevduat_oran_pct: float,
+    ) -> dict:
+        """
+        Vade farki vs mevduat arbitraji.
+        Tedarikciye vade farkiyla gec ode mi, yoksa parayi mevduata yatirip
+        erken ode mi daha karli?
+
+        anapara: Fatura tutari TL
+        vade_farki_oran_pct: Aylik vade farki orani % (ornek: 3.0)
+        gun: Vade gun sayisi
+        mevduat_oran_pct: Yillik mevduat faiz orani % (ornek: 45.0)
+        """
+        FinansalHesap._validate_positive(anapara, "anapara")
+        FinansalHesap._validate_rate(vade_farki_oran_pct, "vade_farki_oran_pct")
+        FinansalHesap._validate_non_negative_int(gun, "gun")
+        FinansalHesap._validate_rate(mevduat_oran_pct, "mevduat_oran_pct")
+
+        vade_farki = anapara * (vade_farki_oran_pct / 100) * gun / 30
+        mevduat_getiri = anapara * (mevduat_oran_pct / 100) * gun / 365
+        net_fark = mevduat_getiri - vade_farki
+        vade_farki_yillik = vade_farki_oran_pct * 12
+        karar = (
+            "Parayi mevduata yatir, tedarikciye gec ode"
+            if net_fark > 0
+            else "Erken ode, vade farkindan kurtul"
+        )
+
+        return {
+            "anapara": anapara,
+            "gun": gun,
+            "vade_farki_oran_aylik_pct": vade_farki_oran_pct,
+            "vade_farki_yillik_pct": round(vade_farki_yillik, 2),
+            "mevduat_oran_yillik_pct": mevduat_oran_pct,
+            "vade_farki_maliyeti_tl": round(vade_farki, 2),
+            "mevduat_getirisi_tl": round(mevduat_getiri, 2),
+            "net_fark_tl": round(net_fark, 2),
+            "karar": karar,
+            "yorum": (
+                f"Vade farki maliyeti: {vade_farki:,.2f} TL (~%{vade_farki_yillik:.0f}/yil), "
+                f"Mevduat getirisi: {mevduat_getiri:,.2f} TL (%{mevduat_oran_pct}/yil). "
+                f"Net fark: {net_fark:,.2f} TL → {karar}"
+            ),
+        }
+
+    @staticmethod
+    def carry_trade_analizi(
+        spot: float,
+        r_tl_pct: float,
+        r_usd_pct: float,
+        gun: int,
+        beklenen_kur: float | None = None,
+    ) -> dict:
+        """
+        Carry trade analizi: USD borc al, TL'ye cevir, TL mevduata yatir.
+
+        spot: Guncel USD/TRY kuru
+        r_tl_pct: TL yillik faiz orani %
+        r_usd_pct: USD yillik borc maliyeti %
+        gun: Yatirim suresi (gun)
+        beklenen_kur: Kullanicinin beklenen kur tahmini (opsiyonel)
+        """
+        FinansalHesap._validate_positive(spot, "spot")
+        FinansalHesap._validate_rate(r_tl_pct, "r_tl_pct")
+        FinansalHesap._validate_rate(r_usd_pct, "r_usd_pct")
+        FinansalHesap._validate_non_negative_int(gun, "gun")
+
+        t = gun / 365
+        r_tl = r_tl_pct / 100
+        r_usd = r_usd_pct / 100
+
+        # 1 USD borc al, TL'ye cevir, mevduata yatir
+        tl_yatirim = spot * (1 + r_tl * t)  # gun sonra TL birikimi
+        usd_borc = 1 + r_usd * t             # gun sonra USD borcu
+
+        # Basabas kur = TL'yi USD'ye cevirdikde borcu tam karsilayan kur
+        basabas_kur = tl_yatirim / usd_borc if usd_borc > 0 else spot
+
+        # Unhedged: kur spot'ta kalirsa
+        unhedged_usd = tl_yatirim / spot if spot > 0 else 0
+        unhedged_kar_pct = ((unhedged_usd - usd_borc) / 1) * 100
+
+        result = {
+            "spot_kur": spot,
+            "r_tl_pct": r_tl_pct,
+            "r_usd_pct": r_usd_pct,
+            "gun": gun,
+            "tl_birikim": round(tl_yatirim, 4),
+            "usd_borc": round(usd_borc, 6),
+            "basabas_kur": round(basabas_kur, 4),
+            "unhedged_kar_pct": round(unhedged_kar_pct, 4),
+            "beklenen_kur_kar_pct": None,
+            "yorum": "",
+        }
+
+        yorum_parts = [
+            f"1 USD borc al ({spot:.2f} TL), {gun} gun sonra {tl_yatirim:.2f} TL birikir. "
+            f"Basabas kur: {basabas_kur:.4f}. "
+            f"Kur sabit kalirsa kar: %{unhedged_kar_pct:.2f}."
+        ]
+
+        if beklenen_kur is not None and beklenen_kur > 0:
+            beklenen_usd = tl_yatirim / beklenen_kur
+            beklenen_kar_pct = ((beklenen_usd - usd_borc) / 1) * 100
+            result["beklenen_kur_kar_pct"] = round(beklenen_kar_pct, 4)
+            yorum_parts.append(
+                f" Beklenen kur ({beklenen_kur:.2f}) ile kar: %{beklenen_kar_pct:.2f}."
+            )
+
+        if basabas_kur > spot * 1.15:
+            yorum_parts.append(" UYARI: Basabas kuru spot'tan %15+ yukarda — kur riski yuksek.")
+
+        result["yorum"] = "".join(yorum_parts)
+        return result
+
 
 # ─── Dosya Okuma ─────────────────────────────────────────────────────────────
 
@@ -321,6 +583,11 @@ def _parse_turkish_number(s: str) -> float:
     last_comma = s.rfind(',')
 
     if last_dot > last_comma:
+        # Belirsizlik kontrolu: noktadan sonra tam 3 basamak varsa TR binlik ayirici
+        after_dot = s[last_dot + 1:]
+        if last_comma == -1 and len(after_dot) == 3 and after_dot.isdigit():
+            # TR format: 45.000 -> 45000 (binlik ayirici)
+            return float(s.replace('.', ''))
         # EN format: 45,000.00 — virgul binlik, nokta ondalik
         return float(s.replace(',', ''))
     elif last_comma > last_dot:
@@ -673,6 +940,10 @@ def main():
   ragip --calc ncd --dio 45 --dso 30 --dpo 60
   ragip --calc doviz --usd-tutar 10000 --gun 90
   ragip --calc ithalat --usd-tutar 50000 --navlun 3000 --gtip-vergi 10
+  ragip --calc cip-arbitraj --market-forward 45.50 --gun 90
+  ragip --calc ucgen-arbitraj
+  ragip --calc vade-mevduat --anapara 500000 --oran 3 --gun 60
+  ragip --calc carry-trade --gun 90 --beklenen-kur 46.0
   ragip --tcmb
   ragip --interactive
   ragip --history
@@ -692,11 +963,14 @@ def main():
     parser.add_argument("--save-to", type=str, help="Yanıtı dosyaya kaydet")
     parser.add_argument("--tcmb", action="store_true",
                         help="Güncel TCMB faiz oranlarını göster")
+    parser.add_argument("--profil", action="store_true",
+                        help="Firma profilini göster")
 
     # Hesaplama modu
     parser.add_argument("--calc", type=str,
-                        choices=["vade-farki", "tvm", "iskonto", "indiferans", "ncd", "doviz", "ithalat"],
-                        help="Finansal hesaplama: vade-farki | tvm | iskonto | indiferans | ncd | doviz | ithalat")
+                        choices=["vade-farki", "tvm", "iskonto", "indiferans", "ncd", "doviz", "ithalat",
+                                 "cip-arbitraj", "ucgen-arbitraj", "vade-mevduat", "carry-trade"],
+                        help="Finansal hesaplama: vade-farki | tvm | iskonto | indiferans | ncd | doviz | ithalat | cip-arbitraj | ucgen-arbitraj | vade-mevduat | carry-trade")
     parser.add_argument("--anapara", type=float, help="Ana para tutarı (TL)")
     parser.add_argument("--oran", type=float, help="Aylık faiz oranı (%%)")
     parser.add_argument("--gun", type=int, help="Gün sayısı")
@@ -711,6 +985,13 @@ def main():
     parser.add_argument("--usd-faiz", type=float, default=4.5, help="USD yıllık faiz %% (varsayılan: 4.5)")
     parser.add_argument("--navlun", type=float, default=0, help="Navlun USD")
     parser.add_argument("--gtip-vergi", type=float, default=0, help="GTIP gümrük vergisi %%")
+
+    # Arbitraj argumanlari
+    parser.add_argument("--market-forward", type=float, help="Piyasa forward kuru (CIP arbitraj)")
+    parser.add_argument("--eur-usd", type=float, help="EUR/USD kuru (ucgen arbitraj)")
+    parser.add_argument("--mevduat-oran", type=float, help="Yillik mevduat faiz orani %%")
+    parser.add_argument("--beklenen-kur", type=float, help="Beklenen kur (carry trade)")
+    parser.add_argument("--islem-maliyeti", type=float, default=0.1, help="Islem maliyeti %% (varsayilan: 0.1)")
 
     args = parser.parse_args()
     config = load_config()
@@ -738,19 +1019,49 @@ def main():
                 pass
         return
 
+    # ── Firma profili ──
+    if args.profil:
+        profil_file = ROOT / "data" / "RAGIP_AGA" / "profil.json"
+        if not profil_file.exists():
+            print("Firma profili tanımlanmamış.")
+            print("Oluşturmak için: /ragip-profil kaydet firma_adi=X sektor=Y is_tipi=Z")
+            return
+        p = json.loads(profil_file.read_text(encoding="utf-8"))
+        doviz = p.get("doviz_riski", {})
+        doviz_str = ", ".join(doviz.get("para_birimleri", [])) if doviz.get("var") else "Yok"
+        stok = p.get("stok", {})
+        stok_str = stok.get("tur", "-") if stok.get("var") else "Yok"
+        print("=== FİRMA PROFİLİ ===")
+        print()
+        print(f"Firma     : {p.get('firma_adi', '-')}")
+        print(f"Sektör    : {p.get('sektor', '-')}")
+        print(f"İş Tipi   : {p.get('is_tipi', '-')}")
+        print(f"Gelir     : {p.get('gelir_modeli', '-')}")
+        print(f"Büyüklük  : {p.get('firma_buyuklugu', '-')}")
+        print(f"Müşteri   : {p.get('musteri_tipi', '-')}")
+        print()
+        print(f"Döviz Riski: {doviz_str}" + (f" ({doviz.get('yon', '-')})" if doviz.get("var") else ""))
+        print(f"Stok       : {stok_str}")
+        print(f"Vade Alıcı : {p.get('vade_alici', '-')} gün")
+        print(f"Vade Satıcı: {p.get('vade_satici', '-')} gün")
+        if p.get("notlar"):
+            print(f"Notlar     : {p['notlar']}")
+        print(f"Güncelleme : {p.get('guncelleme', '-')}")
+        return
+
     # ── Finansal hesaplama modu ──
     if args.calc:
         hesap = FinansalHesap()
 
         if args.calc == "vade-farki":
-            if not all([args.anapara, args.oran, args.gun]):
+            if any(v is None for v in [args.anapara, args.oran, args.gun]):
                 print("Gerekli: --anapara --oran --gun")
                 sys.exit(1)
             sonuc = hesap.vade_farki(args.anapara, args.oran, args.gun)
             display_calc_result("Vade Farkı Hesabı", sonuc)
 
         elif args.calc == "tvm":
-            if not all([args.anapara, args.gun]):
+            if any(v is None for v in [args.anapara, args.gun]):
                 print("Gerekli: --anapara --gun [--repo-orani (varsayılan: TCMB)]")
                 sys.exit(1)
             repo = args.repo_orani or get_tcmb_rates_with_search()["politika_faizi"]
@@ -758,14 +1069,14 @@ def main():
             display_calc_result("TVM - Fırsat Maliyeti", sonuc)
 
         elif args.calc == "iskonto":
-            if not all([args.anapara, args.oran, args.gun]):
+            if any(v is None for v in [args.anapara, args.oran, args.gun]):
                 print("Gerekli: --anapara --oran --gun")
                 sys.exit(1)
             sonuc = hesap.erken_odeme_iskonto(args.anapara, args.oran, args.gun)
             display_calc_result("Erken Ödeme Maksimum İskonto", sonuc)
 
         elif args.calc == "indiferans":
-            if not all([args.anapara, args.oran, args.gun]):
+            if any(v is None for v in [args.anapara, args.oran, args.gun]):
                 print("Gerekli: --anapara --oran --gun [--firsat-orani (varsayılan: TCMB)]")
                 sys.exit(1)
             firsat = args.firsat_orani or get_tcmb_rates_with_search()["politika_faizi"]
@@ -784,8 +1095,8 @@ def main():
                 print("Gerekli: --usd-tutar --gun [--usd-faiz (varsayilan: 4.5)]")
                 sys.exit(1)
             rates = get_tcmb_rates_with_search()
-            spot = rates.get("usd_kuru", 38.50)
-            r_tl = rates.get("politika_faizi", 42.5)
+            spot = rates.get("usd_kuru", _FB["usd_kuru"])
+            r_tl = rates.get("politika_faizi", _FB["politika_faizi"])
             r_usd = args.usd_faiz
             sonuc = hesap.doviz_forward(spot, r_tl, r_usd, args.gun)
             display_calc_result("Doviz Forward Kur Tahmini", sonuc)
@@ -795,7 +1106,7 @@ def main():
                 print("Gerekli: --usd-tutar [--navlun --gtip-vergi]")
                 sys.exit(1)
             rates = get_tcmb_rates_with_search()
-            spot = rates.get("usd_kuru", 38.50)
+            spot = rates.get("usd_kuru", _FB["usd_kuru"])
             sonuc = hesap.ithalat_maliyet(
                 usd_tutar=args.usd_tutar,
                 spot_kur=spot,
@@ -803,6 +1114,49 @@ def main():
                 gtip_vergi_pct=args.gtip_vergi,
             )
             display_calc_result("Ithalat Maliyet Hesabi", sonuc)
+
+        # ── Arbitraj hesaplamalari ──
+
+        elif args.calc == "cip-arbitraj":
+            if not args.market_forward or not args.gun:
+                print("Gerekli: --market-forward --gun [--usd-faiz --islem-maliyeti]")
+                sys.exit(1)
+            rates = get_tcmb_rates_with_search()
+            spot = rates.get("usd_kuru", _FB["usd_kuru"])
+            r_tl = rates.get("politika_faizi", _FB["politika_faizi"])
+            sonuc = hesap.covered_interest_arbitrage(
+                spot, args.market_forward, r_tl, args.usd_faiz, args.gun, args.islem_maliyeti
+            )
+            display_calc_result("CIP Faiz Paritesi Arbitraji", sonuc)
+
+        elif args.calc == "ucgen-arbitraj":
+            rates = get_tcmb_rates_with_search()
+            usd_try = rates.get("usd_kuru", _FB["usd_kuru"])
+            eur_try = rates.get("eur_kuru", _FB["eur_kuru"])
+            eur_usd = args.eur_usd or (eur_try / usd_try if usd_try > 0 else 1.18)
+            sonuc = hesap.ucgen_kur_arbitraji(usd_try, eur_try, eur_usd, args.islem_maliyeti)
+            display_calc_result("Ucgen Kur Arbitraji", sonuc)
+
+        elif args.calc == "vade-mevduat":
+            if any(v is None for v in [args.anapara, args.oran, args.gun]):
+                print("Gerekli: --anapara --oran --gun [--mevduat-oran]")
+                sys.exit(1)
+            mevduat_oran = args.mevduat_oran
+            if mevduat_oran is None:
+                mevduat_oran = get_tcmb_rates_with_search().get("politika_faizi", _FB["politika_faizi"])
+            sonuc = hesap.vade_mevduat_arbitraji(args.anapara, args.oran, args.gun, mevduat_oran)
+            display_calc_result("Vade Farki vs Mevduat Arbitraji", sonuc)
+
+        elif args.calc == "carry-trade":
+            if args.gun is None:
+                print("Gerekli: --gun [--usd-faiz --beklenen-kur]")
+                sys.exit(1)
+            rates = get_tcmb_rates_with_search()
+            spot = rates.get("usd_kuru", _FB["usd_kuru"])
+            r_tl = rates.get("politika_faizi", _FB["politika_faizi"])
+            sonuc = hesap.carry_trade_analizi(spot, r_tl, args.usd_faiz, args.gun, args.beklenen_kur)
+            display_calc_result("Carry Trade / Faiz Arbitraji", sonuc)
+
         return
 
     # ── Geçmiş ──
@@ -867,6 +1221,24 @@ def main():
         f"Kaynak: {rates['kaynak']}]"
     )
     full_prompt = full_prompt + rate_context
+
+    # Firma profili varsa prompt'a ekle
+    profil_file = ROOT / "data" / "RAGIP_AGA" / "profil.json"
+    if profil_file.exists():
+        try:
+            p = json.loads(profil_file.read_text(encoding="utf-8"))
+            doviz = p.get("doviz_riski", {})
+            doviz_str = ", ".join(doviz.get("para_birimleri", [])) if doviz.get("var") else "yok"
+            profil_ctx = (
+                f"\n[Firma Profili: {p.get('firma_adi', '-')}, "
+                f"Sektor: {p.get('sektor', '-')}, "
+                f"Is: {p.get('is_tipi', '-')}, "
+                f"Doviz: {doviz_str}, "
+                f"Buyukluk: {p.get('firma_buyuklugu', '-')}]"
+            )
+            full_prompt = full_prompt + profil_ctx
+        except (json.JSONDecodeError, KeyError):
+            pass
 
     response, model, duration_ms, tokens = call_llm(config, full_prompt)
     display_response(response, model, duration_ms, tokens)

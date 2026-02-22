@@ -76,6 +76,7 @@ ALL_SUBAGENT_FILES = [HESAP_FILE, ARASTIRMA_FILE, VERI_FILE]
 
 EXPECTED_ALL_SKILLS = {
     "ragip-vade-farki",
+    "ragip-arbitraj",
     "ragip-ihtar",
     "ragip-analiz",
     "ragip-dis-veri",
@@ -84,6 +85,7 @@ EXPECTED_ALL_SKILLS = {
     "ragip-firma",
     "ragip-import",
     "ragip-ozet",
+    "ragip-profil",
 }
 
 
@@ -156,7 +158,7 @@ class TestSubAgentHesap:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        assert self.fm["skills"] == ["ragip-vade-farki"]
+        assert self.fm["skills"] == ["ragip-vade-farki", "ragip-arbitraj"]
 
     def test_max_turns_kisa(self):
         assert self.fm["maxTurns"] <= 5, "Hesap motoru 3-5 turn yeterli"
@@ -205,7 +207,7 @@ class TestSubAgentVeri:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet"}
+        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet", "ragip-profil"}
         assert set(self.fm["skills"]) == expected
 
     def test_max_turns_kisa(self):
@@ -223,7 +225,7 @@ class TestSkillDagilimi:
         self.all_subagents = [self.hesap, self.arastirma, self.veri]
 
     def test_tum_skilller_atanmis(self):
-        """9 skill'in tamami sub-agent'lara atanmis olmali"""
+        """11 skill'in tamami sub-agent'lara atanmis olmali"""
         assigned = set()
         for agent in self.all_subagents:
             assigned.update(agent["skills"])
@@ -256,9 +258,9 @@ class TestSkillDagilimi:
         assert orch["skills"] == [], "Orchestrator'de skill olmamali"
 
     def test_toplam_skill_sayisi(self):
-        """Tam 9 skill olmali"""
+        """Tam 11 skill olmali"""
         total = sum(len(a["skills"]) for a in self.all_subagents)
-        assert total == 9, f"Beklenen 9 skill, bulunan {total}"
+        assert total == 11, f"Beklenen 11 skill, bulunan {total}"
 
 
 # --- Test: Skill disable-model-invocation tutarliligi ---
@@ -266,7 +268,7 @@ class TestSkillDagilimi:
 class TestSkillModelInvocation:
     """disable-model-invocation: true olan skill'ler veri/template skill'leri olmali"""
 
-    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-ihtar", "ragip-ozet", "ragip-import"}
+    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-ihtar", "ragip-ozet", "ragip-import", "ragip-profil"}
 
     def _has_disable_flag(self, skill_name: str) -> bool:
         skill_file = SKILLS_DIR / skill_name / "SKILL.md"

@@ -22,12 +22,14 @@ Senaryo belirsizse şunu sor: "Konu nedir? Karşı taraf kim? Tutar ne kadar? S�
 # Canlı TCMB oranı çek
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
-TCMB_ORANI=$(echo $RATES | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('politika_faizi', 42.5))" 2>/dev/null || echo "42.5")
+TCMB_ORANI=$(echo $RATES | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['politika_faizi'])" 2>/dev/null)
 
-python3 -c "
+TCMB_ORANI_VAL="${TCMB_ORANI}" python3 -c "
+import os
 # Kullanıcının verdiği rakamlara göre doldur
 tutar = TUTAR
-aylik_politika = ${TCMB_ORANI} / 12 / 100
+tcmb_oran = float(os.environ.get('TCMB_ORANI_VAL', '37.0'))
+aylik_politika = tcmb_oran / 12 / 100
 
 # Anlaşma maliyeti (iyimser — indirim kabul)
 indirim_pct = 0.10
