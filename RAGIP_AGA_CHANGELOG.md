@@ -33,12 +33,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **`test_ragip_crud.py`** (17 test): ragip_crud.py unit testleri
   - parse_kv, load/save jsonl/json, atomic write, next_id, today
 
+### Added — Firma Tip Alanı
+
+- **`ragip-firma`**: Firma kartlarına `tip` alanı eklendi (`tedarikci` | `musteri` | `distributor` | `diger`)
+- Nakit akışı yönetiminde tedarikçiye "geç öde" vs müşteriye "erken tahsil et" ayrımı artık yapılabilir
+- `listele`: Firmalar tipe göre gruplanarak gösterilir (TDR/MUS/DST/DGR etiketleri)
+- `ekle`/`guncelle`: `tip=tedarikci` parametresi ile tip atanır, validasyonlu
+- `ara`: Tip alanında da arama yapılır
+- Geriye uyumlu: mevcut kayıtlar `diger` varsayılanıyla çalışır
+
 ### Changed
 
 - `install.sh`: ragip_get_rates.sh + ragip_crud.py kopyalama ve manifest'e ekleme (18 → 20 core dosya)
 - `update.sh`: Yeni script dosyalarını tanıma desteği
 - Manifest dosya sayısı: 18 → 20
-- Toplam test: 127 → 164
+- Toplam test: 127 → 166
 
 ---
 
