@@ -37,6 +37,14 @@ cd /path/to/target-repo
 bash /path/to/ragip-aga-kit/install.sh
 ```
 
+### Update (existing installation)
+```bash
+cd /path/to/hedef-repo
+bash /path/to/ragip-aga-kit/update.sh            # Normal update
+bash /path/to/ragip-aga-kit/update.sh --dry-run   # Preview changes
+bash /path/to/ragip-aga-kit/update.sh --force      # Force same-version update
+```
+
 ### Dependencies
 ```bash
 pip install -r requirements.txt   # litellm, pyyaml, pdfplumber, pandas, openpyxl

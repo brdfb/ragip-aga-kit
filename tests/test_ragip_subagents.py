@@ -490,3 +490,71 @@ class TestPortability:
                             f"{f.name}: Metin icinde "
                             f"~/.orchestrator hala mevcut: {line.strip()}"
                         )
+
+
+# --- Test: Versiyon ve manifest dogrulamasi ---
+
+class TestVersionManifest:
+    """VERSION dosyasi, config uyumu ve manifest yapisal dogrulamasi"""
+
+    def test_version_file_exists(self):
+        """Kit kokunde VERSION dosyasi olmali ve semver formatinda olmali"""
+        version_file = _REPO_ROOT / "VERSION"
+        if version_file.exists():
+            version = version_file.read_text(encoding="utf-8").strip()
+            assert re.match(r"^\d+\.\d+\.\d+$", version), (
+                f"VERSION semver formatinda degil: {version}"
+            )
+
+    def test_version_matches_changelog(self):
+        """VERSION ile changelog'daki son surum uyumlu olmali"""
+        version_file = _REPO_ROOT / "VERSION"
+        changelog = _REPO_ROOT / "RAGIP_AGA_CHANGELOG.md"
+        if version_file.exists() and changelog.exists():
+            version = version_file.read_text(encoding="utf-8").strip()
+            cl_text = changelog.read_text(encoding="utf-8")
+            match = re.search(r"## \[(\d+\.\d+\.\d+)\]", cl_text)
+            assert match, "Changelog'da surum bulunamadi"
+            assert match.group(1) == version, (
+                f"VERSION ({version}) ile changelog ({match.group(1)}) uyumsuz"
+            )
+
+    def test_config_version_matches(self):
+        """config/ragip_aga.yaml version alani VERSION ile uyumlu olmali"""
+        version_file = _REPO_ROOT / "VERSION"
+        config_file = _REPO_ROOT / "config" / "ragip_aga.yaml"
+        if version_file.exists() and config_file.exists():
+            version = version_file.read_text(encoding="utf-8").strip()
+            config_text = config_file.read_text(encoding="utf-8")
+            match = re.search(r'version:\s*"(\d+\.\d+\.\d+)"', config_text)
+            assert match, "Config'de version alani bulunamadi"
+            assert match.group(1) == version, (
+                f"Config version ({match.group(1)}) ile VERSION ({version}) uyumsuz"
+            )
+
+    def test_manifest_structure(self):
+        """Kurulumda manifest varsa yapisal olarak dogru olmali"""
+        manifest_file = _REPO_ROOT / "config" / ".ragip_manifest.json"
+        if manifest_file.exists():
+            import json
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+            assert "kit_version" in manifest
+            assert "installed_at" in manifest
+            assert "files" in manifest
+            assert isinstance(manifest["files"], dict)
+            for path, checksum in manifest["files"].items():
+                assert checksum.startswith("sha256:"), (
+                    f"Manifest checksum formati hatali: {path} = {checksum}"
+                )
+
+    def test_manifest_files_exist(self):
+        """Manifestteki tum dosyalar mevcut olmali"""
+        manifest_file = _REPO_ROOT / "config" / ".ragip_manifest.json"
+        if manifest_file.exists():
+            import json
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+            for rel_path in manifest["files"]:
+                full_path = _REPO_ROOT / rel_path
+                assert full_path.exists(), (
+                    f"Manifestte kayitli ama mevcut degil: {rel_path}"
+                )

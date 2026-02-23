@@ -6,6 +6,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.4.0] - 2026-02-23
+
+### Added — Versiyon Takibi ve Güncelleme Mekanizması
+
+**Kit artık kurulumları takip edebiliyor ve güvenli güncelleme yapabiliyor.**
+
+- **`VERSION` dosyası**: Kit kökünde tek kaynak versiyon bilgisi (semver)
+- **`update.sh`**: Manifest-tabanlı güvenli güncelleme scripti
+  - Üçlü checksum karşılaştırma (kurulum vs manifest vs yeni kit)
+  - Kullanıcı değişiklikleri otomatik korunur
+  - Çakışmalarda `.kullanici-yedek-YYYYMMDD` yedek oluşturur
+  - `--dry-run`, `--force`, `--source PATH` flagleri
+- **Kurulum manifesti**: `config/.ragip_manifest.json` — 18 core dosyanın SHA-256 checksum'ları
+- **Mevcut kurulum tespiti**: `install.sh` artık mevcut kurulumu algılayıp `update.sh` önerir
+
+### Changed
+
+- `install.sh`: Versiyon okuma, manifest oluşturma, mevcut kurulum kontrolü eklendi
+- `config/ragip_aga.yaml`: Eski `version: "1.0.0"` → `"2.4.0"` olarak senkronize edildi
+
+### Tests
+
+- `TestVersionManifest`: 5 yeni yapısal test (VERSION semver, changelog uyumu, config uyumu, manifest yapısı, manifest dosya varlığı)
+- Toplam: 127 test
+
+---
+
 ## [2.3.0] - 2026-02-22
 
 ### Changed — Standalone Taşınabilir Modül

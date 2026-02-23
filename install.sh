@@ -40,8 +40,24 @@ if [ ! -f "$SCRIPT_DIR/agents/ragip-aga.md" ]; then
     error "Kaynak dosyalar bulunamadi. install.sh'yi ragip-aga-kit dizininden calistirin."
 fi
 
+# --- Kit versiyonu ---
+KIT_VERSION=$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null) || error "VERSION dosyasi bulunamadi."
+
+# --- Mevcut kurulum kontrolu ---
+if [ -f "$HEDEF/config/.ragip_manifest.json" ]; then
+    INSTALLED_VERSION=$(python3 -c "import json; print(json.load(open('$HEDEF/config/.ragip_manifest.json'))['kit_version'])" 2>/dev/null || echo "")
+    if [ -n "$INSTALLED_VERSION" ]; then
+        warn "Mevcut Ragip Aga kurulumu tespit edildi (v$INSTALLED_VERSION)."
+        warn "Guncelleme icin update.sh kullanin: bash $SCRIPT_DIR/update.sh"
+        if [ -t 0 ]; then
+            read -p "[?] Yine de sifirdan kurmak istiyor musunuz? Mevcut kit dosyalari uzerine yazilacak. (y/N) " OVERWRITE
+            [ "$OVERWRITE" != "y" ] && [ "$OVERWRITE" != "Y" ] && exit 0
+        fi
+    fi
+fi
+
 # --- Kurulum ---
-info "Ragip Aga kurulumu basliyor..."
+info "Ragip Aga v$KIT_VERSION kurulumu basliyor..."
 info "Hedef repo: $HEDEF"
 echo ""
 
@@ -80,7 +96,68 @@ fi
 info "Data dizini olusturuluyor..."
 mkdir -p "$HEDEF/data/RAGIP_AGA/ciktilar"
 
-# 7. Gitignore
+# 7. Manifest olustur
+info "Kurulum manifesti olusturuluyor..."
+python3 << MANIFEST_EOF
+import json, hashlib, datetime
+from pathlib import Path
+
+hedef = "$HEDEF"
+version = "$KIT_VERSION"
+source = "$SCRIPT_DIR"
+
+files = {}
+
+# Agents
+for f in sorted(Path(hedef, ".claude/agents").glob("ragip-*.md")):
+    rel = str(f.relative_to(hedef))
+    sha = hashlib.sha256(f.read_bytes()).hexdigest()
+    files[rel] = "sha256:" + sha
+
+# Skills
+for f in sorted(Path(hedef, ".claude/skills").glob("ragip-*/SKILL.md")):
+    rel = str(f.relative_to(hedef))
+    sha = hashlib.sha256(f.read_bytes()).hexdigest()
+    files[rel] = "sha256:" + sha
+
+# Scripts
+for name in ["ragip_aga.py", "ragip_rates.py"]:
+    f = Path(hedef, "scripts", name)
+    if f.exists():
+        rel = str(f.relative_to(hedef))
+        sha = hashlib.sha256(f.read_bytes()).hexdigest()
+        files[rel] = "sha256:" + sha
+
+# Config
+f = Path(hedef, "config/ragip_aga.yaml")
+if f.exists():
+    rel = str(f.relative_to(hedef))
+    sha = hashlib.sha256(f.read_bytes()).hexdigest()
+    files[rel] = "sha256:" + sha
+
+now = datetime.datetime.now().isoformat(timespec="seconds")
+manifest = {
+    "kit_version": version,
+    "installed_at": now,
+    "updated_at": now,
+    "kit_source": source,
+    "files": files,
+}
+
+Path(hedef, "config/.ragip_manifest.json").write_text(
+    json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+    encoding="utf-8",
+)
+print(f"  {len(files)} dosya manifeste kaydedildi")
+MANIFEST_EOF
+
+# 8. Gitignore
+# Yedek dosyalari gitignore'a ekle
+if [ -f "$HEDEF/.gitignore" ]; then
+    if ! grep -q "*.kullanici-yedek*" "$HEDEF/.gitignore" 2>/dev/null; then
+        echo "*.kullanici-yedek*" >> "$HEDEF/.gitignore"
+    fi
+fi
 if [ -f "$HEDEF/.gitignore" ]; then
     if ! grep -q "data/RAGIP_AGA/" "$HEDEF/.gitignore" 2>/dev/null; then
         echo "" >> "$HEDEF/.gitignore"
@@ -101,7 +178,7 @@ else
     info ".gitignore olusturuldu"
 fi
 
-# 8. Opsiyonel venv + pip install
+# 9. Opsiyonel venv + pip install
 if [ -t 0 ]; then
     read -p "[?] Python venv olusturup bagimliliklari kurayim mi? (y/N) " INSTALL_DEPS
     if [ "$INSTALL_DEPS" = "y" ] || [ "$INSTALL_DEPS" = "Y" ]; then
@@ -111,7 +188,7 @@ if [ -t 0 ]; then
     fi
 fi
 
-# 9. Opsiyonel shell alias
+# 10. Opsiyonel shell alias
 if [ -t 0 ]; then
     read -p "[?] 'ragip' shell alias tanimlayayim mi? (y/N) " SETUP_ALIAS
     if [ "$SETUP_ALIAS" = "y" ] || [ "$SETUP_ALIAS" = "Y" ]; then
@@ -130,7 +207,7 @@ fi
 # --- Sonuc ---
 echo ""
 echo "================================================"
-info "Ragip Aga basariyla kuruldu!"
+info "Ragip Aga v$KIT_VERSION basariyla kuruldu!"
 echo "================================================"
 echo ""
 echo "  Agents:  4  (.claude/agents/ragip-*.md)"

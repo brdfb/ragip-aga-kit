@@ -4,3 +4,4 @@ __pycache__/
 .env
 scripts/.ragip_cache/
 data/RAGIP_AGA/
+*.kullanici-yedek*
