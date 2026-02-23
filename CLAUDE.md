@@ -12,7 +12,7 @@ All user-facing content (agent prompts, skill docs, CLI output) is in **Turkish*
 
 ### Tests
 ```bash
-# Full test suite (19 tests)
+# Full test suite
 python -m pytest tests/ -v
 
 # Individual test files
@@ -80,6 +80,8 @@ Sub-agents save outputs to `data/RAGIP_AGA/ciktilar/` with format `YYYYMMDD_HHMM
 
 - **`scripts/ragip_aga.py`**: CLI entry point with `FinansalHesap` class (vade farki, TVM, iskonto, forward FX, arbitrage calculations). Imports `FALLBACK_RATES` from `ragip_rates.py` as single source of truth.
 - **`scripts/ragip_rates.py`**: Fetches live rates from TCMB EVDS3 API and CollectAPI. Standalone module with 4-hour cache TTL. Exports `FALLBACK_RATES`, `get_rates()`, `get_mevduat()`, `get_kredi()`.
+- **`scripts/ragip_get_rates.sh`**: Single-source TCMB rate helper for skills. Fallback chain: live API → cache → FALLBACK_RATES.
+- **`scripts/ragip_crud.py`**: Shared CRUD helper module for firma/gorev/profil skills (get_root, load/save jsonl/json, parse_kv, atomic_write).
 
 ### Environment Variables
 

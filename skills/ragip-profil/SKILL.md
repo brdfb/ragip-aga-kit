@@ -55,18 +55,19 @@ Gecerli degerler:
 ### `goster`
 Bash ile profil dosyasini oku ve goster:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
+import sys, os, json
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_json
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
-if not dosya.exists():
+dosya = data_path('profil.json')
+p = load_json(dosya)
+if not p:
     print('Firma profili henuz tanimlanmamis.')
     print('Olusturmak icin: /ragip-profil kaydet firma_adi=X sektor=Y is_tipi=Z')
     exit()
 
-p = json.loads(dosya.read_text(encoding='utf-8'))
 doviz = p.get('doviz_riski', {})
 doviz_str = ', '.join(doviz.get('para_birimleri', [])) if doviz.get('var') else 'Yok'
 stok = p.get('stok', {})
@@ -94,16 +95,15 @@ print(f'Guncelleme : {p.get(\"guncelleme\", \"-\")}')
 ### `kaydet <alan=deger ...>`
 Yeni profil olustur. Mevcut varsa uyar:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
-from datetime import date
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_json, save_json, parse_kv, today
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
-dosya.parent.mkdir(parents=True, exist_ok=True)
+dosya = data_path('profil.json')
 
-if dosya.exists():
+if load_json(dosya) is not None:
     print('! Firma profili zaten mevcut.')
     print('Guncellemek icin: /ragip-profil guncelle alan=deger')
     print('Sifirdan olusturmak icin once silin: /ragip-profil sil')
@@ -123,20 +123,15 @@ profil = {
     'musteri_tipi': 'B2B',
     'firma_buyuklugu': 'kucuk',
     'notlar': '',
-    'guncelleme': str(date.today()),
+    'guncelleme': today(),
 }
 
 VALID_IS_TIPI = {'hizmet', 'ithalat', 'ihracat', 'uretim', 'dagitim', 'perakende', 'karma'}
 VALID_GELIR = {'proje_bazli', 'abonelik', 'urun_satisi', 'komisyon', 'karma'}
 VALID_BUYUKLUK = {'mikro', 'kucuk', 'orta'}
 
-for kv in args.split():
-    if '=' not in kv:
-        continue
-    k, v = kv.split('=', 1)
-    k = k.strip()
-    v = v.strip()
-
+kvs = parse_kv(args)
+for k, v in kvs.items():
     if k == 'firma_adi':
         profil['firma_adi'] = v
     elif k == 'sektor':
@@ -181,9 +176,7 @@ if not profil['firma_adi']:
     print('! firma_adi zorunludur.')
     exit()
 
-tmp = dosya.with_suffix('.tmp')
-tmp.write_text(json.dumps(profil, ensure_ascii=False, indent=2), encoding='utf-8')
-tmp.rename(dosya)
+save_json(dosya, profil)
 print(f'+ Firma profili olusturuldu: {profil[\"firma_adi\"]}')
 print(f'  Sektor: {profil[\"sektor\"]} | Is: {profil[\"is_tipi\"]} | Buyukluk: {profil[\"firma_buyuklugu\"]}')
 "
@@ -192,18 +185,18 @@ print(f'  Sektor: {profil[\"sektor\"]} | Is: {profil[\"is_tipi\"]} | Buyukluk: {
 ### `guncelle <alan=deger ...>`
 Mevcut profildeki belirli alanlari guncelle:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
-from datetime import date
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_json, save_json, parse_kv, today
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
-if not dosya.exists():
+dosya = data_path('profil.json')
+profil = load_json(dosya)
+if not profil:
     print('Firma profili yok. Once olusturun: /ragip-profil kaydet firma_adi=X sektor=Y is_tipi=Z')
     exit()
 
-profil = json.loads(dosya.read_text(encoding='utf-8'))
 args = 'ARGUMANLAR_BURAYA'
 
 VALID_IS_TIPI = {'hizmet', 'ithalat', 'ihracat', 'uretim', 'dagitim', 'perakende', 'karma'}
@@ -211,13 +204,8 @@ VALID_GELIR = {'proje_bazli', 'abonelik', 'urun_satisi', 'komisyon', 'karma'}
 VALID_BUYUKLUK = {'mikro', 'kucuk', 'orta'}
 
 degisen = []
-for kv in args.split():
-    if '=' not in kv:
-        continue
-    k, v = kv.split('=', 1)
-    k = k.strip()
-    v = v.strip()
-
+kvs = parse_kv(args)
+for k, v in kvs.items():
     if k == 'firma_adi':
         profil['firma_adi'] = v
         degisen.append(k)
@@ -276,45 +264,38 @@ if not degisen:
     print('Guncelleme yapilmadi. Kullanim: /ragip-profil guncelle alan=deger')
     exit()
 
-profil['guncelleme'] = str(date.today())
+profil['guncelleme'] = today()
 
-tmp = dosya.with_suffix('.tmp')
-tmp.write_text(json.dumps(profil, ensure_ascii=False, indent=2), encoding='utf-8')
-tmp.rename(dosya)
+save_json(dosya, profil)
 print(f'+ Profil guncellendi: {profil[\"firma_adi\"]}')
-print(f'  Degisen alanlar: {', '.join(degisen)}')
+print(f'  Degisen alanlar: {\", \".join(degisen)}')
 "
 ```
 
 ### `sil`
-Profili sil (onay iste):
+Profili sil. Once bilgiyi goster, kullanicidan onay al, sonra ayni bash blogu icinde sil:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_json
 from pathlib import Path
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
-if not dosya.exists():
+dosya = data_path('profil.json')
+p = load_json(dosya)
+if not p:
     print('Firma profili zaten yok.')
     exit()
 
-p = json.loads(dosya.read_text(encoding='utf-8'))
 print(f'Silinecek profil: {p.get(\"firma_adi\", \"-\")} ({p.get(\"sektor\", \"-\")}/{p.get(\"is_tipi\", \"-\")})')
-print('Silme islemini onaylamak icin kullanicidan onay alin.')
-"
-```
-
-Kullanici onayladiktan sonra:
-```bash
-python3 -c "
-import subprocess as _sp
-from pathlib import Path
-
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/profil.json'
-dosya.unlink()
-print('Firma profili silindi.')
+print()
+onay = input('Silmek istediginizden emin misiniz? (evet/hayir): ').strip().lower()
+if onay in ('evet', 'e', 'yes', 'y'):
+    Path(dosya).unlink()
+    print('Firma profili silindi.')
+else:
+    print('Silme islemi iptal edildi.')
 "
 ```
 

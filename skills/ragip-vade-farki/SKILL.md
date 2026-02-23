@@ -1,6 +1,6 @@
 ---
 name: ragip-vade-farki
-description: Vade farkı, TVM fırsat maliyeti ve erken ödeme iskontosu hesapla. Distribütörün kestiği vade farkının doğruluğunu kontrol et veya alternatif ödeme maliyetini karşılaştır.
+description: Vade farki hesapla, faiz hesapla, vade farki dogru mu kontrol et, erken odeme iskontosu, gecikme faizi, odeme maliyeti karsilastir, TVM firsat maliyeti. Distributorun kestigi vade farkinin dogrulugunu kontrol et veya alternatif odeme maliyetini karsilastir.
 argument-hint: "[anapara] [aylık_oran%] [gün]"
 allowed-tools: Bash, WebSearch
 ---
@@ -24,16 +24,23 @@ python3 "$ROOT/scripts/ragip_rates.py" --pretty
 **2. Bash ile hesapla:**
 
 ```bash
-# Önce canlı oranı çek
+# Önce canlı oranı çek (tek kaynak helper)
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
-TCMB_ORANI=$(echo $RATES | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['politika_faizi'])" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
-TCMB_ORANI_VAL="${TCMB_ORANI}" python3 -c "
-import sys, os
-anapara = ANAPARA
-aylik_oran = ORAN / 100
-gun = GUN
+RATES_JSON="$RATES" ANAPARA_VAL="ANAPARA" ORAN_VAL="ORAN" GUN_VAL="GUN" python3 -c "
+import sys, os, json
+
+try:
+    anapara = float(os.environ['ANAPARA_VAL'])
+    aylik_oran = float(os.environ['ORAN_VAL']) / 100
+    gun = int(os.environ['GUN_VAL'])
+except (KeyError, ValueError):
+    print('HATA: anapara, oran ve gun zorunludur.')
+    print('Ornek: /ragip-vade-farki 250000 3 45')
+    sys.exit(1)
+
+rates = json.loads(os.environ.get('RATES_JSON', '{}'))
 
 # Vade farkı
 vade_farki = anapara * aylik_oran * gun / 30
@@ -41,7 +48,7 @@ toplam = anapara + vade_farki
 gunluk_maliyet = vade_farki / gun if gun > 0 else 0
 
 # TVM - Politika faizine göre fırsat maliyeti (canlı TCMB verisi)
-tcmb_oran = float(os.environ.get('TCMB_ORANI_VAL', '37.0'))
+tcmb_oran = float(rates.get('politika_faizi', 50.0))
 yillik_politika = tcmb_oran / 100
 firsatmaliyeti = anapara * yillik_politika * gun / 365
 gunluk_firsat = firsatmaliyeti / gun if gun > 0 else 0

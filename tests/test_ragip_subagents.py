@@ -558,3 +558,201 @@ class TestVersionManifest:
                 assert full_path.exists(), (
                     f"Manifestte kayitli ama mevcut degil: {rel_path}"
                 )
+
+
+# --- Test: Bash blok yapısal doğrulama ---
+
+class TestBashBlocks:
+    """Skill'lerdeki bash bloklarinin yapisal dogrulamasi — syntax, env var, helper kullanimi"""
+
+    SCRIPTS_DIR = _REPO_ROOT / "scripts"
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.skill_files = list(SKILLS_DIR.glob("ragip-*/SKILL.md"))
+
+    def _extract_bash_blocks(self, text: str) -> list[str]:
+        """Markdown bash bloklarini cikar"""
+        blocks = []
+        in_block = False
+        current = []
+        for line in text.split("\n"):
+            if line.strip() == "```bash":
+                in_block = True
+                current = []
+            elif in_block and line.strip() == "```":
+                blocks.append("\n".join(current))
+                in_block = False
+            elif in_block:
+                current.append(line)
+        return blocks
+
+    def _extract_python_inline_code(self, bash_block: str) -> list[str]:
+        """Bash bloğundan python3 -c '...' içeriklerini çıkar"""
+        codes = []
+        lines = bash_block.split("\n")
+        in_python = False
+        current = []
+        for line in lines:
+            if 'python3 -c "' in line or "python3 -c '" in line:
+                in_python = True
+                # python3 -c " sonrasındaki kısmı al
+                idx = line.find('python3 -c "')
+                if idx >= 0:
+                    rest = line[idx + len('python3 -c "'):]
+                    current = [rest]
+                else:
+                    idx = line.find("python3 -c '")
+                    rest = line[idx + len("python3 -c '"):]
+                    current = [rest]
+            elif in_python:
+                if line.strip() == '"' or line.strip() == "'":
+                    codes.append("\n".join(current))
+                    in_python = False
+                    current = []
+                else:
+                    current.append(line)
+        return codes
+
+    def test_python_blocks_valid_syntax(self):
+        """Her python3 -c bloğu geçerli Python sözdizimi olmalı"""
+        for f in self.skill_files:
+            text = f.read_text(encoding="utf-8")
+            bash_blocks = self._extract_bash_blocks(text)
+            for i, block in enumerate(bash_blocks):
+                py_codes = self._extract_python_inline_code(block)
+                for j, code in enumerate(py_codes):
+                    # Placeholder'lar env var pattern'e dönüştürüldü,
+                    # ama hala agent'in dolduracağı PLACEHOLDER string'ler olabilir
+                    # Bunları geçerli string'lerle değiştirerek syntax kontrolü yap
+                    # Bash \" escape'lerini Python " ile değiştir
+                    # (bash python3 -c "..." içinde \" kullanır, Python'da " olmalı)
+                    test_code = code.replace('\\"', '"')
+                    test_code = test_code.replace("ARGUMANLAR_BURAYA", "test")
+                    test_code = test_code.replace("ID_BURAYA", "1")
+                    test_code = test_code.replace("GUNCELLEMELER_BURAYA", "a=b")
+                    test_code = test_code.replace("TERIM_BURAYA", "test")
+                    try:
+                        compile(test_code, f"{f.name}:bash#{i+1}:py#{j+1}", "exec")
+                    except SyntaxError as e:
+                        assert False, (
+                            f"{f.name} Bash blok #{i+1} Python #{j+1}: "
+                            f"Sözdizimi hatası: {e}"
+                        )
+
+    def test_no_bare_placeholder_in_python(self):
+        """Python bloklarında bare placeholder (= ANAPARA, = TUTAR, = GUN) kalmamış olmalı"""
+        bare_patterns = [
+            r"=\s*ANAPARA\b",
+            r"=\s*TUTAR\b",
+            r"=\s*GUN\b",
+            r"=\s*ORAN\b",
+        ]
+        for f in self.skill_files:
+            text = f.read_text(encoding="utf-8")
+            bash_blocks = self._extract_bash_blocks(text)
+            for i, block in enumerate(bash_blocks):
+                py_codes = self._extract_python_inline_code(block)
+                for j, code in enumerate(py_codes):
+                    for pattern in bare_patterns:
+                        matches = re.findall(pattern, code)
+                        assert not matches, (
+                            f"{f.name} Bash blok #{i+1} Python #{j+1}: "
+                            f"Bare placeholder bulundu: {matches} — env var pattern kullanılmalı"
+                        )
+
+    def test_rates_fetch_uses_helper(self):
+        """TCMB oran çeken skill'ler ragip_get_rates.sh kullanıyor olmalı"""
+        rate_skills = {"ragip-vade-farki", "ragip-arbitraj", "ragip-strateji"}
+        for f in self.skill_files:
+            skill_name = f.parent.name
+            if skill_name not in rate_skills:
+                continue
+            text = f.read_text(encoding="utf-8")
+            bash_blocks = self._extract_bash_blocks(text)
+            # En az bir bash bloğunda ragip_get_rates.sh kullanılıyor olmalı
+            uses_helper = any("ragip_get_rates.sh" in b for b in bash_blocks)
+            assert uses_helper, (
+                f"{skill_name}: TCMB oranları çekiyor ama ragip_get_rates.sh kullanmıyor"
+            )
+
+    def test_crud_skills_use_helper(self):
+        """CRUD skill'leri ragip_crud import ediyor olmalı"""
+        crud_skills = {"ragip-firma", "ragip-gorev", "ragip-profil"}
+        for f in self.skill_files:
+            skill_name = f.parent.name
+            if skill_name not in crud_skills:
+                continue
+            text = f.read_text(encoding="utf-8")
+            assert "ragip_crud" in text, (
+                f"{skill_name}: CRUD skill ama ragip_crud import etmiyor"
+            )
+
+    def test_bash_blocks_quote_variables(self):
+        """Bash bloklarında $RATES gibi değişkenler tırnak içinde olmalı"""
+        for f in self.skill_files:
+            text = f.read_text(encoding="utf-8")
+            bash_blocks = self._extract_bash_blocks(text)
+            for i, block in enumerate(bash_blocks):
+                # echo $RATES (tırnak olmadan) kontrolü — python3 -c içindeki satırları atla
+                for line in block.split("\n"):
+                    line_stripped = line.strip()
+                    # Python bloğu içindeki satırları atla
+                    if line_stripped.startswith("import ") or line_stripped.startswith("from "):
+                        continue
+                    # Bash değişken ataması ve env var satırları (KEY="$VAR") zaten doğru
+                    # Sorunlu pattern: echo $VAR (tırnak yok)
+                    if re.search(r'echo\s+\$[A-Z]', line_stripped):
+                        assert False, (
+                            f"{f.name} Bash blok #{i+1}: "
+                            f"Tırnak olmayan değişken: {line_stripped}"
+                        )
+
+    def test_get_rates_sh_exists(self):
+        """scripts/ragip_get_rates.sh mevcut ve çalıştırılabilir olmalı"""
+        get_rates = self.SCRIPTS_DIR / "ragip_get_rates.sh"
+        assert get_rates.exists(), "scripts/ragip_get_rates.sh bulunamadı"
+        import os
+        assert os.access(get_rates, os.X_OK), (
+            "scripts/ragip_get_rates.sh çalıştırılabilir değil (chmod +x gerekli)"
+        )
+
+    def test_crud_py_exists(self):
+        """scripts/ragip_crud.py mevcut olmalı"""
+        crud = self.SCRIPTS_DIR / "ragip_crud.py"
+        assert crud.exists(), "scripts/ragip_crud.py bulunamadı"
+
+    def test_env_var_export_import_match(self):
+        """Bash'te export edilen env var'lar Python'da kullanılan env var'larla eşleşmeli"""
+        for f in self.skill_files:
+            text = f.read_text(encoding="utf-8")
+            bash_blocks = self._extract_bash_blocks(text)
+            for i, block in enumerate(bash_blocks):
+                # Pattern: KEY="val" python3 -c satırlarını bul
+                # Birden fazla KEY="val" olabilir aynı satırda
+                env_line_match = re.search(
+                    r'^((?:\w+="[^"]*"\s+)+)python3\s+-c',
+                    block, re.MULTILINE
+                )
+                if not env_line_match:
+                    continue
+                env_part = env_line_match.group(1)
+                exported_keys = set(re.findall(r'(\w+)="', env_part))
+
+                py_codes = self._extract_python_inline_code(block)
+                for j, code in enumerate(py_codes):
+                    # Python'da kullanılan os.environ key'leri
+                    used_keys = set(re.findall(
+                        r"os\.environ\[?\.?g?e?t?\(?['\"](\w+)", code
+                    ))
+                    # Her kullanılan key export edilmiş olmalı
+                    missing = used_keys - exported_keys
+                    if missing:
+                        # Bazı key'ler ${VAR:-default} pattern'i ile set edilmiş olabilir
+                        # Bunları da kabul et
+                        env_default = set(re.findall(r'(\w+)="\$\{', env_part))
+                        missing = missing - env_default
+                    # RATES_JSON gibi dynamic env var'lar $RATES ile set ediliyor
+                    # Pattern: RATES_JSON="$RATES" — bu da geçerli
+                    dynamic_env = set(re.findall(r'(\w+)="\$\w+"', env_part))
+                    missing = missing - dynamic_env

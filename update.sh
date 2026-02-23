@@ -142,7 +142,7 @@ for f in sorted(kit_root.glob("skills/ragip-*/SKILL.md")):
     rel = kit_to_installed(str(f.relative_to(kit_root)))
     kit_files[rel] = {"kit_path": str(f), "new_hash": sha256_file(f)}
 
-for name in ["ragip_aga.py", "ragip_rates.py"]:
+for name in ["ragip_aga.py", "ragip_rates.py", "ragip_crud.py", "ragip_get_rates.sh"]:
     f = kit_root / "scripts" / name
     if f.exists():
         kit_files[f"scripts/{name}"] = {"kit_path": str(f), "new_hash": sha256_file(f)}

@@ -28,19 +28,16 @@ Her satir bir firma kaydi:
 ### `listele`
 Bash ile dosyayi oku ve tablo goster:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_jsonl
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
-if not dosya.exists():
-    print('Henuz firma karti yok. Eklemek icin: /ragip-firma ekle <firma_adi>')
-    exit()
-
-firmalar = [json.loads(l) for l in dosya.read_text().strip().split('\n') if l.strip()]
+dosya = data_path('firmalar.jsonl')
+firmalar = load_jsonl(dosya)
 if not firmalar:
-    print('Henuz firma karti yok.')
+    print('Henuz firma karti yok. Eklemek icin: /ragip-firma ekle <firma_adi>')
     exit()
 
 risk_icon = {'yuksek': '!', 'orta': '~', 'dusuk': '+'}
@@ -62,20 +59,16 @@ for f in sorted(firmalar, key=lambda x: x.get('ad', '')):
 ### `ekle <firma_adi> [alan=deger ...]`
 Yeni firma karti olustur. Argumanlardaki `alan=deger` ciftlerini parse et:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, sys, subprocess as _sp
-from pathlib import Path
-from datetime import date
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_jsonl, save_jsonl, parse_kv, next_id, today
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
-dosya.parent.mkdir(parents=True, exist_ok=True)
+dosya = data_path('firmalar.jsonl')
+firmalar = load_jsonl(dosya)
 
-firmalar = []
-if dosya.exists() and dosya.read_text().strip():
-    firmalar = [json.loads(l) for l in dosya.read_text().strip().split('\n') if l.strip()]
-
-yeni_id = str(max([int(f['id']) for f in firmalar], default=0) + 1)
+yeni_id = str(next_id(firmalar))
 
 # Argumanlari parse et - ilk arguman firma adi, geri kalani alan=deger
 args = 'ARGUMANLAR_BURAYA'
@@ -100,14 +93,12 @@ yeni = {
     'vade_farki_oran': 0.0,
     'risk_notu': 'orta',
     'notlar': '',
-    'son_islem': str(date.today()),
-    'olusturma': str(date.today()),
+    'son_islem': today(),
+    'olusturma': today(),
 }
 
-for kv in diger:
-    k, v = kv.split('=', 1)
-    k = k.strip()
-    v = v.strip()
+kvs = parse_kv(' '.join(diger))
+for k, v in kvs.items():
     if k == 'tel':
         yeni['iletisim']['tel'] = v
     elif k == 'email':
@@ -134,10 +125,7 @@ if yeni['vergi_no']:
             exit()
 
 firmalar.append(yeni)
-import tempfile
-tmp = dosya.with_suffix('.tmp')
-tmp.write_text('\n'.join(json.dumps(f, ensure_ascii=False) for f in firmalar))
-tmp.rename(dosya)
+save_jsonl(dosya, firmalar)
 print(f'+ Firma eklendi: [{yeni_id}] {yeni[\"ad\"]}')
 if yeni['vergi_no']:
     print(f'   VKN: {yeni[\"vergi_no\"]}')
@@ -148,31 +136,27 @@ print(f'   Vade: {yeni[\"vade_gun\"]} gun | Oran: %{yeni[\"vade_farki_oran\"]}/a
 ### `guncelle <id> <alan=deger ...>`
 Mevcut firma kartini guncelle:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
-from datetime import date
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_jsonl, save_jsonl, parse_kv, today
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
-if not dosya.exists():
+dosya = data_path('firmalar.jsonl')
+firmalar = load_jsonl(dosya)
+if not firmalar:
     print('Henuz firma karti yok.')
     exit()
 
 firma_id = 'ID_BURAYA'
 guncellemeler = 'GUNCELLEMELER_BURAYA'
 
-firmalar = [json.loads(l) for l in dosya.read_text().strip().split('\n') if l.strip()]
 bulundu = False
 for f in firmalar:
     if f['id'] == firma_id:
         bulundu = True
-        for kv in guncellemeler.split():
-            if '=' not in kv:
-                continue
-            k, v = kv.split('=', 1)
-            k = k.strip()
-            v = v.strip()
+        kvs = parse_kv(guncellemeler)
+        for k, v in kvs.items():
             if k == 'tel':
                 f.setdefault('iletisim', {})['tel'] = v
             elif k == 'email':
@@ -187,7 +171,7 @@ for f in firmalar:
                 f['notlar'] = v
             else:
                 f[k] = v
-        f['son_islem'] = str(date.today())
+        f['son_islem'] = today()
         print(f'+ Guncellendi: [{f[\"id\"]}] {f[\"ad\"]}')
         break
 
@@ -195,27 +179,26 @@ if not bulundu:
     print(f'X Firma bulunamadi: ID {firma_id}')
     exit()
 
-tmp = dosya.with_suffix('.tmp')
-tmp.write_text('\n'.join(json.dumps(f, ensure_ascii=False) for f in firmalar))
-tmp.rename(dosya)
+save_jsonl(dosya, firmalar)
 "
 ```
 
 ### `sil <id>`
 Firma kartini sil:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_jsonl, save_jsonl
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
-if not dosya.exists():
+dosya = data_path('firmalar.jsonl')
+firmalar = load_jsonl(dosya)
+if not firmalar:
     print('Henuz firma karti yok.')
     exit()
 
 firma_id = 'ID_BURAYA'
-firmalar = [json.loads(l) for l in dosya.read_text().strip().split('\n') if l.strip()]
 yeni = [f for f in firmalar if f['id'] != firma_id]
 
 if len(yeni) == len(firmalar):
@@ -223,9 +206,7 @@ if len(yeni) == len(firmalar):
     exit()
 
 silinen = [f for f in firmalar if f['id'] == firma_id][0]
-tmp = dosya.with_suffix('.tmp')
-tmp.write_text('\n'.join(json.dumps(f, ensure_ascii=False) for f in yeni))
-tmp.rename(dosya)
+save_jsonl(dosya, yeni)
 print(f'Silindi: [{silinen[\"id\"]}] {silinen[\"ad\"]}')
 "
 ```
@@ -233,18 +214,19 @@ print(f'Silindi: [{silinen[\"id\"]}] {silinen[\"ad\"]}')
 ### `ara <terim>`
 Firma adi, vergi no veya notlarda ara:
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 python3 -c "
-import json, subprocess as _sp
-from pathlib import Path
+import sys, os
+sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
+from ragip_crud import data_path, load_jsonl
 
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dosya = Path(_ROOT) / 'data/RAGIP_AGA/firmalar.jsonl'
-if not dosya.exists():
+dosya = data_path('firmalar.jsonl')
+firmalar = load_jsonl(dosya)
+if not firmalar:
     print('Henuz firma karti yok.')
     exit()
 
 terim = 'TERIM_BURAYA'.lower()
-firmalar = [json.loads(l) for l in dosya.read_text().strip().split('\n') if l.strip()]
 
 sonuclar = []
 for f in firmalar:

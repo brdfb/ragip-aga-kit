@@ -1,6 +1,6 @@
 ---
 name: ragip-arbitraj
-description: Arbitraj firsatlarini hesapla. CIP faiz paritesi, ucgen kur, vade farki vs mevduat ve carry trade arbitrajlari. Canli TCMB oranlariyla calisir.
+description: Arbitraj firsati var mi bak, arbitraj hesapla, faiz paritesi kontrol et, carry trade analizi yap, ucgen kur arbitraji, vade farki mi mevduat mi karli, forward kur farki. CIP faiz paritesi, ucgen kur, vade farki vs mevduat ve carry trade arbitrajlari. Canli TCMB oranlariyla calisir.
 argument-hint: "[tur: cip|ucgen|vade-mevduat|carry-trade] [parametreler]"
 allowed-tools: Bash, WebSearch
 ---
@@ -26,19 +26,27 @@ python3 "$ROOT/scripts/ragip_rates.py" --pretty
 
 Kullanici piyasa forward kurunu vermelidir. Vermemisse WebSearch ile `USD TRY forward rate 90 day 2026` ara.
 
+Kullanici piyasa forward kuru (`market_forward`), USD faiz orani (`r_usd`, varsayilan %4.5) ve gun sayisi (`gun`, varsayilan 90) vermelidir. `market_forward` zorunludur — verilmemisse WebSearch ile `USD TRY forward rate 90 day 2026` ara.
+
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
-RATES_JSON="$RATES" python3 -c "
-import json, os
+RATES_JSON="$RATES" MARKET_FORWARD_VAL="MARKET_FORWARD" R_USD_VAL="${R_USD_VAL:-4.5}" GUN_VAL="${GUN_VAL:-90}" python3 -c "
+import json, os, sys
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
 spot = rates['usd_kuru']
 r_tl = rates['politika_faizi']
 
-market_forward = MARKET_FORWARD  # Kullanicidan al
-r_usd = R_USD  # Varsayilan: 4.5
-gun = GUN
+mf = os.environ.get('MARKET_FORWARD_VAL', '')
+try:
+    market_forward = float(mf)
+except (ValueError, TypeError):
+    print('HATA: Piyasa forward kuru belirtilmedi.')
+    print('Ornek: /ragip-arbitraj cip market_forward=38.50 gun=90')
+    sys.exit(1)
+r_usd = float(os.environ.get('R_USD_VAL', '4.5'))
+gun = int(os.environ.get('GUN_VAL', '90'))
 
 t = gun / 365
 teorik = spot * (1 + r_tl/100 * t) / (1 + r_usd/100 * t)
@@ -65,7 +73,7 @@ else:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
 RATES_JSON="$RATES" python3 -c "
 import json, os
@@ -108,17 +116,22 @@ else:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
-RATES_JSON="$RATES" python3 -c "
-import json, os
+RATES_JSON="$RATES" ANAPARA_VAL="ANAPARA" VADE_ORAN_VAL="VADE_ORAN" GUN_VAL="${GUN_VAL:-30}" python3 -c "
+import json, os, sys
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
 tcmb = rates['politika_faizi']
 
-anapara = ANAPARA  # Kullanicidan al
-vade_oran = VADE_ORAN  # Aylik %
-gun = GUN
-mevduat_oran = MEVDUAT_ORAN  # Yillik %, yoksa tcmb kullan
+try:
+    anapara = float(os.environ['ANAPARA_VAL'])
+    vade_oran = float(os.environ['VADE_ORAN_VAL'])
+except (KeyError, ValueError):
+    print('HATA: anapara ve vade_oran zorunludur.')
+    print('Ornek: /ragip-arbitraj vade-mevduat anapara=500000 vade_oran=3 gun=30')
+    sys.exit(1)
+gun = int(os.environ.get('GUN_VAL', '30'))
+mevduat_oran = tcmb  # TCMB politika faizi varsayilan
 
 vade_farki = anapara * (vade_oran/100) * gun / 30
 mevduat_getiri = anapara * (mevduat_oran/100) * gun / 365
@@ -143,15 +156,15 @@ else:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
-RATES_JSON="$RATES" python3 -c "
+RATES_JSON="$RATES" R_USD_VAL="${R_USD_VAL:-4.5}" GUN_VAL="${GUN_VAL:-180}" python3 -c "
 import json, os
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
 spot = rates['usd_kuru']
 r_tl = rates['politika_faizi'] / 100
-r_usd = R_USD / 100  # Varsayilan: 4.5
-gun = GUN
+r_usd = float(os.environ.get('R_USD_VAL', '4.5')) / 100
+gun = int(os.environ.get('GUN_VAL', '180'))
 t = gun / 365
 
 # 1 USD borc al, TL'ye cevir, mevduata yatir

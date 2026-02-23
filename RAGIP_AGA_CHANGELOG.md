@@ -6,6 +6,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.5.0] - 2026-02-23
+
+### Fixed — Bare Placeholder Bug (P0)
+
+- **ragip-vade-farki**: `anapara = ANAPARA` (NameError) → `float(os.environ['ANAPARA_VAL'])` env var pattern
+- **ragip-strateji**: `tutar = TUTAR` (NameError) → `float(os.environ['TUTAR_VAL'])` env var pattern
+- Her iki skill'de hata durumunda net Türkçe mesaj ve örnek kullanım gösterilir
+
+### Added — DRY Refactoring
+
+- **`scripts/ragip_get_rates.sh`**: TCMB oran çekme tek kaynak helper (fallback zinciri: canlı API → cache → FALLBACK_RATES)
+- **`scripts/ragip_crud.py`**: CRUD skill'leri için paylaşımlı yardımcı modül (get_root, load/save jsonl/json, parse_kv, atomic_write, next_id)
+- 3 oran skill'inde (vade-farki, strateji, arbitraj) tekrarlanan 6 fetch+fallback bloğu → 1 helper + tek satır çağrı
+- 3 CRUD skill'inde (firma, gorev, profil) ~60% boilerplate azaltma → ragip_crud.py import
+
+### Added — Test Coverage
+
+- **`TestBashBlocks`** (8 test): Skill bash bloklarının yapısal doğrulaması
+  - Python sözdizimi kontrolü, bare placeholder tespiti, env var eşleştirme
+  - Helper kullanım kontrolü (get_rates.sh, ragip_crud.py)
+  - Bash değişken tırnaklama kontrolü
+- **`test_ragip_install.py`** (12 test): install.sh ve update.sh otomatik testleri
+  - Fresh install: dosya varlığı, manifest yapısı, checksum doğrulama, gitignore
+  - Update: aynı versiyon reddi, --force, kullanıcı değişikliği koruma, silinen dosya geri yükleme, --dry-run
+- **`test_ragip_crud.py`** (17 test): ragip_crud.py unit testleri
+  - parse_kv, load/save jsonl/json, atomic write, next_id, today
+
+### Changed
+
+- `install.sh`: ragip_get_rates.sh + ragip_crud.py kopyalama ve manifest'e ekleme (18 → 20 core dosya)
+- `update.sh`: Yeni script dosyalarını tanıma desteği
+- Manifest dosya sayısı: 18 → 20
+- Toplam test: 127 → 164
+
+---
+
 ## [2.4.0] - 2026-02-23
 
 ### Added — Versiyon Takibi ve Güncelleme Mekanizması

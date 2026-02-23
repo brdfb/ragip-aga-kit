@@ -19,16 +19,22 @@ Senaryo belirsizse şunu sor: "Konu nedir? Karşı taraf kim? Tutar ne kadar? S�
 
 **2. Bash ile senaryo maliyetini hesapla:**
 ```bash
-# Canlı TCMB oranı çek
+# Canlı TCMB oranı çek (tek kaynak helper)
 ROOT=$(git rev-parse --show-toplevel)
-RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
-TCMB_ORANI=$(echo $RATES | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['politika_faizi'])" 2>/dev/null)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 
-TCMB_ORANI_VAL="${TCMB_ORANI}" python3 -c "
-import os
-# Kullanıcının verdiği rakamlara göre doldur
-tutar = TUTAR
-tcmb_oran = float(os.environ.get('TCMB_ORANI_VAL', '37.0'))
+RATES_JSON="$RATES" TUTAR_VAL="TUTAR" python3 -c "
+import os, sys, json
+
+try:
+    tutar = float(os.environ['TUTAR_VAL'])
+except (KeyError, ValueError):
+    print('HATA: tutar zorunludur.')
+    print('Ornek: /ragip-strateji Microsoft NCE lisans uyusmazligi tutar=450000')
+    sys.exit(1)
+
+rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+tcmb_oran = float(rates.get('politika_faizi', 50.0))
 aylik_politika = tcmb_oran / 12 / 100
 
 # Anlaşma maliyeti (iyimser — indirim kabul)
