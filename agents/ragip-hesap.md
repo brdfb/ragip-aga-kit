@@ -47,7 +47,7 @@ Kullanicinin verdigi rakamlari al ve asagidaki hesaplamalari yap:
 
 1. **Once TCMB oranlarini cek:**
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 python3 "$ROOT/scripts/ragip_rates.py" --pretty
 ```
 

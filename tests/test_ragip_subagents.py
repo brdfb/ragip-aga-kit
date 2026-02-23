@@ -9,8 +9,14 @@ from pathlib import Path
 
 import pytest
 
-AGENTS_DIR = Path(__file__).parent.parent / ".claude" / "agents"
-SKILLS_DIR = Path(__file__).parent.parent / ".claude" / "skills"
+_REPO_ROOT = Path(__file__).parent.parent
+# Kit kaynak dizini: agents/ altinda, kurulum sonrasi: .claude/agents/ altinda
+if (_REPO_ROOT / "agents").is_dir():
+    AGENTS_DIR = _REPO_ROOT / "agents"
+    SKILLS_DIR = _REPO_ROOT / "skills"
+else:
+    AGENTS_DIR = _REPO_ROOT / ".claude" / "agents"
+    SKILLS_DIR = _REPO_ROOT / ".claude" / "skills"
 
 # --- Yardimci fonksiyonlar ---
 
@@ -447,8 +453,9 @@ class TestPortability:
         ).strip()
         repo_root = Path(result)
         assert repo_root.exists(), f"git rev-parse sonucu mevcut degil: {result}"
-        assert (repo_root / ".claude" / "agents").is_dir(), (
-            f"{result}/.claude/agents dizini bulunamadi"
+        # Kit kaynagi veya kurulum dizini
+        assert (repo_root / "agents").is_dir() or (repo_root / ".claude" / "agents").is_dir(), (
+            f"{result}: ne agents/ ne de .claude/agents/ dizini bulunamadi"
         )
 
     def test_doc_text_uses_relative_paths(self):

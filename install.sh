@@ -9,7 +9,7 @@ set -euo pipefail
 #   curl -sSL https://raw.githubusercontent.com/USER/ragip-aga-kit/main/install.sh | bash
 #
 # veya clone edip:
-#   git clone https://github.com/USER/ragip-aga-kit.git /tmp/ragip-aga-kit
+#   git clone https://github.com/brdfb/ragip-aga-kit.git /tmp/ragip-aga-kit
 #   cd /path/to/hedef-repo
 #   bash /tmp/ragip-aga-kit/install.sh
 
@@ -99,6 +99,32 @@ else
     echo "data/RAGIP_AGA/" >> "$HEDEF/.gitignore"
     echo "scripts/.ragip_cache/" >> "$HEDEF/.gitignore"
     info ".gitignore olusturuldu"
+fi
+
+# 8. Opsiyonel venv + pip install
+if [ -t 0 ]; then
+    read -p "[?] Python venv olusturup bagimliliklari kurayim mi? (y/N) " INSTALL_DEPS
+    if [ "$INSTALL_DEPS" = "y" ] || [ "$INSTALL_DEPS" = "Y" ]; then
+        python3 -m venv "$HEDEF/.ragip-venv"
+        "$HEDEF/.ragip-venv/bin/pip" install -q -r "$SCRIPT_DIR/requirements.txt"
+        info "Venv olusturuldu: $HEDEF/.ragip-venv/"
+    fi
+fi
+
+# 9. Opsiyonel shell alias
+if [ -t 0 ]; then
+    read -p "[?] 'ragip' shell alias tanimlayayim mi? (y/N) " SETUP_ALIAS
+    if [ "$SETUP_ALIAS" = "y" ] || [ "$SETUP_ALIAS" = "Y" ]; then
+        SHELL_RC="$HOME/.bashrc"
+        [ -n "$ZSH_VERSION" ] && SHELL_RC="$HOME/.zshrc"
+        VENV_PYTHON="$HEDEF/.ragip-venv/bin/python"
+        [ ! -f "$VENV_PYTHON" ] && VENV_PYTHON="python3"
+        echo "" >> "$SHELL_RC"
+        echo "# Ragip Aga CLI" >> "$SHELL_RC"
+        echo "alias ragip='$VENV_PYTHON $HEDEF/scripts/ragip_aga.py'" >> "$SHELL_RC"
+        info "Alias eklendi: $SHELL_RC"
+        info "Aktif etmek icin: source $SHELL_RC"
+    fi
 fi
 
 # --- Sonuc ---

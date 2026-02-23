@@ -8,7 +8,7 @@ Claude Code icin nakit akisi yonetimi, vade muzakeresi ve sozlesme uyusmazliklar
 
 ```bash
 # 1. Clone et
-git clone https://github.com/USER/ragip-aga-kit.git /tmp/ragip-aga-kit
+git clone https://github.com/brdfb/ragip-aga-kit.git /tmp/ragip-aga-kit
 
 # 2. Hedef repoya git
 cd /path/to/senin-repo
@@ -68,12 +68,12 @@ ragip-aga (orchestrator, sonnet)
   |                                ragip-dis-veri
   |                                ragip-strateji
   |                                ragip-ihtar
-  |                                ragip-profil
   |
   +-- ragip-veri (haiku) --------- ragip-firma
                                    ragip-gorev
                                    ragip-import
                                    ragip-ozet
+                                   ragip-profil
 ```
 
 **Orchestrator** (ragip-aga) kullanicinin istegini anlar ve uygun sub-agent'a yonlendirir. Kendisi hesaplama/analiz yapmaz.

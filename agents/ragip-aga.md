@@ -111,7 +111,7 @@ Alt-ajan bu dosyalari Read ile okuyarak onceki sonuclari kullanir.
 
 **Listeleme:** Mevcut ciktilari gormek icin:
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 ls -lt "$ROOT/data/RAGIP_AGA/ciktilar/"
 ```
 

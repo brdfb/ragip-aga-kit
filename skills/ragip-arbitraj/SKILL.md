@@ -16,7 +16,7 @@ Girdi yoksa sor: "Hangi arbitraj hesabi? cip / ucgen / vade-mevduat / carry-trad
 
 **1. Guncel TCMB oranlarini cek:**
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 python3 "$ROOT/scripts/ragip_rates.py" --pretty
 ```
 
@@ -27,7 +27,7 @@ python3 "$ROOT/scripts/ragip_rates.py" --pretty
 Kullanici piyasa forward kurunu vermelidir. Vermemisse WebSearch ile `USD TRY forward rate 90 day 2026` ara.
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
 
 RATES_JSON="$RATES" python3 -c "
@@ -64,7 +64,7 @@ else:
 ### B. Ucgen Kur Arbitraji
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
 
 RATES_JSON="$RATES" python3 -c "
@@ -107,7 +107,7 @@ else:
 ### C. Vade Farki vs Mevduat Arbitraji
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
 
 RATES_JSON="$RATES" python3 -c "
@@ -142,7 +142,7 @@ else:
 ### D. Carry Trade Analizi
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
 
 RATES_JSON="$RATES" python3 -c "

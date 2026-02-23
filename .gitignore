@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+scripts/.ragip_cache/
+data/RAGIP_AGA/

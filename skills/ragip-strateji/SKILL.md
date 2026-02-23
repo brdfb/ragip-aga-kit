@@ -20,7 +20,7 @@ Senaryo belirsizse şunu sor: "Konu nedir? Karşı taraf kim? Tutar ne kadar? S�
 **2. Bash ile senaryo maliyetini hesapla:**
 ```bash
 # Canlı TCMB oranı çek
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "$HOME/.orchestrator")
+ROOT=$(git rev-parse --show-toplevel)
 RATES=$(python3 "$ROOT/scripts/ragip_rates.py" 2>/dev/null)
 TCMB_ORANI=$(echo $RATES | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['politika_faizi'])" 2>/dev/null)
 
