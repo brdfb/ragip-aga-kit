@@ -756,3 +756,17 @@ class TestBashBlocks:
                     # Pattern: RATES_JSON="$RATES" — bu da geçerli
                     dynamic_env = set(re.findall(r'(\w+)="\$\w+"', env_part))
                     missing = missing - dynamic_env
+
+    def test_firma_tip_field_in_schema(self):
+        """ragip-firma skill'inde tip alanı schema'da tanımlı olmalı"""
+        firma_skill = SKILLS_DIR / "ragip-firma" / "SKILL.md"
+        text = firma_skill.read_text(encoding="utf-8")
+        assert '"tip"' in text, "Firma schema'sında tip alanı eksik"
+        for tip in ["tedarikci", "musteri", "distributor", "diger"]:
+            assert tip in text, f"Firma tip değeri eksik: {tip}"
+
+    def test_firma_tip_validation_in_ekle(self):
+        """ragip-firma ekle komutunda tip validasyonu olmalı"""
+        firma_skill = SKILLS_DIR / "ragip-firma" / "SKILL.md"
+        text = firma_skill.read_text(encoding="utf-8")
+        assert "VALID_TIP" in text, "Firma ekle komutunda tip validasyonu eksik"
