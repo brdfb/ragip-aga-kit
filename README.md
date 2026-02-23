@@ -20,6 +20,22 @@ bash /tmp/ragip-aga-kit/install.sh
 python -m pytest tests/test_ragip_subagents.py -v
 ```
 
+## Guncelleme
+
+Mevcut kurulumu guncellemek icin:
+
+```bash
+cd /path/to/senin-repo
+bash /path/to/ragip-aga-kit/update.sh
+```
+
+- Sizin degisiklikleriniz otomatik korunur
+- Cakisma varsa `.kullanici-yedek-YYYYMMDD` yedeginiz olusur
+- Onizleme icin: `bash update.sh --dry-run`
+- Ayni surumde zorla: `bash update.sh --force`
+
+Her kurulumda `config/.ragip_manifest.json` dosyasina 18 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kurulum anindaki hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz.
+
 ## Ne Kuruluyor
 
 | Tip | Sayi | Konum |
@@ -28,6 +44,7 @@ python -m pytest tests/test_ragip_subagents.py -v
 | Skill | 11 | `.claude/skills/ragip-*/SKILL.md` |
 | Script | 2 | `scripts/ragip_*.py` |
 | Config | 1 | `config/ragip_aga.yaml` |
+| Manifest | 1 | `config/.ragip_manifest.json` |
 | Test | 3+5 | `tests/` |
 
 ## Kullanim
