@@ -34,7 +34,7 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 18 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kurulum anindaki hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 20 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kurulum anindaki hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz.
 
 ## Ne Kuruluyor
 
@@ -42,10 +42,10 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 18 core dosyanin SHA-256 c
 |-----|------|-------|
 | Agent | 4 | `.claude/agents/ragip-*.md` |
 | Skill | 11 | `.claude/skills/ragip-*/SKILL.md` |
-| Script | 2 | `scripts/ragip_*.py` |
+| Script | 4 | `scripts/ragip_*.py` + `ragip_get_rates.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 3+5 | `tests/` |
+| Test | 4+5 | `tests/` |
 
 ## Kullanim
 
@@ -98,6 +98,32 @@ ragip-aga (orchestrator, sonnet)
 **Sub-agent'lar** model maliyetine gore optimize edilmistir:
 - **haiku**: Deterministik islemler (CRUD, hesaplama) — ucuz ve hizli
 - **sonnet**: Derin dusunme gerektiren islemler (analiz, strateji) — kaliteli
+
+### Paylasimli Yardimci Moduller (v2.5.0)
+
+- **`scripts/ragip_get_rates.sh`** — TCMB oranlarini cekmek icin tek kaynak. Fallback zinciri: canli API → cache → FALLBACK_RATES. Tum oran kullanan skill'ler (vade-farki, arbitraj, strateji) bu helper'i cagirir.
+- **`scripts/ragip_crud.py`** — CRUD skill'leri (firma, gorev, profil) icin paylasimli yardimci modul. `load/save_jsonl`, `load/save_json`, `parse_kv`, `atomic_write`, `next_id` fonksiyonlari.
+
+## Test
+
+```bash
+# Tam suite (164 test)
+python -m pytest tests/ -v
+
+# Dosya bazli
+python -m pytest tests/test_ragip_subagents.py -v   # Yapisal + bash block (58 test)
+python -m pytest tests/test_ragip_finansal.py -v     # FinansalHesap (58 test)
+python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher (19 test)
+python -m pytest tests/test_ragip_crud.py -v         # CRUD helper (17 test)
+python -m pytest tests/test_ragip_install.py -v      # Install/update (12 test)
+```
+
+Testler 5 katmani kapsar:
+1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
+2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
+3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
+4. **TCMB** — Oran cekme, cache, fallback, format
+5. **Install/Update** — Fresh install, manifest, checksum, update senaryolari (kullanici degisikligi koruma, conflict backup, dry-run)
 
 ## Bagimlilklar
 
