@@ -220,3 +220,63 @@ class TestUpdate:
         # Manifest değişmemiş olmalı
         manifest_after = (repo / "config" / ".ragip_manifest.json").read_text()
         assert manifest_before == manifest_after, "dry-run modunda manifest değişmemeli"
+
+    def test_user_change_preserved_across_updates(self, tmp_path):
+        """Kullanıcı değişikliği ardışık update'lerde korunmalı (manifest hash bug fix)"""
+        repo = self._create_repo(tmp_path)
+        self._install_fresh(repo)
+        # Bir dosyayı değiştir
+        agent_file = repo / ".claude" / "agents" / "ragip-aga.md"
+        original = agent_file.read_text()
+        agent_file.write_text(original + "\n# Kullanici ozellistirmesi\n")
+        user_content = agent_file.read_text()
+        # İlk update
+        result = self._run_update(repo, "--force")
+        assert result.returncode == 0
+        assert agent_file.read_text() == user_content, "İlk update'de korunmalıydı"
+        # İkinci update — BU ESKİDEN BAŞARISIZ OLUYORDU
+        result = self._run_update(repo, "--force")
+        assert result.returncode == 0
+        assert agent_file.read_text() == user_content, "İkinci update'de de korunmalıydı"
+
+    def test_manifest_stores_kit_hash_not_user_hash(self, tmp_path):
+        """Update sonrası manifest kit hash'i saklamalı, kullanıcı hash'i değil"""
+        repo = self._create_repo(tmp_path)
+        self._install_fresh(repo)
+        # Kit'teki orijinal hash'i hesapla
+        kit_file = KIT_DIR / "agents" / "ragip-aga.md"
+        kit_hash = "sha256:" + hashlib.sha256(kit_file.read_bytes()).hexdigest()
+        # Hedefte dosyayı değiştir
+        agent_file = repo / ".claude" / "agents" / "ragip-aga.md"
+        agent_file.write_text(agent_file.read_text() + "\n# Ozel not\n")
+        # Force update
+        self._run_update(repo, "--force")
+        # Manifest'teki hash kit hash'i olmalı
+        manifest = json.loads(
+            (repo / "config" / ".ragip_manifest.json").read_text()
+        )
+        stored = manifest["files"][".claude/agents/ragip-aga.md"]
+        assert stored == kit_hash, (
+            f"Manifest kit hash saklamalı ({kit_hash}), ama {stored} saklıyor"
+        )
+
+    def test_conflict_backup_content(self, tmp_path):
+        """Çakışma yedek dosyası kullanıcının orijinal içeriğini taşımalı"""
+        repo = self._create_repo(tmp_path)
+        self._install_fresh(repo)
+        # Dosyayı değiştir
+        agent_file = repo / ".claude" / "agents" / "ragip-aga.md"
+        agent_file.write_text(agent_file.read_text() + "\n# Kullanici notu\n")
+        user_content = agent_file.read_text()
+        # Manifest'i elle değiştir — farklı hash koy (çakışma simülasyonu)
+        manifest_path = repo / "config" / ".ragip_manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["files"][".claude/agents/ragip-aga.md"] = "sha256:" + "a" * 64
+        manifest_path.write_text(json.dumps(manifest))
+        # Force update → çakışma → yedek
+        self._run_update(repo, "--force")
+        backups = list(
+            (repo / ".claude" / "agents").glob("*.kullanici-yedek*")
+        )
+        assert len(backups) > 0, "Çakışma yedek dosyası oluşmalıydı"
+        assert backups[0].read_text() == user_content

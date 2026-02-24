@@ -245,22 +245,11 @@ for rel_path in missing_reinstall:
 for rel_path in new_files:
     copy_file(rel_path)
 
-# Yeni manifest
+# Yeni manifest — her zaman KIT hash'i sakla (installed hash degil)
+# Boylece kullanici degisiklikleri sonraki update'lerde de tespit edilir.
 new_manifest_files = {}
 for rel_path in sorted(kit_files.keys()):
-    installed_path = Path(hedef) / rel_path
-    if installed_path.exists():
-        new_manifest_files[rel_path] = "sha256:" + sha256_file(installed_path)
-
-for rel_path in skipped_user:
-    installed_path = Path(hedef) / rel_path
-    if installed_path.exists():
-        new_manifest_files[rel_path] = "sha256:" + sha256_file(installed_path)
-
-for rel_path in skipped_unchanged:
-    installed_path = Path(hedef) / rel_path
-    if installed_path.exists():
-        new_manifest_files[rel_path] = "sha256:" + sha256_file(installed_path)
+    new_manifest_files[rel_path] = "sha256:" + kit_files[rel_path]["new_hash"]
 
 new_manifest = {
     "kit_version": new_version,

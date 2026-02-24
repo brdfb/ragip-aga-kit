@@ -6,6 +6,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.5.1] - 2026-02-24
+
+### Fixed — Manifest Hash Bug (Kritik)
+
+- **`update.sh`**: Manifest'e kullanıcı hash'i yerine **kit hash'i** yazılıyor
+  - Eski davranış: Kullanıcı bir skill'i özelleştirince ilk update koruyor ama ikinci update sessizce üzerine yazıyordu
+  - Yeni davranış: Kullanıcı değişiklikleri **tüm ardışık update'lerde** korunur
+  - Sebep: 3 ayrı manifest yazma döngüsü → tek döngü, her zaman `kit_files[rel_path]["new_hash"]`
+
+### Added — Update Güvenlik Testleri
+
+- **`test_user_change_preserved_across_updates`**: Ardışık 2 update'de kullanıcı değişikliği korunuyor mu
+- **`test_manifest_stores_kit_hash_not_user_hash`**: Manifest'te kit hash'i saklandığını doğrular
+- **`test_conflict_backup_content`**: Çakışma yedek dosyasının kullanıcı içeriğini taşıdığını doğrular
+
+### Changed
+
+- Toplam test: 166 → 169
+
+---
+
 ## [2.5.0] - 2026-02-23
 
 ### Fixed — Bare Placeholder Bug (P0)
