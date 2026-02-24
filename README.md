@@ -34,7 +34,7 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 20 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 25 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
 
 ## Ne Kuruluyor
 
@@ -45,7 +45,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 20 core dosyanin SHA-256 c
 | Script | 4 | `scripts/ragip_*.py` + `ragip_get_rates.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 4+5 | `tests/` |
+| Test | 5 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 

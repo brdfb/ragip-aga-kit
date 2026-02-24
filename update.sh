@@ -151,6 +151,10 @@ f = kit_root / "config" / "ragip_aga.yaml"
 if f.exists():
     kit_files["config/ragip_aga.yaml"] = {"kit_path": str(f), "new_hash": sha256_file(f)}
 
+for f in sorted(kit_root.glob("tests/test_ragip_*.py")):
+    rel = str(f.relative_to(kit_root))
+    kit_files[rel] = {"kit_path": str(f), "new_hash": sha256_file(f)}
+
 # Uclu checksum karsilastirma
 updated = []
 skipped_unchanged = []

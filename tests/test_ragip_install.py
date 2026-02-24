@@ -70,7 +70,7 @@ class TestInstall:
             (temp_repo / "config" / ".ragip_manifest.json").read_text()
         )
         count = len(manifest["files"])
-        assert count == 20, f"Beklenen 20 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
+        assert count == 25, f"Beklenen 25 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
 
     def test_manifest_checksums_valid(self, temp_repo):
         """Her checksum sha256: prefix ile başlamalı ve 64 hex karakter olmalı"""

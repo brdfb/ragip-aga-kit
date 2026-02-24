@@ -137,6 +137,12 @@ if f.exists():
     sha = hashlib.sha256(f.read_bytes()).hexdigest()
     files[rel] = "sha256:" + sha
 
+# Tests
+for f in sorted(Path(hedef, "tests").glob("test_ragip_*.py")):
+    rel = str(f.relative_to(hedef))
+    sha = hashlib.sha256(f.read_bytes()).hexdigest()
+    files[rel] = "sha256:" + sha
+
 now = datetime.datetime.now().isoformat(timespec="seconds")
 manifest = {
     "kit_version": version,
