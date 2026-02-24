@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.5.2] - 2026-02-24
+
+### Changed — Doküman Yapısı Yenileme
+
+- **`.claude/rules/`**: Kural dosyaları oluşturuldu (architecture, portability, update-mechanism, data-schema)
+- **`docs/adr/`**: ADR kayıtları oluşturuldu (sub-agent mimarisi, version-manifest, kit-hash fix, kit-mcp ayrımı, DRY helpers)
+- **`CLAUDE.md`**: Yalınlaştırıldı — hardcoded sayılar kaldırıldı, rules/ADR referansları eklendi
+- **`MEMORY.md`**: Tarihsel bilgi ADR'lere taşındı, sadece index kaldı
+
+### Prensip
+
+- Sayı yazma, kaynak göster (`cat VERSION`, `pytest tests/ -v`)
+- Kural = zamansız (`.claude/rules/`), karar = tarihli + bağlamlı (`docs/adr/`)
+
+---
+
 ## [2.5.1] - 2026-02-24
 
 ### Fixed — Manifest Hash Bug (Kritik)
@@ -20,10 +36,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **`test_user_change_preserved_across_updates`**: Ardışık 2 update'de kullanıcı değişikliği korunuyor mu
 - **`test_manifest_stores_kit_hash_not_user_hash`**: Manifest'te kit hash'i saklandığını doğrular
 - **`test_conflict_backup_content`**: Çakışma yedek dosyasının kullanıcı içeriğini taşıdığını doğrular
-
-### Changed
-
-- Toplam test: 166 → 169
 
 ---
 
@@ -44,14 +56,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added — Test Coverage
 
-- **`TestBashBlocks`** (8 test): Skill bash bloklarının yapısal doğrulaması
+- **`TestBashBlocks`**: Skill bash bloklarının yapısal doğrulaması
   - Python sözdizimi kontrolü, bare placeholder tespiti, env var eşleştirme
   - Helper kullanım kontrolü (get_rates.sh, ragip_crud.py)
   - Bash değişken tırnaklama kontrolü
-- **`test_ragip_install.py`** (12 test): install.sh ve update.sh otomatik testleri
+- **`test_ragip_install.py`**: install.sh ve update.sh otomatik testleri
   - Fresh install: dosya varlığı, manifest yapısı, checksum doğrulama, gitignore
   - Update: aynı versiyon reddi, --force, kullanıcı değişikliği koruma, silinen dosya geri yükleme, --dry-run
-- **`test_ragip_crud.py`** (17 test): ragip_crud.py unit testleri
+- **`test_ragip_crud.py`**: ragip_crud.py unit testleri
   - parse_kv, load/save jsonl/json, atomic write, next_id, today
 
 ### Added — Firma Tip Alanı
@@ -65,10 +77,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 
-- `install.sh`: ragip_get_rates.sh + ragip_crud.py kopyalama ve manifest'e ekleme (18 → 20 core dosya)
+- `install.sh`: ragip_get_rates.sh + ragip_crud.py kopyalama ve manifest'e ekleme
 - `update.sh`: Yeni script dosyalarını tanıma desteği
-- Manifest dosya sayısı: 18 → 20
-- Toplam test: 127 → 166
 
 ---
 
@@ -84,7 +94,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
   - Kullanıcı değişiklikleri otomatik korunur
   - Çakışmalarda `.kullanici-yedek-YYYYMMDD` yedek oluşturur
   - `--dry-run`, `--force`, `--source PATH` flagleri
-- **Kurulum manifesti**: `config/.ragip_manifest.json` — 18 core dosyanın SHA-256 checksum'ları
+- **Kurulum manifesti**: `config/.ragip_manifest.json` — core dosyaların SHA-256 checksum'ları
 - **Mevcut kurulum tespiti**: `install.sh` artık mevcut kurulumu algılayıp `update.sh` önerir
 
 ### Changed
@@ -94,8 +104,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Tests
 
-- `TestVersionManifest`: 5 yeni yapısal test (VERSION semver, changelog uyumu, config uyumu, manifest yapısı, manifest dosya varlığı)
-- Toplam: 127 test
+- `TestVersionManifest`: VERSION semver, changelog uyumu, config uyumu, manifest yapısı, manifest dosya varlığı
 
 ---
 
@@ -129,8 +138,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Tests
 
 - `get_env_key` mock'ları kaldırıldı → `os.environ` mock'ları
-- 5 yeni test: `TestCacheDir` (3), `TestAllExports` (2)
-- Toplam: 19/19 test, full suite 300/300
+- Yeni testler: `TestCacheDir`, `TestAllExports`
 
 ---
 
@@ -185,8 +193,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Tests
 
-- `test_ragip_subagents.py`: Portability (7), skill dağılımı (5), dosya varlığı (4)
-- Toplam: 16 yeni yapısal test
+- `test_ragip_subagents.py`: Portability, skill dağılımı, dosya varlığı yapısal testleri
 
 ---
 
