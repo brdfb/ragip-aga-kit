@@ -98,6 +98,13 @@ Sub-agents save outputs to `data/RAGIP_AGA/ciktilar/` with format `YYYYMMDD_HHMM
 - `data/RAGIP_AGA/` — firm cards, tasks, output files, history
 - `scripts/.ragip_cache/` — TCMB/CollectAPI rate cache files
 
+### Manifest & Update
+
+- `config/.ragip_manifest.json` tracks **25 core files** (4 agent + 11 skill + 4 script + 1 config + 5 test) with SHA-256 checksums
+- `update.sh` uses triple checksum comparison: manifest (kit hash) vs installed file vs new kit
+- Manifest always stores **kit hash**, not installed hash — user customizations survive all consecutive updates
+- Pre-commit hook (`.git/hooks/pre-commit`) runs full test suite before every commit
+
 ## Test Structure
 
 Tests auto-detect whether running from the kit source (`agents/`) or an installed repo (`.claude/agents/`). The structural tests in `test_ragip_subagents.py` validate the entire agent architecture: frontmatter YAML, skill distribution, model assignments, portability, and output management conventions. E2E scenario fixtures are in `tests/e2e_ragip_scenario/` (contract, invoices, CSV for a Microsoft NCE license dispute scenario).
