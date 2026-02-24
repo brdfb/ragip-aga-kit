@@ -12,13 +12,15 @@ All user-facing content (agent prompts, skill docs, CLI output) is in **Turkish*
 
 ### Tests
 ```bash
-# Full test suite
+# Full test suite (169 tests)
 python -m pytest tests/ -v
 
 # Individual test files
-python -m pytest tests/test_ragip_subagents.py -v   # Structural/architecture tests
-python -m pytest tests/test_ragip_finansal.py -v     # FinansalHesap unit tests
-python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher tests
+python -m pytest tests/test_ragip_subagents.py -v   # Structural + bash block tests (60)
+python -m pytest tests/test_ragip_finansal.py -v     # FinansalHesap unit tests (58)
+python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher tests (19)
+python -m pytest tests/test_ragip_crud.py -v         # CRUD helper tests (17)
+python -m pytest tests/test_ragip_install.py -v      # Install/update tests (15)
 
 # Single test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

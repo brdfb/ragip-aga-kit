@@ -34,7 +34,7 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 20 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kurulum anindaki hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 20 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
 
 ## Ne Kuruluyor
 
@@ -107,15 +107,15 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (164 test)
+# Tam suite (169 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
-python -m pytest tests/test_ragip_subagents.py -v   # Yapisal + bash block (58 test)
+python -m pytest tests/test_ragip_subagents.py -v   # Yapisal + bash block (60 test)
 python -m pytest tests/test_ragip_finansal.py -v     # FinansalHesap (58 test)
 python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher (19 test)
 python -m pytest tests/test_ragip_crud.py -v         # CRUD helper (17 test)
-python -m pytest tests/test_ragip_install.py -v      # Install/update (12 test)
+python -m pytest tests/test_ragip_install.py -v      # Install/update (15 test)
 ```
 
 Testler 5 katmani kapsar:
