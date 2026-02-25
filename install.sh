@@ -62,12 +62,12 @@ info "Hedef repo: $HEDEF"
 echo ""
 
 # 1. Agents
-info "Agent dosyalari kopyalaniyor (4 dosya)..."
+info "Agent dosyalari kopyalaniyor (5 dosya)..."
 mkdir -p "$HEDEF/.claude/agents"
 cp "$SCRIPT_DIR"/agents/ragip-*.md "$HEDEF/.claude/agents/"
 
 # 2. Skills
-info "Skill dosyalari kopyalaniyor (11 skill)..."
+info "Skill dosyalari kopyalaniyor (14 skill)..."
 for skill_dir in "$SCRIPT_DIR"/skills/ragip-*/; do
     skill_name=$(basename "$skill_dir")
     mkdir -p "$HEDEF/.claude/skills/$skill_name"
@@ -218,8 +218,8 @@ echo "================================================"
 info "Ragip Aga v$KIT_VERSION basariyla kuruldu!"
 echo "================================================"
 echo ""
-echo "  Agents:  4  (.claude/agents/ragip-*.md)"
-echo "  Skills:  11 (.claude/skills/ragip-*/SKILL.md)"
+echo "  Agents:  5  (.claude/agents/ragip-*.md)"
+echo "  Skills:  14 (.claude/skills/ragip-*/SKILL.md)"
 echo "  Scripts: 4  (scripts/ragip_*.py + ragip_get_rates.sh)"
 echo "  Config:  1  (config/ragip_aga.yaml)"
 echo ""

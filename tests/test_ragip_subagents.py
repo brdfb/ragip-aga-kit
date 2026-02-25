@@ -77,8 +77,9 @@ ORCHESTRATOR_FILE = AGENTS_DIR / "ragip-aga.md"
 HESAP_FILE = AGENTS_DIR / "ragip-hesap.md"
 ARASTIRMA_FILE = AGENTS_DIR / "ragip-arastirma.md"
 VERI_FILE = AGENTS_DIR / "ragip-veri.md"
+HUKUK_FILE = AGENTS_DIR / "ragip-hukuk.md"
 
-ALL_SUBAGENT_FILES = [HESAP_FILE, ARASTIRMA_FILE, VERI_FILE]
+ALL_SUBAGENT_FILES = [HESAP_FILE, ARASTIRMA_FILE, VERI_FILE, HUKUK_FILE]
 
 EXPECTED_ALL_SKILLS = {
     "ragip-vade-farki",
@@ -92,6 +93,9 @@ EXPECTED_ALL_SKILLS = {
     "ragip-import",
     "ragip-ozet",
     "ragip-profil",
+    "ragip-degerlendirme",
+    "ragip-zamanasimi",
+    "ragip-delil",
 }
 
 
@@ -109,6 +113,9 @@ class TestDosyaVarligi:
 
     def test_veri_mevcut(self):
         assert VERI_FILE.exists(), "ragip-veri.md bulunamadi"
+
+    def test_hukuk_mevcut(self):
+        assert HUKUK_FILE.exists(), "ragip-hukuk.md bulunamadi"
 
 
 # --- Test: Orchestrator yapilandirmasi ---
@@ -137,11 +144,12 @@ class TestOrchestrator:
         assert self.fm.get("memory") == "project"
 
     def test_dispatch_tablosu(self):
-        """System prompt'ta 3 sub-agent referansi olmali"""
+        """System prompt'ta 4 sub-agent referansi olmali"""
         text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
         assert "ragip-hesap" in text, "ragip-hesap dispatch referansi eksik"
         assert "ragip-arastirma" in text, "ragip-arastirma dispatch referansi eksik"
         assert "ragip-veri" in text, "ragip-veri dispatch referansi eksik"
+        assert "ragip-hukuk" in text, "ragip-hukuk dispatch referansi eksik"
 
     def test_paralel_kurallari(self):
         """Paralel calistirma kurallari olmali"""
@@ -183,7 +191,7 @@ class TestSubAgentArastirma:
         assert self.fm["model"] == "sonnet"
 
     def test_skills(self):
-        expected = {"ragip-analiz", "ragip-dis-veri", "ragip-strateji", "ragip-ihtar"}
+        expected = {"ragip-analiz", "ragip-dis-veri", "ragip-strateji"}
         assert set(self.fm["skills"]) == expected
 
     def test_max_turns(self):
@@ -198,6 +206,49 @@ class TestSubAgentArastirma:
         assert "TBK" in text, "TBK referansi eksik"
         assert "TTK" in text, "TTK referansi eksik"
         assert "IIK" in text, "IIK referansi eksik"
+
+
+class TestSubAgentHukuk:
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.fm = parse_agent_frontmatter(HUKUK_FILE)
+
+    def test_isim(self):
+        assert self.fm["name"] == "ragip-hukuk"
+
+    def test_model_sonnet(self):
+        """Hukuki analiz icin sonnet gerekli (yasal yorum)"""
+        assert self.fm["model"] == "sonnet"
+
+    def test_skills(self):
+        expected = {"ragip-degerlendirme", "ragip-zamanasimi", "ragip-delil", "ragip-ihtar"}
+        assert set(self.fm["skills"]) == expected
+
+    def test_max_turns(self):
+        assert self.fm["maxTurns"] >= 5, "Hukuk analizi icin 5+ turn gerekli"
+
+    def test_memory(self):
+        assert self.fm.get("memory") == "project"
+
+    def test_yasal_referanslar(self):
+        """System prompt'ta genisletilmis yasal referans cercevesi olmali"""
+        text = HUKUK_FILE.read_text(encoding="utf-8")
+        assert "TBK" in text, "TBK referansi eksik"
+        assert "TTK" in text, "TTK referansi eksik"
+        assert "IIK" in text, "IIK referansi eksik"
+        assert "KVKK" in text, "KVKK referansi eksik"
+        assert "HMK" in text, "HMK referansi eksik"
+
+    def test_avukata_danisin_uyarisi(self):
+        """Hukuk agent'inda avukata danisin uyarisi zorunlu"""
+        text = HUKUK_FILE.read_text(encoding="utf-8")
+        assert "avukat" in text.lower(), "Avukata danisin uyarisi eksik"
+
+    def test_cikti_kaydetme(self):
+        """Cikti kaydetme talimati icermeli"""
+        text = HUKUK_FILE.read_text(encoding="utf-8")
+        assert "CIKTI KAYDETME" in text
+        assert "ciktilar/" in text
 
 
 class TestSubAgentVeri:
@@ -228,7 +279,8 @@ class TestSkillDagilimi:
         self.hesap = parse_agent_frontmatter(HESAP_FILE)
         self.arastirma = parse_agent_frontmatter(ARASTIRMA_FILE)
         self.veri = parse_agent_frontmatter(VERI_FILE)
-        self.all_subagents = [self.hesap, self.arastirma, self.veri]
+        self.hukuk = parse_agent_frontmatter(HUKUK_FILE)
+        self.all_subagents = [self.hesap, self.arastirma, self.veri, self.hukuk]
 
     def test_tum_skilller_atanmis(self):
         """11 skill'in tamami sub-agent'lara atanmis olmali"""
@@ -264,9 +316,9 @@ class TestSkillDagilimi:
         assert orch["skills"] == [], "Orchestrator'de skill olmamali"
 
     def test_toplam_skill_sayisi(self):
-        """Tam 11 skill olmali"""
+        """Tam 14 skill olmali"""
         total = sum(len(a["skills"]) for a in self.all_subagents)
-        assert total == 11, f"Beklenen 11 skill, bulunan {total}"
+        assert total == 14, f"Beklenen 14 skill, bulunan {total}"
 
 
 # --- Test: Skill disable-model-invocation tutarliligi ---
@@ -274,7 +326,7 @@ class TestSkillDagilimi:
 class TestSkillModelInvocation:
     """disable-model-invocation: true olan skill'ler veri/template skill'leri olmali"""
 
-    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-ihtar", "ragip-ozet", "ragip-import", "ragip-profil"}
+    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-ihtar", "ragip-ozet", "ragip-import", "ragip-profil", "ragip-zamanasimi"}
 
     def _has_disable_flag(self, skill_name: str) -> bool:
         skill_file = SKILLS_DIR / skill_name / "SKILL.md"
@@ -334,6 +386,16 @@ class TestCiktiYonetimi:
         )
         assert "ciktilar/" in text, (
             "ragip-hesap'ta ciktilar/ dizin referansi eksik"
+        )
+
+    def test_hukuk_cikti_kaydetme(self):
+        """ragip-hukuk cikti kaydetme talimati icermeli"""
+        text = HUKUK_FILE.read_text(encoding="utf-8")
+        assert "CIKTI KAYDETME" in text, (
+            "ragip-hukuk'ta CIKTI KAYDETME bolumu eksik"
+        )
+        assert "ciktilar/" in text, (
+            "ragip-hukuk'ta ciktilar/ dizin referansi eksik"
         )
 
     def test_veri_cikti_kaydetme(self):

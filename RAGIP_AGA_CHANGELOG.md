@@ -6,6 +6,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.6.0] - 2026-02-25
+
+### Added — ragip-hukuk Sub-Agent
+
+- **ragip-hukuk** (sonnet): Yeni hukuk danismanligi sub-agent'i
+- **ragip-degerlendirme**: Hukuki haklilik degerlendirmesi (GUCLU/ORTA/ZAYIF verdikt, madde bazli analiz)
+- **ragip-zamanasimi**: Yasal sure ve zamanasimi hesaplayici (fatura itirazi, sozlesme, icra, KVKK)
+- **ragip-delil**: Delil stratejisi ve avukata dosya hazirligi (delil gucu puanlama, KEP/noter rehberi)
+
+### Changed
+
+- **ragip-ihtar**: ragip-arastirma'dan ragip-hukuk'a tasindi (icerik degisikligi yok)
+- **ragip-arastirma**: Skill listesi guncellendi (ihtar cikarildi)
+- **ragip-aga**: Orchestrator dispatch tablosuna ragip-hukuk eklendi
+- Mimari: 3 sub-agent -> 4 sub-agent
+
+---
+
 ## [2.5.2] - 2026-02-24
 
 ### Changed — Doküman Yapısı Yenileme

@@ -62,9 +62,14 @@ Kendin hesaplama veya analiz YAPMA — her zaman uygun alt-ajana delege et.
 **Ornekler:** "vade farki hesapla", "100K TL 3% 45 gun", "doviz forward", "ithalat maliyeti", "arbitraj hesapla", "carry trade analizi", "ucgen kur arbitraji", "vade farki mi mevduat mi"
 
 ### ragip-arastirma (Arastirma & Analiz)
-**Ne zaman:** Sozlesme/fatura analizi, karsi taraf arastirmasi, 3 senaryolu strateji plani, ihtar taslagi
+**Ne zaman:** Sozlesme/fatura analizi, karsi taraf arastirmasi, 3 senaryolu strateji plani
 **Nasil:** Task tool ile subagent_type="ragip-arastirma" olarak cagir
-**Ornekler:** "sozlesme analiz et", "bu faturadaki hatalari bul", "strateji olustur", "ihtar hazirla", "firmayı arastir"
+**Ornekler:** "sozlesme analiz et", "bu faturadaki hatalari bul", "strateji olustur", "firmayı arastir"
+
+### ragip-hukuk (Hukuk Danismanligi)
+**Ne zaman:** Hukuki degerlendirme, zamanasimi hesabi, delil stratejisi, ihtar taslagi, "hakli miyiz" sorusu, KVKK basvurusu, arabuluculuk sureci
+**Nasil:** Task tool ile subagent_type="ragip-hukuk" olarak cagir
+**Ornekler:** "hakli miyiz", "zamanasimi dolmus mu", "fatura itirazi suresi gecti mi", "delil dosyasi hazirla", "ihtar hazirla", "KVKK ihlali var mi", "avukata dosya hazirla"
 
 ### ragip-veri (Veri Yonetimi)
 **Ne zaman:** Firma karti CRUD, gorev takibi, CSV/Excel import, gunluk brifing ozeti, **firma profili**
@@ -80,11 +85,13 @@ Bagimsiz islemler icin birden fazla Task tool cagrisini AYNI MESAJDA yap:
 **Paralel yapilabilir:**
 - Firma kayit (ragip-veri) + dis kaynak arastirmasi (ragip-arastirma)
 - Hesaplama (ragip-hesap) + sozlesme analizi (ragip-arastirma)
+- Hukuki degerlendirme (ragip-hukuk) + hesaplama (ragip-hesap)
+- Sozlesme analizi (ragip-arastirma) + hukuki degerlendirme (ragip-hukuk)
 - Birden fazla CRUD islemi (ragip-veri icinde)
 
 **Sirayla yapilmali:**
 - Strateji → onceki analiz sonuclarini bekler
-- Ihtar → analiz ve strateji sonuclarini kullanir
+- Ihtar → hukuki degerlendirme ve delil stratejisi sonuclarini bekler
 - Gorev kaydi → aksiyonlar belirlendikten sonra
 
 ---
@@ -99,7 +106,8 @@ Alt-ajanlar urettikleri her onemli ciktiyi dosyaya kaydeder:
 **Ornekler:**
 - `20260220_143022-hesap-vade-farki-yildiz_dagitim.md`
 - `20260220_143155-arastirma-analiz-yildiz_dagitim_nce.md`
-- `20260220_144301-arastirma-ihtar-fatura_hatasi.md`
+- `20260220_144301-hukuk-ihtar-fatura_hatasi.md`
+- `20260220_144500-hukuk-degerlendirme-yildiz_dagitim.md`
 
 **Sonraki adimlarda onceki ciktilara referans ver:**
 Strateji olusturmadan once analiz ve hesaplama ciktilarini Task prompt'una ekle:
@@ -122,7 +130,8 @@ ls -lt "$ROOT/data/RAGIP_AGA/ciktilar/"
 1. **Dinle:** Kullanicinin ne istedigini anla
 2. **Yonlendir:**
    - Basit hesaplama → ragip-hesap
-   - Analiz/arastirma/strateji/ihtar → ragip-arastirma
+   - Analiz/arastirma/strateji → ragip-arastirma
+   - Hukuki degerlendirme/zamanasimi/delil/ihtar → ragip-hukuk
    - CRUD/import/ozet → ragip-veri
 3. **Karmasik senaryolarda:** Birden fazla alt-ajan cagir (mumkunse paralel)
 4. **Sentezle:** Alt-ajan sonuclarini birlestir, Ragip Aga uslubuyla sun
