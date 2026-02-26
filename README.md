@@ -34,18 +34,18 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 25 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 31 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
 
 ## Ne Kuruluyor
 
 | Tip | Sayi | Konum |
 |-----|------|-------|
-| Agent | 4 | `.claude/agents/ragip-*.md` |
-| Skill | 11 | `.claude/skills/ragip-*/SKILL.md` |
+| Agent | 5 | `.claude/agents/ragip-*.md` |
+| Skill | 15 | `.claude/skills/ragip-*/SKILL.md` |
 | Script | 4 | `scripts/ragip_*.py` + `ragip_get_rates.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 5 | `tests/test_ragip_*.py` |
+| Test | 6 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -58,6 +58,11 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 25 core dosyanin SHA-256 c
 /ragip-gorev listele                    — Aktif gorevler
 /ragip-vade-farki 250000 3 45           — Vade farki hesapla
 /ragip-arbitraj                         — Arbitraj firsatlari (CIP, ucgen kur, carry trade)
+/ragip-rapor aging                      — Fatura analiz raporu (aging, DSO, DPO, tahsilat, gelir-trendi, konsantrasyon, kdv, hepsi)
+/ragip-degerlendirme                    — Hukuki haklilik degerlendirmesi
+/ragip-zamanasimi                       — Zamanasimi ve yasal sure hesabi
+/ragip-delil                            — Delil stratejisi ve avukata dosya hazirligi
+/ragip-ihtar vade-farki                 — Ihtar yazisi taslagi
 /ragip-profil ABC Dagitim               — Sektor-aware firma profili
 /ragip-ozet                             — Gunluk brifing
 /ragip-import dosya.csv                 — CSV/Excel import
@@ -71,6 +76,9 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 25 core dosyanin SHA-256 c
 "ABC Dagitim hakkinda bilgi topla"
 "3 senaryo strateji olustur"
 "ihtar taslagi hazirla - vade farki"
+"hakli miyiz bu uyusmazlikta"
+"aging raporu goster"
+"tum raporlari calistir"
 ```
 
 ## Mimari
@@ -80,10 +88,15 @@ ragip-aga (orchestrator, sonnet)
   |
   +-- ragip-hesap (haiku) -------- ragip-vade-farki
   |                                ragip-arbitraj
+  |                                ragip-rapor
   |
   +-- ragip-arastirma (sonnet) --- ragip-analiz
   |                                ragip-dis-veri
   |                                ragip-strateji
+  |
+  +-- ragip-hukuk (sonnet) ------- ragip-degerlendirme
+  |                                ragip-zamanasimi
+  |                                ragip-delil
   |                                ragip-ihtar
   |
   +-- ragip-veri (haiku) --------- ragip-firma
@@ -107,23 +120,25 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (169 test)
+# Tam suite (213 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
-python -m pytest tests/test_ragip_subagents.py -v   # Yapisal + bash block (60 test)
-python -m pytest tests/test_ragip_finansal.py -v     # FinansalHesap (58 test)
-python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher (19 test)
-python -m pytest tests/test_ragip_crud.py -v         # CRUD helper (17 test)
-python -m pytest tests/test_ragip_install.py -v      # Install/update (15 test)
+python -m pytest tests/test_ragip_subagents.py -v      # Yapisal + bash block
+python -m pytest tests/test_ragip_finansal.py -v        # FinansalHesap
+python -m pytest tests/test_ragip_fatura_analiz.py -v   # Fatura analiz motorlari
+python -m pytest tests/test_ragip_rates.py -v           # TCMB rate fetcher
+python -m pytest tests/test_ragip_crud.py -v            # CRUD helper
+python -m pytest tests/test_ragip_install.py -v         # Install/update
 ```
 
-Testler 5 katmani kapsar:
+Testler 6 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
-4. **TCMB** — Oran cekme, cache, fallback, format
-5. **Install/Update** — Fresh install, manifest, checksum, update senaryolari (kullanici degisikligi koruma, conflict backup, dry-run)
+4. **Fatura analiz** — Aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti
+5. **TCMB** — Oran cekme, cache, fallback, format
+6. **Install/Update** — Fresh install, manifest, checksum, update senaryolari (kullanici degisikligi koruma, conflict backup, dry-run)
 
 ## Bagimlilklar
 
