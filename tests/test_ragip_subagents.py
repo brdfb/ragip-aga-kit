@@ -84,6 +84,7 @@ ALL_SUBAGENT_FILES = [HESAP_FILE, ARASTIRMA_FILE, VERI_FILE, HUKUK_FILE]
 EXPECTED_ALL_SKILLS = {
     "ragip-vade-farki",
     "ragip-arbitraj",
+    "ragip-rapor",
     "ragip-ihtar",
     "ragip-analiz",
     "ragip-dis-veri",
@@ -172,7 +173,7 @@ class TestSubAgentHesap:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        assert self.fm["skills"] == ["ragip-vade-farki", "ragip-arbitraj"]
+        assert self.fm["skills"] == ["ragip-vade-farki", "ragip-arbitraj", "ragip-rapor"]
 
     def test_max_turns_kisa(self):
         assert self.fm["maxTurns"] <= 5, "Hesap motoru 3-5 turn yeterli"
@@ -283,7 +284,7 @@ class TestSkillDagilimi:
         self.all_subagents = [self.hesap, self.arastirma, self.veri, self.hukuk]
 
     def test_tum_skilller_atanmis(self):
-        """11 skill'in tamami sub-agent'lara atanmis olmali"""
+        """15 skill'in tamami sub-agent'lara atanmis olmali"""
         assigned = set()
         for agent in self.all_subagents:
             assigned.update(agent["skills"])
@@ -316,9 +317,9 @@ class TestSkillDagilimi:
         assert orch["skills"] == [], "Orchestrator'de skill olmamali"
 
     def test_toplam_skill_sayisi(self):
-        """Tam 14 skill olmali"""
+        """Tam 15 skill olmali"""
         total = sum(len(a["skills"]) for a in self.all_subagents)
-        assert total == 14, f"Beklenen 14 skill, bulunan {total}"
+        assert total == 15, f"Beklenen 15 skill, bulunan {total}"
 
 
 # --- Test: Skill disable-model-invocation tutarliligi ---
@@ -326,7 +327,7 @@ class TestSkillDagilimi:
 class TestSkillModelInvocation:
     """disable-model-invocation: true olan skill'ler veri/template skill'leri olmali"""
 
-    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-ihtar", "ragip-ozet", "ragip-import", "ragip-profil", "ragip-zamanasimi"}
+    EXPECTED_DISABLED = {"ragip-firma", "ragip-gorev", "ragip-rapor", "ragip-ozet", "ragip-import", "ragip-profil", "ragip-zamanasimi"}
 
     def _has_disable_flag(self, skill_name: str) -> bool:
         skill_file = SKILLS_DIR / skill_name / "SKILL.md"

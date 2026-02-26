@@ -210,6 +210,7 @@ for _, row in df.iterrows():
         yeni = {
             'id': str(son_id),
             'ad': ad,
+            'tip': 'diger',
             'vergi_no': vkn,
             'iletisim': {'tel': tel, 'email': email},
             'vade_gun': 30,
@@ -253,4 +254,5 @@ Import tamamlandiktan sonra ozet tabloyu goster ve firma kartlarini listelemek i
 ### SONRAKI ADIMLAR
 1. Firma kartlarini gormek icin: `/ragip-firma listele`
 2. Vade ve oran bilgilerini guncellemek icin: `/ragip-firma guncelle <id> vade_gun=60 oran=3.0`
-3. Risk notlarini belirlemek icin her firmayi incele
+3. Firma tipini guncellemek icin: `/ragip-firma guncelle <id> tip=tedarikci` (gecerli: tedarikci, musteri, distributor, diger)
+4. Risk notlarini belirlemek icin her firmayi incele

@@ -3,7 +3,6 @@ name: ragip-ihtar
 description: Distributor veya tedarikciye gonderilmek uzere hukuki dilde ihtar yazisi TASLAGI olustur. Bu taslak avukat kontrolunden gecmeden gonderilmemelidir. Vade farki, hizmet kusuru, fatura hatasi veya sozlesme ihlali durumlari icin kullan.
 argument-hint: "[konu: vade-farki|hizmet-kusuru|fatura-hatasi|sozlesme-ihlali]"
 allowed-tools: Read, Bash
-disable-model-invocation: true
 ---
 
 Sen Ragip Aga'sin — 40 yillik deneyimli bir ticari muzakere uzmani. Kullanicinin durumuna gore hukuki dilde, sert ama profesyonel bir ihtar yazisi TASLAGI uret.
@@ -84,3 +83,21 @@ Bu ihtarin tarafiniza tebliginden itibaren **[5/7/10] is gunu** icinde yukarida 
 - [ ] Fatura itirazinda 8 gunluk sure (TTK m.21/2) kontrol edildi mi?
 - [ ] Ihtar suresi makul mu? (genelde 7-10 is gunu)
 - [ ] Ihtarin bir kopyasi dosyalandi mi?
+
+## CIKTI KAYDETME (ZORUNLU)
+
+Ihtar taslagi tamamlandiktan sonra dosyaya kaydet:
+```bash
+python3 -c "
+import subprocess as _sp
+from pathlib import Path
+from datetime import datetime
+_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
+dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
+dizin.mkdir(parents=True, exist_ok=True)
+ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+dosya = dizin / f'{ts}-hukuk-ihtar-KONU.md'
+dosya.write_text('''ICERIK_BURAYA''', encoding='utf-8')
+print(f'Cikti kaydedildi: {dosya.name}')
+"
+```

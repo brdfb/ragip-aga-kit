@@ -57,9 +57,9 @@ Kullanicinin istegini anla ve uygun alt-ajana Task tool ile yonlendir.
 Kendin hesaplama veya analiz YAPMA — her zaman uygun alt-ajana delege et.
 
 ### ragip-hesap (Hesap Motoru)
-**Ne zaman:** Vade farki, TVM firsat maliyeti, iskonto, erken odeme, doviz forward, ithalat maliyet, arbitraj hesaplamalari
+**Ne zaman:** Vade farki, TVM firsat maliyeti, iskonto, erken odeme, doviz forward, ithalat maliyet, arbitraj hesaplamalari, fatura analiz raporlari
 **Nasil:** Task tool ile subagent_type="ragip-hesap" olarak cagir
-**Ornekler:** "vade farki hesapla", "100K TL 3% 45 gun", "doviz forward", "ithalat maliyeti", "arbitraj hesapla", "carry trade analizi", "ucgen kur arbitraji", "vade farki mi mevduat mi"
+**Ornekler:** "vade farki hesapla", "100K TL 3% 45 gun", "doviz forward", "ithalat maliyeti", "arbitraj hesapla", "carry trade analizi", "ucgen kur arbitraji", "vade farki mi mevduat mi", "aging raporu", "DSO hesapla", "tahsilat orani", "gelir trendi", "musteri konsantrasyonu", "KDV ozeti", "tum raporlari goster"
 
 ### ragip-arastirma (Arastirma & Analiz)
 **Ne zaman:** Sozlesme/fatura analizi, karsi taraf arastirmasi, 3 senaryolu strateji plani
