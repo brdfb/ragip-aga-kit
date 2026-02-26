@@ -204,6 +204,17 @@ class TestDso:
         assert sonuc["dso_gun"] == 0.0
         assert "Veri yok" in sonuc["yorum"]
 
+    def test_bugun_str_parametre(self):
+        """bugun parametresi str olarak kabul edilmeli"""
+        bugun_str = str(datetime.date.today())
+        sonuc = FinansalHesap.dso(FATURALAR, donem_gun=90, bugun=bugun_str)
+        assert sonuc["dso_gun"] >= 0
+
+    def test_bugun_date_parametre(self):
+        """bugun parametresi date olarak kabul edilmeli"""
+        sonuc = FinansalHesap.dso(FATURALAR, donem_gun=90, bugun=datetime.date.today())
+        assert sonuc["dso_gun"] >= 0
+
 
 class TestTahsilatOrani:
     def test_kismi_odeme(self):
@@ -388,3 +399,14 @@ class TestDpo:
         sonuc = FinansalHesap.dpo([], donem_gun=90)
         assert sonuc["dpo_gun"] == 0.0
         assert "Veri yok" in sonuc["yorum"]
+
+    def test_bugun_str_parametre(self):
+        """bugun parametresi str olarak kabul edilmeli"""
+        bugun_str = str(datetime.date.today())
+        sonuc = FinansalHesap.dpo(FATURALAR, donem_gun=90, bugun=bugun_str)
+        assert sonuc["dpo_gun"] >= 0
+
+    def test_bugun_date_parametre(self):
+        """bugun parametresi date olarak kabul edilmeli"""
+        sonuc = FinansalHesap.dpo(FATURALAR, donem_gun=90, bugun=datetime.date.today())
+        assert sonuc["dpo_gun"] >= 0

@@ -644,13 +644,17 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def dso(faturalar, donem_gun=90):
+    def dso(faturalar, donem_gun=90, bugun=None):
         """
         DSO (Days Sales Outstanding) hesabi.
         DSO = (acik_alacak / donem_geliri) x donem_gun.
         donem_gun: Son kac gunluk pencere (varsayilan 90).
+        bugun: date veya 'YYYY-MM-DD' str. None ise today().
         """
-        bugun = datetime.date.today()
+        if bugun is None:
+            bugun = datetime.date.today()
+        elif isinstance(bugun, str):
+            bugun = datetime.date.fromisoformat(bugun)
         baslangic = bugun - datetime.timedelta(days=donem_gun)
 
         donem_geliri = 0.0
@@ -903,13 +907,17 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def dpo(faturalar, donem_gun=90):
+    def dpo(faturalar, donem_gun=90, bugun=None):
         """
         DPO (Days Payable Outstanding) hesabi.
         DPO = (acik_borc / donem_alimlari) x donem_gun.
         donem_gun: Son kac gunluk pencere (varsayilan 90).
+        bugun: date veya 'YYYY-MM-DD' str. None ise today().
         """
-        bugun = datetime.date.today()
+        if bugun is None:
+            bugun = datetime.date.today()
+        elif isinstance(bugun, str):
+            bugun = datetime.date.fromisoformat(bugun)
         baslangic = bugun - datetime.timedelta(days=donem_gun)
 
         donem_alimlari = 0.0
