@@ -567,6 +567,385 @@ class FinansalHesap:
         result["yorum"] = "".join(yorum_parts)
         return result
 
+    # ─── Fatura Analiz Motorlari ──────────────────────────────────────────────
+
+    @staticmethod
+    def _kalan_tutar(f: dict) -> float:
+        """Fatura kalanini hesapla: toplam - (odeme_tutari or 0)."""
+        return f["toplam"] - (f.get("odeme_tutari") or 0.0)
+
+    @staticmethod
+    def aging_raporu(faturalar, bugun=None):
+        """
+        Alacak yaslandirma raporu (0-30 / 31-60 / 61-90 / 90+ gun).
+        faturalar: list[dict] — ADR-0007 fatura semasi.
+        bugun: date veya 'YYYY-MM-DD' str. None ise today().
+        """
+        if bugun is None:
+            bugun = datetime.date.today()
+        elif isinstance(bugun, str):
+            bugun = datetime.date.fromisoformat(bugun)
+
+        buckets = {
+            "b_0_30": {"adet": 0, "tutar_tl": 0.0},
+            "b_31_60": {"adet": 0, "tutar_tl": 0.0},
+            "b_61_90": {"adet": 0, "tutar_tl": 0.0},
+            "b_90_plus": {"adet": 0, "tutar_tl": 0.0},
+        }
+        toplam_acik = 0.0
+        fatura_adedi = 0
+
+        for f in faturalar:
+            if f.get("yon") != "alacak":
+                continue
+            if f.get("durum") not in ("acik", "kismi"):
+                continue
+            vade = datetime.date.fromisoformat(f["vade_tarihi"])
+            gecikme = (bugun - vade).days
+            kalan = FinansalHesap._kalan_tutar(f)
+            toplam_acik += kalan
+            fatura_adedi += 1
+
+            if gecikme <= 30:
+                buckets["b_0_30"]["adet"] += 1
+                buckets["b_0_30"]["tutar_tl"] += kalan
+            elif gecikme <= 60:
+                buckets["b_31_60"]["adet"] += 1
+                buckets["b_31_60"]["tutar_tl"] += kalan
+            elif gecikme <= 90:
+                buckets["b_61_90"]["adet"] += 1
+                buckets["b_61_90"]["tutar_tl"] += kalan
+            else:
+                buckets["b_90_plus"]["adet"] += 1
+                buckets["b_90_plus"]["tutar_tl"] += kalan
+
+        for b in buckets.values():
+            b["tutar_tl"] = round(b["tutar_tl"], 2)
+
+        if fatura_adedi == 0:
+            yorum = "Veri yok."
+        else:
+            parts = [f"Toplam {fatura_adedi} acik alacak: {toplam_acik:,.2f} TL."]
+            if buckets["b_90_plus"]["tutar_tl"] > 0:
+                parts.append(f" 90+ gun: {buckets['b_90_plus']['tutar_tl']:,.2f} TL — kritik.")
+            elif buckets["b_61_90"]["tutar_tl"] > 0:
+                parts.append(f" 61-90 gun: {buckets['b_61_90']['tutar_tl']:,.2f} TL — dikkat.")
+            yorum = "".join(parts)
+
+        return {
+            "bugun": str(bugun),
+            "toplam_acik_alacak_tl": round(toplam_acik, 2),
+            "fatura_adedi": fatura_adedi,
+            "b_0_30": buckets["b_0_30"],
+            "b_31_60": buckets["b_31_60"],
+            "b_61_90": buckets["b_61_90"],
+            "b_90_plus": buckets["b_90_plus"],
+            "yorum": yorum,
+        }
+
+    @staticmethod
+    def dso(faturalar, donem_gun=90):
+        """
+        DSO (Days Sales Outstanding) hesabi.
+        DSO = (acik_alacak / donem_geliri) x donem_gun.
+        donem_gun: Son kac gunluk pencere (varsayilan 90).
+        """
+        bugun = datetime.date.today()
+        baslangic = bugun - datetime.timedelta(days=donem_gun)
+
+        donem_geliri = 0.0
+        acik_alacak = 0.0
+
+        for f in faturalar:
+            if f.get("yon") != "alacak":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            ft = datetime.date.fromisoformat(f["fatura_tarihi"])
+            if ft < baslangic:
+                continue
+            donem_geliri += f["toplam"]
+            if f.get("durum") in ("acik", "kismi"):
+                acik_alacak += FinansalHesap._kalan_tutar(f)
+
+        dso_gun = (acik_alacak / donem_geliri) * donem_gun if donem_geliri > 0 else 0.0
+
+        if donem_geliri == 0:
+            yorum = "Veri yok."
+        elif dso_gun < 30:
+            yorum = f"Son {donem_gun} gunde DSO: {dso_gun:.1f} gun — iyi."
+        elif dso_gun < 60:
+            yorum = f"Son {donem_gun} gunde DSO: {dso_gun:.1f} gun — orta."
+        else:
+            yorum = f"Son {donem_gun} gunde DSO: {dso_gun:.1f} gun — kritik."
+
+        return {
+            "donem_gun": donem_gun,
+            "donem_geliri_tl": round(donem_geliri, 2),
+            "acik_alacak_tl": round(acik_alacak, 2),
+            "dso_gun": round(dso_gun, 1),
+            "yorum": yorum,
+        }
+
+    @staticmethod
+    def tahsilat_orani(faturalar, baslangic=None, bitis=None):
+        """
+        Tahsilat orani (%) hesabi.
+        Oran = sum(odeme_tutari) / sum(toplam) x 100.
+        baslangic/bitis: date veya 'YYYY-MM-DD' str. None ise filtre yok.
+        """
+        if isinstance(baslangic, str):
+            baslangic = datetime.date.fromisoformat(baslangic)
+        if isinstance(bitis, str):
+            bitis = datetime.date.fromisoformat(bitis)
+
+        toplam_fatura = 0.0
+        toplam_odeme = 0.0
+        adet = 0
+
+        for f in faturalar:
+            if f.get("yon") != "alacak":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            if baslangic or bitis:
+                ft = datetime.date.fromisoformat(f["fatura_tarihi"])
+                if baslangic and ft < baslangic:
+                    continue
+                if bitis and ft > bitis:
+                    continue
+            toplam_fatura += f["toplam"]
+            toplam_odeme += (f.get("odeme_tutari") or 0.0)
+            adet += 1
+
+        oran = (toplam_odeme / toplam_fatura) * 100 if toplam_fatura > 0 else 0.0
+
+        if adet == 0:
+            yorum = "Veri yok."
+        elif oran >= 90:
+            yorum = f"Tahsilat orani: %{oran:.2f} — iyi."
+        elif oran >= 70:
+            yorum = f"Tahsilat orani: %{oran:.2f} — orta."
+        else:
+            yorum = f"Tahsilat orani: %{oran:.2f} — kritik."
+
+        return {
+            "baslangic": str(baslangic) if baslangic else None,
+            "bitis": str(bitis) if bitis else None,
+            "fatura_adedi": adet,
+            "toplam_fatura_tl": round(toplam_fatura, 2),
+            "toplam_odeme_tl": round(toplam_odeme, 2),
+            "tahsilat_orani_pct": round(oran, 2),
+            "yorum": yorum,
+        }
+
+    @staticmethod
+    def gelir_trendi(faturalar):
+        """
+        Donem bazli gelir trendi (aylik).
+        Alacak faturalarini YYYY-MM bazinda gruplar, degisim % hesaplar.
+        """
+        aylik = {}
+        for f in faturalar:
+            if f.get("yon") != "alacak":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            ay = f["fatura_tarihi"][:7]
+            aylik[ay] = aylik.get(ay, 0.0) + f["toplam"]
+
+        aylar_sorted = sorted(aylik.keys())
+        aylar = []
+        for i, ay in enumerate(aylar_sorted):
+            toplam = round(aylik[ay], 2)
+            if i == 0:
+                degisim = None
+            else:
+                onceki = aylik[aylar_sorted[i - 1]]
+                degisim = round(((aylik[ay] - onceki) / onceki) * 100, 2) if onceki > 0 else None
+            aylar.append({"ay": ay, "toplam_tl": toplam, "degisim_pct": degisim})
+
+        toplam_gelir = sum(aylik.values())
+        ortalama = round(toplam_gelir / len(aylar), 2) if aylar else 0.0
+
+        if not aylar:
+            yorum = "Veri yok."
+        else:
+            son = aylar[-1]
+            parts = [f"{len(aylar)} aylik trend."]
+            parts.append(f" Son ay ({son['ay']}): {son['toplam_tl']:,.2f} TL")
+            if son["degisim_pct"] is not None:
+                parts.append(f" ({son['degisim_pct']:+.1f}%)")
+            parts.append(".")
+            yorum = "".join(parts)
+
+        return {
+            "ay_sayisi": len(aylar),
+            "aylar": aylar,
+            "ortalama_aylik_tl": ortalama,
+            "yorum": yorum,
+        }
+
+    @staticmethod
+    def musteri_konsantrasyonu(faturalar):
+        """
+        Musteri konsantrasyon riski (HHI endeksi).
+        Alacak faturalarini firma_id bazinda gruplar, top 3 + HHI hesaplar.
+        HHI > 2500: yuksek, 1500-2500: orta, < 1500: dagitik.
+        """
+        firma_tutar = {}
+        for f in faturalar:
+            if f.get("yon") != "alacak":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            fid = f["firma_id"]
+            firma_tutar[fid] = firma_tutar.get(fid, 0.0) + f["toplam"]
+
+        toplam_gelir = sum(firma_tutar.values())
+        if toplam_gelir == 0:
+            return {
+                "firma_adedi": 0,
+                "toplam_gelir_tl": 0.0,
+                "top3": [],
+                "top3_pay_pct": 0.0,
+                "hhi": 0.0,
+                "yorum": "Veri yok.",
+            }
+
+        sirali = sorted(firma_tutar.items(), key=lambda x: x[1], reverse=True)
+        hhi = sum((tutar / toplam_gelir * 100) ** 2 for _, tutar in sirali)
+
+        top3 = []
+        for fid, tutar in sirali[:3]:
+            pay = (tutar / toplam_gelir) * 100
+            top3.append({
+                "firma_id": fid,
+                "tutar_tl": round(tutar, 2),
+                "pay_pct": round(pay, 2),
+            })
+        top3_pay = sum(t["pay_pct"] for t in top3)
+
+        if hhi > 2500:
+            risk = "yuksek konsantrasyon — tekillik riski"
+        elif hhi > 1500:
+            risk = "orta konsantrasyon"
+        else:
+            risk = "dagitik — dusuk risk"
+
+        return {
+            "firma_adedi": len(firma_tutar),
+            "toplam_gelir_tl": round(toplam_gelir, 2),
+            "top3": top3,
+            "top3_pay_pct": round(top3_pay, 2),
+            "hhi": round(hhi, 0),
+            "yorum": f"{len(firma_tutar)} firma, HHI: {hhi:,.0f} — {risk}.",
+        }
+
+    @staticmethod
+    def kdv_donem_ozeti(faturalar):
+        """
+        KDV donem ozeti (aylik hesaplanan vs indirilecek).
+        Alacak KDV = hesaplanan (odememiz gereken).
+        Borc KDV = indirilecek (indirim hakkimiz).
+        Net = hesaplanan - indirilecek. Pozitif = odeme, negatif = iade hakki.
+        """
+        aylik = {}
+        for f in faturalar:
+            if f.get("durum") == "iptal":
+                continue
+            ay = f["fatura_tarihi"][:7]
+            kdv = f.get("kdv_tutar")
+            if kdv is None:
+                kdv = f["toplam"] - f["tutar"]
+            if ay not in aylik:
+                aylik[ay] = {"hesaplanan": 0.0, "indirilecek": 0.0}
+            if f.get("yon") == "alacak":
+                aylik[ay]["hesaplanan"] += kdv
+            elif f.get("yon") == "borc":
+                aylik[ay]["indirilecek"] += kdv
+
+        donemler = []
+        toplam_h = 0.0
+        toplam_i = 0.0
+        for ay in sorted(aylik.keys()):
+            h = round(aylik[ay]["hesaplanan"], 2)
+            i = round(aylik[ay]["indirilecek"], 2)
+            net = round(h - i, 2)
+            donemler.append({
+                "ay": ay,
+                "hesaplanan_kdv_tl": h,
+                "indirilecek_kdv_tl": i,
+                "net_kdv_tl": net,
+            })
+            toplam_h += h
+            toplam_i += i
+
+        if not donemler:
+            yorum = "Veri yok."
+        else:
+            net = round(toplam_h - toplam_i, 2)
+            yorum = f"{len(donemler)} donem. Net KDV: {net:,.2f} TL"
+            if net > 0:
+                yorum += " (odeme)."
+            elif net < 0:
+                yorum += " (iade hakki)."
+            else:
+                yorum += " (sifir)."
+
+        return {
+            "ay_sayisi": len(donemler),
+            "donemler": donemler,
+            "toplam_hesaplanan_tl": round(toplam_h, 2),
+            "toplam_indirilecek_tl": round(toplam_i, 2),
+            "toplam_net_tl": round(toplam_h - toplam_i, 2),
+            "yorum": yorum,
+        }
+
+    @staticmethod
+    def dpo(faturalar, donem_gun=90):
+        """
+        DPO (Days Payable Outstanding) hesabi.
+        DPO = (acik_borc / donem_alimlari) x donem_gun.
+        donem_gun: Son kac gunluk pencere (varsayilan 90).
+        """
+        bugun = datetime.date.today()
+        baslangic = bugun - datetime.timedelta(days=donem_gun)
+
+        donem_alimlari = 0.0
+        acik_borc = 0.0
+
+        for f in faturalar:
+            if f.get("yon") != "borc":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            ft = datetime.date.fromisoformat(f["fatura_tarihi"])
+            if ft < baslangic:
+                continue
+            donem_alimlari += f["toplam"]
+            if f.get("durum") in ("acik", "kismi"):
+                acik_borc += FinansalHesap._kalan_tutar(f)
+
+        dpo_gun = (acik_borc / donem_alimlari) * donem_gun if donem_alimlari > 0 else 0.0
+
+        if donem_alimlari == 0:
+            yorum = "Veri yok."
+        elif dpo_gun > 45:
+            yorum = f"Son {donem_gun} gunde DPO: {dpo_gun:.1f} gun — tedarikciler seni finanse ediyor."
+        elif dpo_gun >= 30:
+            yorum = f"Son {donem_gun} gunde DPO: {dpo_gun:.1f} gun — normal."
+        else:
+            yorum = f"Son {donem_gun} gunde DPO: {dpo_gun:.1f} gun — erken oduyorsun."
+
+        return {
+            "donem_gun": donem_gun,
+            "donem_alimlari_tl": round(donem_alimlari, 2),
+            "acik_borc_tl": round(acik_borc, 2),
+            "dpo_gun": round(dpo_gun, 1),
+            "yorum": yorum,
+        }
+
 
 # ─── Dosya Okuma ─────────────────────────────────────────────────────────────
 
