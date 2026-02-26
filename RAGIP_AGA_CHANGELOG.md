@@ -6,6 +6,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.7.0] - 2026-02-26
+
+### Added — ragip-rapor Skill
+
+- **ragip-rapor** (ragip-hesap): 7 fatura analiz raporu tek skill'de — aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti
+- `hepsi` modu: 7 raporu sirayla calistirir
+- `disable-model-invocation: true` — deterministik, FinansalHesap motorunu dogrudan cagirir
+
+### Fixed
+
+- **ragip-ihtar**: `disable-model-invocation: true` kaldirildi (LLM gerekli — template placeholder'lari doldurulmasi lazim), cikti kaydetme blogu eklendi
+- **ragip-import**: Import edilen firma kartlarina `tip: diger` varsayilan alani eklendi (firmalar.jsonl semasina uyum)
+
+### Changed
+
+- **ragip-hesap**: Skills listesine ragip-rapor eklendi, GOREVIN bolumunerakam analiz satirlari eklendi
+- **ragip-aga**: Dispatch tablosuna rapor trigger'lari eklendi (aging, DSO, tahsilat vb.)
+- **architecture.md**: ragip-hesap skill listesi + LLM skill listesine ihtar eklendi
+- Mimari: 14 skill -> 15 skill
+
+---
+
 ## [2.6.0] - 2026-02-25
 
 ### Added — ragip-hukuk Sub-Agent
