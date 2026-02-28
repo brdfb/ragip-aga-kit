@@ -6,6 +6,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.7.2] - 2026-02-28
+
+### Added — Firma Bazli Rapor Filtresi (Backlog #8)
+
+- **FinansalHesap**: 6 analiz metodu `firma_id=None` parametresi aldi — aging, DSO, DPO, tahsilat, gelir trendi, KDV donem ozeti
+- None ise mevcut davranis (tum faturalar), deger verilirse sadece o firmanin faturalari islenir
+- Dondurulen dict'e `firma_id` anahtari eklendi ("tumu" veya verilen id)
+- `musteri_konsantrasyonu` haric — firma bazinda gruplama yapiyor, tek firmaya filtrelemek anlamsiz
+- **ragip-rapor**: `firma_id=` parametresi eklendi (argument-hint + Bash blogu)
+- 6 yeni test: her metot icin `test_firma_id_filtresi` (225 test toplam)
+
+---
+
 ## [2.7.1] - 2026-02-28
 
 ### Fixed — Kit-wide Critique Duzeltmeleri

@@ -1,7 +1,7 @@
 ---
 name: ragip-rapor
 description: Fatura analiz raporlari — aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti
-argument-hint: "[tur: aging|dso|dpo|tahsilat|gelir-trendi|konsantrasyon|kdv|hepsi] [donem_gun=90]"
+argument-hint: "[tur: aging|dso|dpo|tahsilat|gelir-trendi|konsantrasyon|kdv|hepsi] [firma_id=] [donem_gun=90]"
 allowed-tools: Bash, Read
 disable-model-invocation: true
 ---
@@ -31,6 +31,7 @@ Tur belirtilmemisse `hepsi` olarak calistir.
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 RAPOR_TUR="RAPOR_TURU_BURAYA"
+FIRMA_ID=""
 DONEM_GUN="90"
 python3 -c "
 import sys, os, json
@@ -44,23 +45,25 @@ if not faturalar:
     sys.exit(0)
 
 tur = '$RAPOR_TUR'
+firma_id_str = '$FIRMA_ID'
+firma_id = int(firma_id_str) if firma_id_str else None
 donem_gun = int('$DONEM_GUN')
 
-def rapor_calistir(tur, faturalar, donem_gun):
+def rapor_calistir(tur, faturalar, donem_gun, firma_id):
     if tur == 'aging':
-        return 'ALACAK YASLANDIRMA', FinansalHesap.aging_raporu(faturalar)
+        return 'ALACAK YASLANDIRMA', FinansalHesap.aging_raporu(faturalar, firma_id=firma_id)
     elif tur == 'dso':
-        return 'DSO (TAHSILAT SURESI)', FinansalHesap.dso(faturalar, donem_gun)
+        return 'DSO (TAHSILAT SURESI)', FinansalHesap.dso(faturalar, donem_gun, firma_id=firma_id)
     elif tur == 'dpo':
-        return 'DPO (ODEME SURESI)', FinansalHesap.dpo(faturalar, donem_gun)
+        return 'DPO (ODEME SURESI)', FinansalHesap.dpo(faturalar, donem_gun, firma_id=firma_id)
     elif tur == 'tahsilat':
-        return 'TAHSILAT ORANI', FinansalHesap.tahsilat_orani(faturalar)
+        return 'TAHSILAT ORANI', FinansalHesap.tahsilat_orani(faturalar, firma_id=firma_id)
     elif tur == 'gelir-trendi':
-        return 'GELIR TRENDI', FinansalHesap.gelir_trendi(faturalar)
+        return 'GELIR TRENDI', FinansalHesap.gelir_trendi(faturalar, firma_id=firma_id)
     elif tur == 'konsantrasyon':
         return 'MUSTERI KONSANTRASYONU', FinansalHesap.musteri_konsantrasyonu(faturalar)
     elif tur == 'kdv':
-        return 'KDV DONEM OZETI', FinansalHesap.kdv_donem_ozeti(faturalar)
+        return 'KDV DONEM OZETI', FinansalHesap.kdv_donem_ozeti(faturalar, firma_id=firma_id)
     else:
         print(f'Bilinmeyen rapor turu: {tur}')
         print('Gecerli turler: aging, dso, dpo, tahsilat, gelir-trendi, konsantrasyon, kdv, hepsi')
@@ -70,7 +73,7 @@ turler = ['aging', 'dso', 'dpo', 'tahsilat', 'gelir-trendi', 'konsantrasyon', 'k
 
 sonuclar = []
 for t in turler:
-    baslik, sonuc = rapor_calistir(t, faturalar, donem_gun)
+    baslik, sonuc = rapor_calistir(t, faturalar, donem_gun, firma_id)
     sonuclar.append((baslik, sonuc))
 
 for i, (baslik, sonuc) in enumerate(sonuclar):

@@ -134,19 +134,9 @@ ragip_crud.py DRY helper olarak yapildi (ADR-0005) ama skill Bash bloklari hala 
 
 ---
 
-### 8. Firma Bazli Rapor (YUKSEK DEGER)
+### ~~8. Firma Bazli Rapor (YUKSEK DEGER)~~ — YAPILDI (v2.7.2)
 
-**Sorun:** Tum raporlar (aging, DSO, DPO) tum faturalar uzerinden calisiyor. "ABC Dagitim icin aging raporu" yapilamiyor.
-
-**Fikir:** Mevcut metotlara `firma_id` filtresi:
-```python
-FinansalHesap.aging_raporu(faturalar, firma_id=10)
-FinansalHesap.dso(faturalar, firma_id=10)
-```
-
-**Effort:** Kucuk — her metota 3-4 satir filtre eklemek
-**Risk:** Dusuk
-**Not:** En dogal kullanim senaryosu, gercek ihtiyac
+6 analiz metodu `firma_id=None` parametresi aldi. `musteri_konsantrasyonu` haric (tek firmaya filtrelemek anlamsiz).
 
 ---
 
@@ -289,7 +279,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I5. Test Coverage Boslugu
 
-219 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
+225 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
 - Skill Bash bloklarinin dogru calismasi (inline Python template'ler)
 - Orchestrator'un dogru agent'a yonlendirmesi (integration test yok)
 - Cikti dosyalarinin dogru formatta yazilmasi

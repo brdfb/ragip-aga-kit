@@ -171,6 +171,13 @@ class TestAgingRaporu:
         assert sonuc["bugun"] == bugun_str
         assert sonuc["fatura_adedi"] == 3
 
+    def test_firma_id_filtresi(self):
+        """firma_id=10: F-001(acik,12000) + F-006(acik,36000) = 2 fatura, 48000 TL"""
+        sonuc = FinansalHesap.aging_raporu(FATURALAR, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        assert sonuc["fatura_adedi"] == 2
+        assert sonuc["toplam_acik_alacak_tl"] == 48000.0
+
 
 class TestDso:
     def test_dso_hesap(self):
@@ -215,6 +222,14 @@ class TestDso:
         sonuc = FinansalHesap.dso(FATURALAR, donem_gun=90, bugun=datetime.date.today())
         assert sonuc["dso_gun"] >= 0
 
+    def test_firma_id_filtresi(self):
+        """firma_id=10: F-001(12000) + F-003(18000) + F-006(36000) = 66000 gelir"""
+        sonuc = FinansalHesap.dso(FATURALAR, donem_gun=90, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        assert sonuc["donem_geliri_tl"] == 66000.0
+        # Acik: F-001(12000) + F-006(36000) = 48000
+        assert sonuc["acik_alacak_tl"] == 48000.0
+
 
 class TestTahsilatOrani:
     def test_kismi_odeme(self):
@@ -254,6 +269,14 @@ class TestTahsilatOrani:
         assert sonuc["tahsilat_orani_pct"] == 0.0
         assert "Veri yok" in sonuc["yorum"]
 
+    def test_firma_id_filtresi(self):
+        """firma_id=10: F-001(12000,0) + F-003(18000,18000) + F-006(36000,0)"""
+        sonuc = FinansalHesap.tahsilat_orani(FATURALAR, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        assert sonuc["fatura_adedi"] == 3
+        assert sonuc["toplam_fatura_tl"] == 66000.0
+        assert sonuc["toplam_odeme_tl"] == 18000.0
+
 
 class TestGelirTrendi:
     def test_aylar_sirali(self):
@@ -291,6 +314,14 @@ class TestGelirTrendi:
         assert sonuc["ay_sayisi"] == 0
         assert sonuc["aylar"] == []
         assert "Veri yok" in sonuc["yorum"]
+
+    def test_firma_id_filtresi(self):
+        """firma_id=10: T-001(9600, 2026-01) + T-003(30000, 2026-02) = 2 ay"""
+        sonuc = FinansalHesap.gelir_trendi(TRENDI_FATURALAR, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        assert sonuc["ay_sayisi"] == 2
+        assert sonuc["aylar"][0]["toplam_tl"] == 9600.0
+        assert sonuc["aylar"][1]["toplam_tl"] == 30000.0
 
 
 class TestMusteriKonsantrasyonu:
@@ -370,6 +401,15 @@ class TestKdvDonemOzeti:
         assert sonuc["ay_sayisi"] == 0
         assert "Veri yok" in sonuc["yorum"]
 
+    def test_firma_id_filtresi(self):
+        """firma_id=10: K-001(alacak, kdv=2000) — K-004 iptal, haric"""
+        sonuc = FinansalHesap.kdv_donem_ozeti(KDV_FATURALAR, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        assert sonuc["ay_sayisi"] == 1
+        assert sonuc["toplam_hesaplanan_tl"] == 2000.0
+        assert sonuc["toplam_indirilecek_tl"] == 0.0
+        assert sonuc["toplam_net_tl"] == 2000.0
+
 
 class TestDpo:
     def test_dpo_hesap(self):
@@ -410,3 +450,11 @@ class TestDpo:
         """bugun parametresi date olarak kabul edilmeli"""
         sonuc = FinansalHesap.dpo(FATURALAR, donem_gun=90, bugun=datetime.date.today())
         assert sonuc["dpo_gun"] >= 0
+
+    def test_firma_id_filtresi(self):
+        """firma_id=50: F-005(borc, acik, 9600) — tek borc fatura"""
+        sonuc = FinansalHesap.dpo(FATURALAR, donem_gun=90, firma_id=50)
+        assert sonuc["firma_id"] == 50
+        assert sonuc["donem_alimlari_tl"] == 9600.0
+        assert sonuc["acik_borc_tl"] == 9600.0
+        assert sonuc["dpo_gun"] == 90.0

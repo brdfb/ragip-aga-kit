@@ -575,11 +575,12 @@ class FinansalHesap:
         return f["toplam"] - (f.get("odeme_tutari") or 0.0)
 
     @staticmethod
-    def aging_raporu(faturalar, bugun=None):
+    def aging_raporu(faturalar, bugun=None, firma_id=None):
         """
         Alacak yaslandirma raporu (0-30 / 31-60 / 61-90 / 90+ gun).
         faturalar: list[dict] — ADR-0007 fatura semasi.
         bugun: date veya 'YYYY-MM-DD' str. None ise today().
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         if bugun is None:
             bugun = datetime.date.today()
@@ -596,6 +597,8 @@ class FinansalHesap:
         fatura_adedi = 0
 
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("yon") != "alacak":
                 continue
             if f.get("durum") not in ("acik", "kismi"):
@@ -633,6 +636,7 @@ class FinansalHesap:
             yorum = "".join(parts)
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "bugun": str(bugun),
             "toplam_acik_alacak_tl": round(toplam_acik, 2),
             "fatura_adedi": fatura_adedi,
@@ -644,12 +648,13 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def dso(faturalar, donem_gun=90, bugun=None):
+    def dso(faturalar, donem_gun=90, bugun=None, firma_id=None):
         """
         DSO (Days Sales Outstanding) hesabi.
         DSO = (acik_alacak / donem_geliri) x donem_gun.
         donem_gun: Son kac gunluk pencere (varsayilan 90).
         bugun: date veya 'YYYY-MM-DD' str. None ise today().
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         if bugun is None:
             bugun = datetime.date.today()
@@ -661,6 +666,8 @@ class FinansalHesap:
         acik_alacak = 0.0
 
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("yon") != "alacak":
                 continue
             if f.get("durum") == "iptal":
@@ -684,6 +691,7 @@ class FinansalHesap:
             yorum = f"Son {donem_gun} gunde DSO: {dso_gun:.1f} gun — kritik."
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "donem_gun": donem_gun,
             "donem_geliri_tl": round(donem_geliri, 2),
             "acik_alacak_tl": round(acik_alacak, 2),
@@ -692,11 +700,12 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def tahsilat_orani(faturalar, baslangic=None, bitis=None):
+    def tahsilat_orani(faturalar, baslangic=None, bitis=None, firma_id=None):
         """
         Tahsilat orani (%) hesabi.
         Oran = sum(odeme_tutari) / sum(toplam) x 100.
         baslangic/bitis: date veya 'YYYY-MM-DD' str. None ise filtre yok.
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         if isinstance(baslangic, str):
             baslangic = datetime.date.fromisoformat(baslangic)
@@ -708,6 +717,8 @@ class FinansalHesap:
         adet = 0
 
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("yon") != "alacak":
                 continue
             if f.get("durum") == "iptal":
@@ -734,6 +745,7 @@ class FinansalHesap:
             yorum = f"Tahsilat orani: %{oran:.2f} — kritik."
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "baslangic": str(baslangic) if baslangic else None,
             "bitis": str(bitis) if bitis else None,
             "fatura_adedi": adet,
@@ -744,13 +756,16 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def gelir_trendi(faturalar):
+    def gelir_trendi(faturalar, firma_id=None):
         """
         Donem bazli gelir trendi (aylik).
         Alacak faturalarini YYYY-MM bazinda gruplar, degisim % hesaplar.
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         aylik = {}
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("yon") != "alacak":
                 continue
             if f.get("durum") == "iptal":
@@ -784,6 +799,7 @@ class FinansalHesap:
             yorum = "".join(parts)
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "ay_sayisi": len(aylar),
             "aylar": aylar,
             "ortalama_aylik_tl": ortalama,
@@ -847,15 +863,18 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def kdv_donem_ozeti(faturalar):
+    def kdv_donem_ozeti(faturalar, firma_id=None):
         """
         KDV donem ozeti (aylik hesaplanan vs indirilecek).
         Alacak KDV = hesaplanan (odememiz gereken).
         Borc KDV = indirilecek (indirim hakkimiz).
         Net = hesaplanan - indirilecek. Pozitif = odeme, negatif = iade hakki.
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         aylik = {}
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("durum") == "iptal":
                 continue
             ay = f["fatura_tarihi"][:7]
@@ -898,6 +917,7 @@ class FinansalHesap:
                 yorum += " (sifir)."
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "ay_sayisi": len(donemler),
             "donemler": donemler,
             "toplam_hesaplanan_tl": round(toplam_h, 2),
@@ -907,12 +927,13 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def dpo(faturalar, donem_gun=90, bugun=None):
+    def dpo(faturalar, donem_gun=90, bugun=None, firma_id=None):
         """
         DPO (Days Payable Outstanding) hesabi.
         DPO = (acik_borc / donem_alimlari) x donem_gun.
         donem_gun: Son kac gunluk pencere (varsayilan 90).
         bugun: date veya 'YYYY-MM-DD' str. None ise today().
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
         """
         if bugun is None:
             bugun = datetime.date.today()
@@ -924,6 +945,8 @@ class FinansalHesap:
         acik_borc = 0.0
 
         for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
             if f.get("yon") != "borc":
                 continue
             if f.get("durum") == "iptal":
@@ -947,6 +970,7 @@ class FinansalHesap:
             yorum = f"Son {donem_gun} gunde DPO: {dpo_gun:.1f} gun — erken oduyorsun."
 
         return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
             "donem_gun": donem_gun,
             "donem_alimlari_tl": round(donem_alimlari, 2),
             "acik_borc_tl": round(acik_borc, 2),
