@@ -6,6 +6,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.7.1] - 2026-02-28
+
+### Fixed — Kit-wide Critique Duzeltmeleri
+
+- **ragip-arastirma, ragip-hukuk**: WebSearch ile oran arama kaldirdi — `ragip_get_rates.sh` kullanacak sekilde guncellendi (paralel calistirmada tutarsiz oran riski giderildi)
+- **ragip-aga**: Orchestrator dispatch'ine arastirma vs hukuk yonlendirme notlari eklendi (kullanici talebinin dogru agent'a gitmesi icin)
+- **ragip-dis-veri**: "veri topla" ifadesi "on arastirma" olarak guncellendi, WebSearch sinirlilik notu eklendi (beklenti yonetimi)
+- **ragip_rates.py**: Fallback oranlarinda `guncelleme` alaninin simdiki zamanla uzerine yazilmasi kaldirildi — >7 gun eskiyse yaslanma uyarisi eklendi (`FALLBACK_DATE` sabiti)
+
+### Added
+
+- 2 yeni test: fallback yaslanma uyarisi tespiti (219 test toplam)
+
+### Changed
+
+- **FEATURE_IDEAS.md**: Kit-wide critique sonuclariyla yeniden yapilandirildi — 15 aktif fikir, 5 reddedilen (gerekceyle), 5 izleme maddesi
+
+---
+
 ## [2.7.0] - 2026-02-26
 
 ### Added — ragip-rapor Skill
