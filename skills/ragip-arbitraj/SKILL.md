@@ -35,6 +35,10 @@ RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 RATES_JSON="$RATES" MARKET_FORWARD_VAL="MARKET_FORWARD" R_USD_VAL="${R_USD_VAL:-4.5}" GUN_VAL="${GUN_VAL:-90}" python3 -c "
 import json, os, sys
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 spot = rates['usd_kuru']
 r_tl = rates['politika_faizi']
 
@@ -78,6 +82,10 @@ RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 RATES_JSON="$RATES" python3 -c "
 import json, os
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 usd_try = rates['usd_kuru']
 eur_try = rates['eur_kuru']
 eur_usd = eur_try / usd_try
@@ -121,6 +129,10 @@ RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 RATES_JSON="$RATES" ANAPARA_VAL="ANAPARA" VADE_ORAN_VAL="VADE_ORAN" GUN_VAL="${GUN_VAL:-30}" python3 -c "
 import json, os, sys
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 tcmb = rates['politika_faizi']
 
 try:
@@ -161,6 +173,10 @@ RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
 RATES_JSON="$RATES" R_USD_VAL="${R_USD_VAL:-4.5}" GUN_VAL="${GUN_VAL:-180}" python3 -c "
 import json, os
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 spot = rates['usd_kuru']
 r_tl = rates['politika_faizi'] / 100
 r_usd = float(os.environ.get('R_USD_VAL', '4.5')) / 100

@@ -3,85 +3,33 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-01
+Guncelleme: 2026-03-01 (v2.8.2)
 
 ---
 
 ## A. Aktif Fikirler
 
-### 1. WebSearch Oran Tutarsizligi (ORTA)
+### ~~1. WebSearch Oran Tutarsizligi (ORTA)~~ — YAPILDI (v2.8.2)
 
-**Sorun:** Ayni bilgiyi (yasal gecikme faizi) uc farkli yoldan aliyor:
-- ragip-hesap: ragip_rates.py -> TCMB API -> cache -> fallback
-- ragip-arastirma: WebSearch "yasal gecikme faizi 2026"
-- ragip-hukuk: WebSearch ayni arama
-
-Paralel calistirilirsa farkli sonuclar bulabilirler. Orchestrator sentezlediginde celiskili rakamlar cikar.
-
-**Cozum secenekleri:**
-- a) Oran bilgisi tek kaynak: ragip_rates.py. Diger agent'lar hesap ciktisina bagimli olur (paralelligi kisitlar)
-- b) Arastirma ve hukuk'a "oran icin WebSearch yapma, ragip_get_rates.sh kullan" talimati ekle (prompt degisikligi)
-- c) Orchestrator'e "once hesap, sonra diger" siralamasini zorunlu kil
-
-**Effort:** Kucuk (b secenegi) / Orta (a veya c)
-**Risk:** b secenegi prompt'a guvenme — agent atlayabilir. a secenegi paralelligi bozar.
+ragip-analiz, ragip-strateji ve ragip-degerlendirme'den oran icin WebSearch kaldirildi. Tumu `ragip_get_rates.sh` kullaniyor. ragip-degerlendirme'de WebSearch sadece mevzuat guncellemesi icin kaldi (mesru kullanim).
 
 ---
 
-### 2. Arastirma / Hukuk Sinir Netlestirme (ORTA)
+### ~~2. Arastirma / Hukuk Sinir Netlestirme (ORTA)~~ — YAPILDI (v2.7.1 + v2.8.2)
 
-**Sorun:** ragip-arastirma ve ragip-hukuk ikisi de sozlesme okuyor, ikisi de yasal referans veriyor. Ayrim kit gelistiricisinin kafasinda net, kullanicinin kafasinda degil.
-
-Kullanici "bu sozlesmeyi incele" dediginde orchestrator hangisine yonlendirecek? Ikisi de "sozlesme oku + yorum yap" yapiyor.
-
-**Gercek fark:**
-- arastirma: ticari analiz (vade maddeleri, KDV, risk skoru, muzakere kozlari)
-- hukuk: hukuki pozisyon (mevzuat, ispat yuku, zamanasimiI, arabuluculuk)
-
-**Cozum secenekleri:**
-- a) Orchestrator prompt'una net yonlendirme tablosu ekle ("sozlesme analizi" -> arastirma, "hakli miyiz" -> hukuk)
-- b) Skill/agent aciklamalarini kullanici diline yaklastir
-- c) Ikisini birlestir (ADR-0006'yi geri al) — riskli, 4-agent karari iyi gerekcelendirilmis
-
-**Effort:** Kucuk (a secenegi — prompt guncellemesi)
-**Risk:** Dusuk — prompt iyilestirmesi, mimari degisiklik degil
+v2.7.1'de orchestrator dispatch tablosu eklendi. v2.8.2'de belirsiz durumlar icin acik yonlendirme ornekleri eklendi ("sozlesme incele" → arastirma, "sozlesme hukuken sorunlu mu" → hukuk).
 
 ---
 
-### 3. ragip-dis-veri Beklenti Yonetimi (ORTA)
+### ~~3. ragip-dis-veri Beklenti Yonetimi (ORTA)~~ — YAPILDI (v2.7.1)
 
-**Sorun:** Tek araci WebSearch. "Karsi tarafi arastir" deyince kullanici guclu sonuc bekler, ama:
-- Turk sirket verileri web'de duzgun indekslenmemis
-- Ticaret Sicil Gazetesi WebSearch ile guvenilir bulunamaz
-- Asil degerli kaynaklar (UYAP, Findeks, KKB) kisitli — skill "kullanicidan iste" diyor
-
-Sonuc: Skill tutarli sekilde hayal kirikligi yaratiyor olabilir.
-
-**Cozum secenekleri:**
-- a) Skill aciklamasini "kamuya acik kaynaklardan ON arastirma" olarak daralt, beklentiyi dusur
-- b) Skill'in ciktisina "Bu sonuclar sinirlidir, kesin bilgi icin Findeks/UYAP gerekir" uyarisini guclendir
-- c) Skill'i kaldir, is-veri'yi arastirma agent'indan cikar — asiri tepki
-
-**Effort:** Kucuk (a+b prompt guncellemesi)
-**Risk:** Dusuk
+Skill aciklamasi "on arastirma" olarak daraltildi, guven seviyeleri ve EKSIK bolumu eklendi.
 
 ---
 
-### 4. FALLBACK_RATES Yaslanma Uyarisi (ORTA)
+### ~~4. FALLBACK_RATES Yaslanma Uyarisi (ORTA)~~ — YAPILDI (v2.7.1 + v2.8.2)
 
-**Sorun:** ragip_rates.py'de hardcoded fallback:
-```
-politika_faizi: 37.00, guncelleme: "21 Subat 2026"
-```
-TCMB faiz karari gelip oran degisirse, API key'i olmayan kullanici eski oranla hesap yapar. `kaynak: "fallback"` yaziyor ama kullanici fark etmeyebilir. Yasal gecikme faizi = avans faizi — ihtar yazisindaki faiz referansi sessizce yanlis olur.
-
-**Cozum secenekleri:**
-- a) Fallback kullanildiginda ve X gundan eskiyse acik uyari: "Bu oranlar N gun oncesine ait, guncel olmayabilir"
-- b) Skill ciktilarina `kaynak: fallback (N gun once)` notu ekle
-- c) TCMB_API_KEY yoksa ilk kullaninda kullaniciya setup talimati goster
-
-**Effort:** Kucuk (a — ragip_rates.py'ye 5 satir kontrol)
-**Risk:** Dusuk
+v2.7.1'de ragip_rates.py'ye >7 gun yaslanma uyarisi eklendi. v2.8.2'de 6 skill'in (vade-farki, strateji, arbitraj x4, analiz, degerlendirme) Bash bloklarina `rates.uyari` surfacing eklendi — uyari artik kullanici ciktisinda gorunuyor.
 
 ---
 

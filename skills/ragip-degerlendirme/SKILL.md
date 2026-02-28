@@ -23,10 +23,28 @@ Sozlesme/fatura dosyasi verilmisse once oku ve ilgili maddeleri tespit et.
 - Sozlesme/fatura varsa Read ile oku, ilgili maddeleri dogrudan alintila
 - Karsi tarafin iddiasi ne, bizim pozisyonumuz ne?
 
-**2. Guncel yasal oranlari ve mevzuati dogrula (WebSearch)**
-`Türkiye yasal gecikme faizi 2026 MB avans faizi temerrüt` ara. Hesaplamalarda kullan.
+**2. Guncel yasal oranlari al:**
+```bash
+ROOT=$(git rev-parse --show-toplevel)
+RATES=$(bash "$ROOT/scripts/ragip_get_rates.sh")
+echo "$RATES" | python3 -c "
+import sys, json
+rates = json.loads(sys.stdin.read())
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
+print(f'Politika faizi      : %{rates.get(\"politika_faizi\", \"?\")}')
+print(f'Yasal gecikme faizi : %{rates.get(\"yasal_gecikme_faizi\", \"?\")}')
+print(f'Kaynak              : {rates.get(\"kaynak\", \"?\")}')
+"
+```
+Bu oranlari temerut faizi ve yasal gecikme hesaplamalarinda kullan.
 
-**3. Mevzuat analizi**
+**3. Guncel mevzuat degisikliklerini dogrula (WebSearch)**
+`Türkiye ticari temerrüt mevzuat değişiklik 2026` ara. Ilgili kanun maddelerinde guncel degisiklik var mi kontrol et.
+
+**4. Mevzuat analizi**
 
 Uyusmazlik turune gore ilgili kanun maddelerini belirle ve somut olaya uygula:
 
@@ -61,7 +79,7 @@ Uyusmazlik turune gore ilgili kanun maddelerini belirle ve somut olaya uygula:
 - IIK m.68: Odeme emrine itiraz ve itirazin kaldirilmasi
 - IIK m.167: Kambiyo senetlerine ozgu haciz yolu
 
-**4. Hukuki degerlendirme raporu yaz (Bash):**
+**5. Hukuki degerlendirme raporu yaz (Bash):**
 
 ```bash
 python3 -c "

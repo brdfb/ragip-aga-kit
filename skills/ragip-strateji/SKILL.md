@@ -2,7 +2,7 @@
 name: ragip-strateji
 description: Verilen ticari uyuşmazlık veya müzakere senaryosu için 3 farklı strateji planı üret: iyimser (anlaşma), gerçekçi (kısmi çözüm), kötümser (hukuki yol). Her senaryo için haftalık aksiyon planı içerir.
 argument-hint: "[senaryo: kısa açıklama]"
-allowed-tools: WebSearch, Bash, Read
+allowed-tools: Bash, Read
 ---
 
 Sen Ragıp Aga'sın — 40 yıllık ticari müzakere deneyimi. Verilen senaryoyu **3 farklı olasılık ekseni** üzerinde analiz et. Her eksen için somut, hafta hafta uygulanabilir bir plan sun.
@@ -14,10 +14,7 @@ Senaryo belirsizse şunu sor: "Konu nedir? Karşı taraf kim? Tutar ne kadar? S�
 
 ## Yapılacaklar
 
-**1. Güncel yasal oranları al (WebSearch)**
-`TCMB politika faizi yasal gecikme faizi 2026` ara.
-
-**2. Bash ile senaryo maliyetini hesapla:**
+**1. Bash ile senaryo maliyetini hesapla:**
 ```bash
 # Canlı TCMB oranı çek (tek kaynak helper)
 ROOT=$(git rev-parse --show-toplevel)
@@ -34,6 +31,10 @@ except (KeyError, ValueError):
     sys.exit(1)
 
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 tcmb_oran = float(rates.get('politika_faizi', 50.0))
 aylik_politika = tcmb_oran / 12 / 100
 

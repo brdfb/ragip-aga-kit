@@ -41,6 +41,10 @@ except (KeyError, ValueError):
     sys.exit(1)
 
 rates = json.loads(os.environ.get('RATES_JSON', '{}'))
+uyari = rates.get('uyari')
+if uyari:
+    print(f'UYARI: {uyari}')
+    print()
 
 # Vade farkı
 vade_farki = anapara * aylik_oran * gun / 30

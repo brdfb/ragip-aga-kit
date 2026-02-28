@@ -6,6 +6,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.2] - 2026-03-01
+
+### Fixed — Prompt & Rate Warning Fixes (Backlog #1, #2, #4)
+
+- **ragip-analiz**: WebSearch oran aramasi kaldirildi — `ragip_get_rates.sh` ile degistirildi, `allowed-tools`'dan WebSearch cikarildi (#1)
+- **ragip-strateji**: Cift oran cekme (WebSearch + Bash) kaldirildi — sadece Bash blogu kaldi, `allowed-tools`'dan WebSearch cikarildi (#1)
+- **ragip-degerlendirme**: Oran ve mevzuat adimi ayrildi — oranlar icin `ragip_get_rates.sh`, mevzuat guncellemeleri icin WebSearch (mesru kullanim) (#1)
+- **ragip-vade-farki**: Fallback uyarisi (`rates.uyari`) skill ciktisinda gosteriliyor (#4)
+- **ragip-arbitraj**: 4 Bash blogunun (CIP, ucgen, vade-mevduat, carry trade) hepsinde fallback uyarisi gosteriliyor (#4)
+- **ragip-aga**: Orchestrator dispatch'ine arastirma vs hukuk belirsiz durumlar icin acik yonlendirme eklendi (#2)
+
+---
+
 ## [2.8.1] - 2026-03-01
 
 ### Added — Nakit Cevrim Dongusu Dashboard (Backlog #10)
