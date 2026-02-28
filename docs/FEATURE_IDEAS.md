@@ -9,66 +9,6 @@ Guncelleme: 2026-03-01 (v2.8.4)
 
 ## A. Aktif Fikirler
 
-### ~~1. WebSearch Oran Tutarsizligi (ORTA)~~ — YAPILDI (v2.8.2)
-
-ragip-analiz, ragip-strateji ve ragip-degerlendirme'den oran icin WebSearch kaldirildi. Tumu `ragip_get_rates.sh` kullaniyor. ragip-degerlendirme'de WebSearch sadece mevzuat guncellemesi icin kaldi (mesru kullanim).
-
----
-
-### ~~2. Arastirma / Hukuk Sinir Netlestirme (ORTA)~~ — YAPILDI (v2.7.1 + v2.8.2)
-
-v2.7.1'de orchestrator dispatch tablosu eklendi. v2.8.2'de belirsiz durumlar icin acik yonlendirme ornekleri eklendi ("sozlesme incele" → arastirma, "sozlesme hukuken sorunlu mu" → hukuk).
-
----
-
-### ~~3. ragip-dis-veri Beklenti Yonetimi (ORTA)~~ — YAPILDI (v2.7.1)
-
-Skill aciklamasi "on arastirma" olarak daraltildi, guven seviyeleri ve EKSIK bolumu eklendi.
-
----
-
-### ~~4. FALLBACK_RATES Yaslanma Uyarisi (ORTA)~~ — YAPILDI (v2.7.1 + v2.8.2)
-
-v2.7.1'de ragip_rates.py'ye >7 gun yaslanma uyarisi eklendi. v2.8.2'de 6 skill'in (vade-farki, strateji, arbitraj x4, analiz, degerlendirme) Bash bloklarina `rates.uyari` surfacing eklendi — uyari artik kullanici ciktisinda gorunuyor.
-
----
-
-### ~~5. Skill Bash Bloklarinda DRY + FinansalHesap Tutarliligi (DUSUK)~~ — YAPILDI (v2.8.3)
-
-ragip-vade-farki inline hesaplamalar `FinansalHesap.vade_farki()`, `.tvm_gunluk_maliyet()`, `.erken_odeme_iskonto()` cagrilariyla degistirildi — ragip-rapor ile tutarli pattern. ragip-arbitraj benzer sorun ama ayri kapsam.
-
----
-
-### ~~6. Risk Skoru AI Disclaimer Iyilestirme (DUSUK)~~ — YAPILDI (v2.8.3)
-
-ragip-analiz risk skoru ciktisina ve ragip-degerlendirme verdikt basliklarinin altina inline AI disclaimer eklendi. Skor/verdikt ile disclaimer artik yan yana.
-
----
-
-### ~~7. Cikti Kesfedilebilirligi (DUSUK)~~ — YAPILDI (v2.8.4)
-
-ragip-ozet'e SON CIKTILAR bolumu eklendi (secenek a). Tam ozet: son 10 cikti (tarih, agent/skill, konu). Firma detay: firma adina gore filtrelenmis son 5 cikti. HIZLI KOMUTLAR'a dizin listelemesi eklendi.
-
----
-
-### ~~8. Firma Bazli Rapor (YUKSEK DEGER)~~ — YAPILDI (v2.7.2)
-
-6 analiz metodu `firma_id=None` parametresi aldi. `musteri_konsantrasyonu` haric (tek firmaya filtrelemek anlamsiz).
-
----
-
-### ~~9. Fatura Uyari Sistemi (YUKSEK DEGER)~~ — YAPILDI (v2.8.0)
-
-`FinansalHesap.fatura_uyarilari()` + ragip-ozet dashboard entegrasyonu. 3 kategori: vade gecmis, yaklasan vade (7g), TTK m.21/2 itiraz suresi (8g).
-
----
-
-### ~~10. Nakit Cevrim Dongusu Dashboard (ORTA DEGER)~~ — YAPILDI (v2.8.1)
-
-`FinansalHesap.ccc_dashboard()` — DSO + DPO + tahsilat orani + aging tek cagri. CCC = DSO - DPO (DIO haric — stok verisi yok). ragip-rapor'a `ccc` turu eklendi.
-
----
-
 ### 11. Agent Tool Kisitlama (MCP BAGIMLI)
 
 **Sorun:** Agent, hedef repoda MCP tool gorunde system prompt talimatini atlayip dogrudan MCP'ye yoneliyor.
@@ -186,6 +126,23 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 - Cikti dosyalarinin dogru formatta yazilmasi
 
 Normal — LLM agent'lari e2e test etmek zor. Ama inline Python Bash bloklarinin birim testi olabilir.
+
+---
+
+## D. Tamamlanan (10/10)
+
+| # | Madde | Versiyon | Ozet |
+|---|-------|----------|------|
+| 1 | WebSearch Oran Tutarsizligi | v2.8.2 | Oran icin WebSearch kaldirildi, tumu `ragip_get_rates.sh` kullaniyor |
+| 2 | Arastirma / Hukuk Sinir Netlestirme | v2.7.1 + v2.8.2 | Orchestrator dispatch tablosu + belirsiz durum yonlendirmesi |
+| 3 | ragip-dis-veri Beklenti Yonetimi | v2.7.1 | Skill aciklamasi "on arastirma" olarak daraltildi |
+| 4 | FALLBACK_RATES Yaslanma Uyarisi | v2.7.1 + v2.8.2 | >7 gun yaslanma uyarisi + 6 skill'de surfacing |
+| 5 | DRY + FinansalHesap Tutarliligi | v2.8.3 | ragip-vade-farki inline hesaplamalar FinansalHesap cagrilariyla degistirildi |
+| 6 | Risk Skoru AI Disclaimer | v2.8.3 | ragip-analiz + ragip-degerlendirme'ye inline AI disclaimer |
+| 7 | Cikti Kesfedilebilirligi | v2.8.4 | ragip-ozet'e SON CIKTILAR + FIRMA CIKTILARI bolumleri |
+| 8 | Firma Bazli Rapor | v2.7.2 | 6 analiz metodu `firma_id` parametresi aldi |
+| 9 | Fatura Uyari Sistemi | v2.8.0 | `fatura_uyarilari()` — vade gecmis, yaklasan, TTK itiraz |
+| 10 | Nakit Cevrim Dongusu Dashboard | v2.8.1 | `ccc_dashboard()` — DSO + DPO + tahsilat + aging tek cagri |
 
 ---
 
