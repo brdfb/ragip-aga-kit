@@ -6,6 +6,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.4] - 2026-03-01
+
+### Added — Cikti Kesfedilebilirligi (Backlog #7)
+
+- **ragip-ozet (tam ozet)**: SON CIKTILAR bolumu eklendi — `data/RAGIP_AGA/ciktilar/` dizinindeki son 10 ciktiyi tarih, agent/skill, konu olarak listeler
+- **ragip-ozet (firma detay)**: FIRMA CIKTILARI bolumu eklendi — firma adina gore filtrelenmis son 5 cikti
+- **ragip-ozet**: HIZLI KOMUTLAR'a ciktilar dizin listelemesi eklendi
+
+---
+
 ## [2.8.3] - 2026-03-01
 
 ### Changed — DRY Refactor + AI Disclaimer (Backlog #5, #6)

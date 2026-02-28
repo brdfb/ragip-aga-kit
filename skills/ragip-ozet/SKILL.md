@@ -138,6 +138,27 @@ if fatura_dosya.exists() and fatura_dosya.read_text().strip():
         print('FATURA UYARILARI: Uyari yok.')
         print()
 
+# --- SON CIKTILAR ---
+ciktilar_dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
+if ciktilar_dizin.exists():
+    dosyalar = sorted(ciktilar_dizin.glob('*.md'), key=lambda p: p.name, reverse=True)[:10]
+    if dosyalar:
+        toplam_cikti = len(list(ciktilar_dizin.glob('*.md')))
+        print(f'SON CIKTILAR ({toplam_cikti} dosya, son 10)')
+        print('-' * 40)
+        for d in dosyalar:
+            parcalar = d.stem.split('-', 3)
+            if len(parcalar) >= 4:
+                tarih_str = parcalar[0][:8]
+                tarih = f'{tarih_str[:4]}-{tarih_str[4:6]}-{tarih_str[6:8]}'
+                agent = parcalar[1]
+                skill = parcalar[2]
+                konu = parcalar[3].replace('_', ' ')
+                print(f'  {tarih} | {agent}/{skill} | {konu}')
+            else:
+                print(f'  {d.name}')
+        print()
+
 # --- OZET ISTATISTIKLER ---
 print('OZET')
 print('-' * 40)
@@ -152,6 +173,7 @@ print('  /ragip-firma listele       — Tum firma kartlari')
 print('  /ragip-gorev listele       — Tum gorevler')
 print('  /ragip-vade-farki A O G    — Vade farki hesapla')
 print('  /ragip-strateji [senaryo]  — 3 senaryo stratejisi')
+print('  ls data/RAGIP_AGA/ciktilar/      — Tum ciktilar')
 "
 ```
 
@@ -238,6 +260,26 @@ if tamamlanan:
 if not aktif and not tamamlanan:
     print('Bu firma ile iliskili gorev bulunamadi.')
     print()
+
+# --- FIRMA CIKTILARI ---
+ciktilar_dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
+if ciktilar_dizin.exists():
+    firma_kisa = firma['ad'].split()[0].lower().replace(' ', '_')
+    firma_dosyalar = [d for d in sorted(ciktilar_dizin.glob('*.md'), key=lambda p: p.name, reverse=True) if firma_kisa in d.name.lower()]
+    if firma_dosyalar:
+        print(f'FIRMA CIKTILARI ({len(firma_dosyalar)})')
+        print('-' * 40)
+        for d in firma_dosyalar[:5]:
+            parcalar = d.stem.split('-', 3)
+            if len(parcalar) >= 4:
+                tarih_str = parcalar[0][:8]
+                tarih = f'{tarih_str[:4]}-{tarih_str[4:6]}-{tarih_str[6:8]}'
+                skill = parcalar[2]
+                konu = parcalar[3].replace('_', ' ')
+                print(f'  {tarih} | {skill} | {konu}')
+            else:
+                print(f'  {d.name}')
+        print()
 
 # Hizli hesaplama onerisi
 if oran:

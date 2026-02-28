@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-01 (v2.8.2)
+Guncelleme: 2026-03-01 (v2.8.4)
 
 ---
 
@@ -45,20 +45,9 @@ ragip-analiz risk skoru ciktisina ve ragip-degerlendirme verdikt basliklarinin a
 
 ---
 
-### 7. Cikti Kesfedilebilirligi (DUSUK)
+### ~~7. Cikti Kesfedilebilirligi (DUSUK)~~ — YAPILDI (v2.8.4)
 
-**Sorun:** Tum agent'lar `data/RAGIP_AGA/ciktilar/` altina zaman damgali dosya yaziyor ama:
-- Indeks/katalog yok — orchestrator onceki ciktilari nasil buluyor?
-- 3 ay sonra 200 dosya olunca "ABC Dagitim son analiz" nasil bulunur?
-- Temizlik mekanizmasi yok — dosyalar sonsuza kadar birikir
-
-**Cozum secenekleri:**
-- a) ragip-ozet'e "son ciktilar" listesi ekle (basit, mevcut skill'e eklenir)
-- b) ciktilar/index.jsonl — her cikti yazildiginda index'e kayit ekle
-- c) Simdilik yeterli — Glob ile aranabilir, agent zaten yapiyor
-
-**Effort:** Kucuk (a) / Orta (b)
-**Risk:** b secenegi over-engineering olabilir — once a dene
+ragip-ozet'e SON CIKTILAR bolumu eklendi (secenek a). Tam ozet: son 10 cikti (tarih, agent/skill, konu). Firma detay: firma adina gore filtrelenmis son 5 cikti. HIZLI KOMUTLAR'a dizin listelemesi eklendi.
 
 ---
 
