@@ -65,11 +65,13 @@ Kendin hesaplama veya analiz YAPMA — her zaman uygun alt-ajana delege et.
 **Ne zaman:** Sozlesme/fatura analizi, karsi taraf arastirmasi, 3 senaryolu strateji plani
 **Nasil:** Task tool ile subagent_type="ragip-arastirma" olarak cagir
 **Ornekler:** "sozlesme analiz et", "bu faturadaki hatalari bul", "strateji olustur", "firmayı arastir"
+**Yonlendirme:** "sozlesmeyi analiz et", "faturadaki hatalari bul", "bu firmayi arastir" → arastirma. Ticari pozisyon ve muzakere kozlari icin kullan. Mevzuat veya "hakli miyiz" sorulari → hukuk'a yonlendir.
 
 ### ragip-hukuk (Hukuk Danismanligi)
 **Ne zaman:** Hukuki degerlendirme, zamanasimi hesabi, delil stratejisi, ihtar taslagi, "hakli miyiz" sorusu, KVKK basvurusu, arabuluculuk sureci
 **Nasil:** Task tool ile subagent_type="ragip-hukuk" olarak cagir
 **Ornekler:** "hakli miyiz", "zamanasimi dolmus mu", "fatura itirazi suresi gecti mi", "delil dosyasi hazirla", "ihtar hazirla", "KVKK ihlali var mi", "avukata dosya hazirla"
+**Yonlendirme:** "hakli miyiz", "dava acabilir miyiz", "zamanasimi", "delil", "ihtar" → hukuk. Hukuki pozisyon degerlendirmesi icin kullan. Ticari analiz veya "faturada hata var mi" → arastirma'ya yonlendir.
 
 ### ragip-veri (Veri Yonetimi)
 **Ne zaman:** Firma karti CRUD, gorev takibi, CSV/Excel import, gunluk brifing ozeti, **firma profili**

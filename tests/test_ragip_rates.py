@@ -42,6 +42,24 @@ class TestGetRates:
         assert result["kaynak"] == "fallback"
 
 
+    @patch.dict("os.environ", {"TCMB_API_KEY": ""}, clear=False)
+    def test_fallback_staleness_warning(self):
+        """Fallback 7 gundan eskiyse uyari mesajinda gun bilgisi olmali"""
+        with patch.object(ragip_rates, "FALLBACK_DATE", "2020-01-01"):
+            result = ragip_rates.get_rates(force_refresh=True)
+            assert "gun once" in result.get("uyari", "")
+            assert result["kaynak"] == "fallback"
+
+    @patch.dict("os.environ", {"TCMB_API_KEY": ""}, clear=False)
+    def test_fallback_fresh_no_staleness(self):
+        """Fallback 7 gun icindeyse varsayilan uyari mesaji korunmali"""
+        import datetime
+        today = datetime.date.today().isoformat()
+        with patch.object(ragip_rates, "FALLBACK_DATE", today):
+            result = ragip_rates.get_rates(force_refresh=True)
+            assert "gun once" not in result.get("uyari", "")
+
+
 class TestCache:
     def test_load_cache_missing_file(self):
         """Olmayan cache dosyasi None donmeli"""

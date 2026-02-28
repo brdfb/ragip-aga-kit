@@ -74,6 +74,7 @@ FALLBACK_RATES = {
     "guncelleme":           "Manuel — 21 Şubat 2026",
     "uyari":                "TCMB_API_KEY eksik. Kayıt: https://evds3.tcmb.gov.tr"
 }
+FALLBACK_DATE = "2026-02-21"  # FALLBACK_RATES'in guncellendigi tarih
 
 
 # ─── Cache yardımcıları ───────────────────────────────────────────────────────
@@ -261,7 +262,12 @@ def get_rates(force_refresh: bool = False) -> dict:
             pass
 
     fallback = FALLBACK_RATES.copy()
-    fallback["guncelleme"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    gun_farki = (datetime.date.today() - datetime.date.fromisoformat(FALLBACK_DATE)).days
+    if gun_farki > 7:
+        fallback["uyari"] = (
+            f"TCMB_API_KEY eksik. Bu oranlar {gun_farki} gun once manuel girildi, "
+            f"guncel olmayabilir. Kayit: https://evds3.tcmb.gov.tr"
+        )
     return fallback
 
 

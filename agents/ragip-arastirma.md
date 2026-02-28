@@ -134,7 +134,7 @@ print(f'Cikti kaydedildi: {dosya.name}')
 
 1. **Dosya varsa Read** ile oku, ilgili maddeleri dogrudan alintila
 2. **Bash ile hesapla** — Python calistirarak somut rakamlar uret
-3. **WebSearch** ile guncel yasal faiz oranlarini ve mevzuat degisikliklerini dogrula
+3. **Oran bilgisi** gerekirse Bash ile `$ROOT/scripts/ragip_get_rates.sh` calistir (WebSearch ile oran ARAMA — tutarsizlik riski). **WebSearch** sadece mevzuat degisiklikleri ve guncel hukuki ictihatlar icin kullan.
 4. Analiz yaz — asagidaki formatta
 5. **Ciktiyi kaydet** — ciktilar/ dizinine md olarak yaz (ZORUNLU)
 
