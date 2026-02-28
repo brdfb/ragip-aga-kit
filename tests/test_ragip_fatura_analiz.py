@@ -460,6 +460,61 @@ class TestDpo:
         assert sonuc["dpo_gun"] == 90.0
 
 
+class TestCccDashboard:
+    def test_ccc_hesap(self):
+        """CCC = DSO - DPO"""
+        sonuc = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=90)
+        # DSO ve DPO ayri metotlarla ayni sonucu vermeli
+        dso = FinansalHesap.dso(FATURALAR, donem_gun=90)
+        dpo = FinansalHesap.dpo(FATURALAR, donem_gun=90)
+        beklenen_ccc = round(dso["dso_gun"] - dpo["dpo_gun"], 1)
+        assert sonuc["ccc_gun"] == beklenen_ccc
+        assert sonuc["dso_gun"] == dso["dso_gun"]
+        assert sonuc["dpo_gun"] == dpo["dpo_gun"]
+
+    def test_firma_id(self):
+        """firma_id=10 filtresi tum alt metotlara iletilir"""
+        sonuc = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=90, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        # Firma 10 icin DSO/DPO kontrol
+        dso = FinansalHesap.dso(FATURALAR, donem_gun=90, firma_id=10)
+        dpo = FinansalHesap.dpo(FATURALAR, donem_gun=90, firma_id=10)
+        assert sonuc["dso_gun"] == dso["dso_gun"]
+        assert sonuc["dpo_gun"] == dpo["dpo_gun"]
+
+    def test_bos_liste(self):
+        """Bos liste → sifir + 'Veri yok'"""
+        sonuc = FinansalHesap.ccc_dashboard([])
+        assert sonuc["ccc_gun"] == 0.0
+        assert sonuc["dso_gun"] == 0.0
+        assert sonuc["dpo_gun"] == 0.0
+        assert sonuc["tahsilat_orani_pct"] == 0.0
+        assert "Veri yok" in sonuc["yorum"]
+
+    def test_donem_gun(self):
+        """Farkli donem penceresi farkli sonuc verebilir"""
+        sonuc_30 = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=30)
+        sonuc_90 = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=90)
+        assert sonuc_30["donem_gun"] == 30
+        assert sonuc_90["donem_gun"] == 90
+
+    def test_altinda_metotlar(self):
+        """dso_gun, dpo_gun, tahsilat, aging alanlari dogru donuyor"""
+        sonuc = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=90)
+        # Acik alacak = F-001(12000) + F-002(16000) + F-006(36000) = 64000
+        assert sonuc["acik_alacak_tl"] == 64000.0
+        # Acik borc = F-005(9600)
+        assert sonuc["acik_borc_tl"] == 9600.0
+        # Tahsilat orani
+        tahsilat = FinansalHesap.tahsilat_orani(FATURALAR)
+        assert sonuc["tahsilat_orani_pct"] == tahsilat["tahsilat_orani_pct"]
+        # Aging alanlari mevcut
+        assert "b_0_30" in sonuc["aging"]
+        assert "b_31_60" in sonuc["aging"]
+        assert "b_61_90" in sonuc["aging"]
+        assert "b_90_plus" in sonuc["aging"]
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fatura Uyari Sistemi
 # ═══════════════════════════════════════════════════════════════════════════════

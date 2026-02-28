@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-02-28 (v2 — kit-wide critique sonrasi)
+Guncelleme: 2026-03-01
 
 ---
 
@@ -146,16 +146,9 @@ ragip_crud.py DRY helper olarak yapildi (ADR-0005) ama skill Bash bloklari hala 
 
 ---
 
-### 10. Nakit Cevrim Dongusu Dashboard (ORTA DEGER)
+### ~~10. Nakit Cevrim Dongusu Dashboard (ORTA DEGER)~~ — YAPILDI (v2.8.1)
 
-**Sorun:** DSO, DPO ayri ayri hesaplaniyor. CCC = DSO + DIO - DPO tek rapor olarak yok.
-
-**Fikir:** `FinansalHesap.nakit_cevrim_dashboard()`:
-- DSO + DPO + tahsilat orani + aging tek cagri
-- Stok varsa DIO dahil (profil'den `stok.var` kontrolu)
-
-**Effort:** Kucuk — mevcut metotlari birlestirmek
-**Risk:** Dusuk
+`FinansalHesap.ccc_dashboard()` — DSO + DPO + tahsilat orani + aging tek cagri. CCC = DSO - DPO (DIO haric — stok verisi yok). ragip-rapor'a `ccc` turu eklendi.
 
 ---
 
@@ -270,7 +263,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I5. Test Coverage Boslugu
 
-232 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
+237 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
 - Skill Bash bloklarinin dogru calismasi (inline Python template'ler)
 - Orchestrator'un dogru agent'a yonlendirmesi (integration test yok)
 - Cikti dosyalarinin dogru formatta yazilmasi

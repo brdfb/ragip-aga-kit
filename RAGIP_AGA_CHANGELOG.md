@@ -6,6 +6,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.1] - 2026-03-01
+
+### Added — Nakit Cevrim Dongusu Dashboard (Backlog #10)
+
+- **FinansalHesap.ccc_dashboard()**: Birlesik nakit cevrim dongusu raporu — mevcut DSO, DPO, tahsilat_orani, aging_raporu metotlarini orkestre eder
+  - CCC = DSO - DPO (DIO haric — stok verisi yok)
+  - Yorum: uzun (>60g), orta (>30g), kisa (<=30g), negatif (tedarikci finansmani)
+  - `donem_gun`, `bugun`, `firma_id` parametreleri
+- **ragip-rapor**: `ccc` rapor turu eklendi (`hepsi` modunda da calisir)
+- 5 yeni test: `TestCccDashboard` sinifi (237 test toplam)
+
+---
+
 ## [2.8.0] - 2026-02-28
 
 ### Added — Fatura Uyari Sistemi (Backlog #9)

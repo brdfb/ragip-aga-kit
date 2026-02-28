@@ -979,6 +979,49 @@ class FinansalHesap:
         }
 
     @staticmethod
+    def ccc_dashboard(faturalar, donem_gun=90, bugun=None, firma_id=None):
+        """
+        Nakit Cevrim Dongusu (CCC) Dashboard.
+        CCC = DSO - DPO (DIO haric — faturalar.jsonl'de stok verisi yok).
+        Mevcut analiz metotlarini cagirir, birlesik sonuc dondurur.
+        """
+        dso_sonuc = FinansalHesap.dso(faturalar, donem_gun, bugun, firma_id)
+        dpo_sonuc = FinansalHesap.dpo(faturalar, donem_gun, bugun, firma_id)
+        tahsilat_sonuc = FinansalHesap.tahsilat_orani(faturalar, firma_id=firma_id)
+        aging_sonuc = FinansalHesap.aging_raporu(faturalar, bugun, firma_id)
+
+        ccc = round(dso_sonuc["dso_gun"] - dpo_sonuc["dpo_gun"], 1)
+
+        if dso_sonuc["donem_geliri_tl"] == 0 and dpo_sonuc["donem_alimlari_tl"] == 0:
+            yorum = "Veri yok."
+        elif ccc > 60:
+            yorum = "Nakit dongusu uzun — finansman ihtiyaci yuksek."
+        elif ccc > 30:
+            yorum = "Nakit dongusu orta."
+        elif ccc >= 0:
+            yorum = "Nakit dongusu kisa — iyi."
+        else:
+            yorum = "Tedarikciler seni finanse ediyor."
+
+        return {
+            "firma_id": firma_id if firma_id is not None else "tumu",
+            "donem_gun": donem_gun,
+            "ccc_gun": ccc,
+            "dso_gun": dso_sonuc["dso_gun"],
+            "dpo_gun": dpo_sonuc["dpo_gun"],
+            "acik_alacak_tl": dso_sonuc["acik_alacak_tl"],
+            "acik_borc_tl": dpo_sonuc["acik_borc_tl"],
+            "tahsilat_orani_pct": tahsilat_sonuc["tahsilat_orani_pct"],
+            "aging": {
+                "b_0_30": aging_sonuc["b_0_30"],
+                "b_31_60": aging_sonuc["b_31_60"],
+                "b_61_90": aging_sonuc["b_61_90"],
+                "b_90_plus": aging_sonuc["b_90_plus"],
+            },
+            "yorum": yorum,
+        }
+
+    @staticmethod
     def fatura_uyarilari(faturalar, bugun=None, firma_id=None):
         """
         Fatura uyari sistemi — vade gecmis, yaklasan vade, TTK m.21/2 itiraz suresi.
