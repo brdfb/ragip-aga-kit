@@ -6,6 +6,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.0] - 2026-02-28
+
+### Added — Fatura Uyari Sistemi (Backlog #9)
+
+- **FinansalHesap.fatura_uyarilari()**: Proaktif fatura uyari metodu — 3 kategori:
+  - **Vade gecmis**: Vadesi gecmis acik alacak faturalari (gecikme gunu + kalan tutar)
+  - **Yaklasan vade**: 7 gun icinde vadesi dolacak alacak faturalari
+  - **TTK m.21/2 itiraz suresi**: Alinan (borc) faturalarda 8 gunluk itiraz suresi dolmak uzere (<=3 gun kala uyari)
+- `bugun` + `firma_id` parametreleri (testability + firma filtresi)
+- **ragip-ozet**: Dashboard'a fatura uyari bolumu eklendi — vade gecmis, yaklasan, TTK itiraz ozeti
+- 7 yeni test: `TestFaturaUyarilari` sinifi (232 test toplam)
+
+---
+
 ## [2.7.2] - 2026-02-28
 
 ### Added — Firma Bazli Rapor Filtresi (Backlog #8)

@@ -978,6 +978,106 @@ class FinansalHesap:
             "yorum": yorum,
         }
 
+    @staticmethod
+    def fatura_uyarilari(faturalar, bugun=None, firma_id=None):
+        """
+        Fatura uyari sistemi — vade gecmis, yaklasan vade, TTK m.21/2 itiraz suresi.
+        bugun: date veya 'YYYY-MM-DD' str. None ise today().
+        firma_id: None ise tum firmalar, deger verilirse sadece o firma.
+        """
+        if bugun is None:
+            bugun = datetime.date.today()
+        elif isinstance(bugun, str):
+            bugun = datetime.date.fromisoformat(bugun)
+
+        vade_gecmis = []
+        yaklasan_vade = []
+        ttk_itiraz = []
+
+        for f in faturalar:
+            if firma_id is not None and f.get("firma_id") != firma_id:
+                continue
+            if f.get("durum") not in ("acik", "kismi"):
+                continue
+
+            yon = f.get("yon")
+
+            # Alacak faturalari: vade gecmis + yaklasan vade
+            if yon == "alacak":
+                vade = datetime.date.fromisoformat(f["vade_tarihi"])
+                fark = (bugun - vade).days
+                kalan = FinansalHesap._kalan_tutar(f)
+                if fark > 0:
+                    vade_gecmis.append({
+                        "fatura_no": f["fatura_no"],
+                        "firma_id": f["firma_id"],
+                        "toplam": f["toplam"],
+                        "kalan": round(kalan, 2),
+                        "gecikme_gun": fark,
+                        "vade_tarihi": f["vade_tarihi"],
+                    })
+                elif fark >= -7:
+                    yaklasan_vade.append({
+                        "fatura_no": f["fatura_no"],
+                        "firma_id": f["firma_id"],
+                        "toplam": f["toplam"],
+                        "kalan": round(kalan, 2),
+                        "kalan_gun": -fark,
+                        "vade_tarihi": f["vade_tarihi"],
+                    })
+
+            # Borc faturalari: TTK m.21/2 itiraz suresi (8 gun)
+            elif yon == "borc":
+                ft = datetime.date.fromisoformat(f["fatura_tarihi"])
+                son_itiraz = ft + datetime.timedelta(days=8)
+                kalan_gun = (son_itiraz - bugun).days
+                if 0 < kalan_gun <= 3:
+                    ttk_itiraz.append({
+                        "fatura_no": f["fatura_no"],
+                        "firma_id": f["firma_id"],
+                        "toplam": f["toplam"],
+                        "fatura_tarihi": f["fatura_tarihi"],
+                        "son_itiraz_tarihi": str(son_itiraz),
+                        "kalan_gun": kalan_gun,
+                    })
+
+        # Sirala: en kritik basta
+        vade_gecmis.sort(key=lambda x: x["gecikme_gun"], reverse=True)
+        yaklasan_vade.sort(key=lambda x: x["kalan_gun"])
+        ttk_itiraz.sort(key=lambda x: x["kalan_gun"])
+
+        vg_tl = sum(v["kalan"] for v in vade_gecmis)
+        yv_tl = sum(v["kalan"] for v in yaklasan_vade)
+        toplam_uyari = len(vade_gecmis) + len(yaklasan_vade) + len(ttk_itiraz)
+
+        if toplam_uyari == 0:
+            yorum = "Veri yok." if not faturalar else "Uyari yok."
+        else:
+            parts = []
+            if vade_gecmis:
+                parts.append(f"{len(vade_gecmis)} vade gecmis ({vg_tl:,.2f} TL)")
+            if yaklasan_vade:
+                parts.append(f"{len(yaklasan_vade)} yaklasan vade ({yv_tl:,.2f} TL)")
+            if ttk_itiraz:
+                parts.append(f"{len(ttk_itiraz)} TTK itiraz suresi dolmak uzere")
+            yorum = ", ".join(parts) + "."
+
+        return {
+            "bugun": str(bugun),
+            "firma_id": firma_id if firma_id is not None else "tumu",
+            "vade_gecmis": vade_gecmis,
+            "yaklasan_vade": yaklasan_vade,
+            "ttk_itiraz": ttk_itiraz,
+            "ozet": {
+                "vade_gecmis_adet": len(vade_gecmis),
+                "vade_gecmis_tl": round(vg_tl, 2),
+                "yaklasan_adet": len(yaklasan_vade),
+                "yaklasan_tl": round(yv_tl, 2),
+                "ttk_adet": len(ttk_itiraz),
+            },
+            "yorum": yorum,
+        }
+
 
 # ─── Dosya Okuma ─────────────────────────────────────────────────────────────
 

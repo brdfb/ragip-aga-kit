@@ -140,18 +140,9 @@ ragip_crud.py DRY helper olarak yapildi (ADR-0005) ama skill Bash bloklari hala 
 
 ---
 
-### 9. Fatura Uyari Sistemi (YUKSEK DEGER)
+### ~~9. Fatura Uyari Sistemi (YUKSEK DEGER)~~ — YAPILDI (v2.8.0)
 
-**Sorun:** Faturalar.jsonl'de vade gecmis faturalar var ama kit bunu sadece sorulunca soyluyor. Proaktif degil.
-
-**Fikir:** ragip-ozet skill'ine ekle:
-- Vade gecmis faturalar (bugun > vade_tarihi, durum=acik)
-- Yaklasan vadeler (7 gun icinde)
-- TTK m.21/2 fatura itirazi 8 gun suresi yaklasanlar
-
-**Effort:** Orta — yeni metot + skill prompt
-**Risk:** Dusuk
-**Not:** ragip-ozet zaten dashboard — uyarilar oraya dogal oturur, yeni skill gereksiz
+`FinansalHesap.fatura_uyarilari()` + ragip-ozet dashboard entegrasyonu. 3 kategori: vade gecmis, yaklasan vade (7g), TTK m.21/2 itiraz suresi (8g).
 
 ---
 
@@ -279,7 +270,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I5. Test Coverage Boslugu
 
-225 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
+232 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
 - Skill Bash bloklarinin dogru calismasi (inline Python template'ler)
 - Orchestrator'un dogru agent'a yonlendirmesi (integration test yok)
 - Cikti dosyalarinin dogru formatta yazilmasi

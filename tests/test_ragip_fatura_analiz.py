@@ -458,3 +458,123 @@ class TestDpo:
         assert sonuc["donem_alimlari_tl"] == 9600.0
         assert sonuc["acik_borc_tl"] == 9600.0
         assert sonuc["dpo_gun"] == 90.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fatura Uyari Sistemi
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# Yaklasan vade fixture: alacak, acik, vade 3 gun sonra
+YAKLASAN_FATURALAR = [
+    {
+        "id": 301, "fatura_no": "Y-001", "firma_id": 10,
+        "yon": "alacak", "tutar": 5000.0, "kdv_tutar": 1000.0, "toplam": 6000.0,
+        "fatura_tarihi": _gun_once(20),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=3)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+    {
+        "id": 302, "fatura_no": "Y-002", "firma_id": 20,
+        "yon": "alacak", "tutar": 8000.0, "kdv_tutar": 1600.0, "toplam": 9600.0,
+        "fatura_tarihi": _gun_once(15),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=6)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+    # Vade 10 gun sonra — yaklasan degil (>7)
+    {
+        "id": 303, "fatura_no": "Y-003", "firma_id": 10,
+        "yon": "alacak", "tutar": 3000.0, "kdv_tutar": 600.0, "toplam": 3600.0,
+        "fatura_tarihi": _gun_once(10),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=10)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+]
+
+
+# TTK m.21/2 fixture: borc fatura, fatura_tarihi 6 gun once (itiraz suresi 2 gun kaldi)
+TTK_FATURALAR = [
+    {
+        "id": 401, "fatura_no": "B-001", "firma_id": 50,
+        "yon": "borc", "tutar": 7000.0, "kdv_tutar": 1400.0, "toplam": 8400.0,
+        "fatura_tarihi": _gun_once(6),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=24)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+    # fatura_tarihi 3 gun once — itiraz suresi 5 gun kaldi (>3, dahil degil)
+    {
+        "id": 402, "fatura_no": "B-002", "firma_id": 50,
+        "yon": "borc", "tutar": 4000.0, "kdv_tutar": 800.0, "toplam": 4800.0,
+        "fatura_tarihi": _gun_once(3),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=27)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+    # fatura_tarihi 10 gun once — itiraz suresi gecmis (<=0, dahil degil)
+    {
+        "id": 403, "fatura_no": "B-003", "firma_id": 60,
+        "yon": "borc", "tutar": 2000.0, "kdv_tutar": 400.0, "toplam": 2400.0,
+        "fatura_tarihi": _gun_once(10),
+        "vade_tarihi": str(datetime.date.today() + datetime.timedelta(days=20)),
+        "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
+    },
+]
+
+
+class TestFaturaUyarilari:
+    def test_vade_gecmis(self):
+        """F-001(15g), F-002(45g, kismi), F-006(100g) vade gecmis"""
+        sonuc = FinansalHesap.fatura_uyarilari(FATURALAR)
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 3
+        # En kritik (100g) basta
+        assert sonuc["vade_gecmis"][0]["fatura_no"] == "F-006"
+        assert sonuc["vade_gecmis"][0]["gecikme_gun"] == 100
+        # Kismi odeme: kalan = 24000 - 8000 = 16000
+        f002 = [v for v in sonuc["vade_gecmis"] if v["fatura_no"] == "F-002"]
+        assert len(f002) == 1
+        assert f002[0]["kalan"] == 16000.0
+
+    def test_yaklasan_vade(self):
+        """Y-001(3g) + Y-002(6g) yaklasan, Y-003(10g) degil"""
+        sonuc = FinansalHesap.fatura_uyarilari(YAKLASAN_FATURALAR)
+        assert sonuc["ozet"]["yaklasan_adet"] == 2
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 0
+        # En yakin basta
+        assert sonuc["yaklasan_vade"][0]["fatura_no"] == "Y-001"
+        assert sonuc["yaklasan_vade"][0]["kalan_gun"] == 3
+
+    def test_ttk_itiraz_suresi(self):
+        """B-001(2g kaldi) dahil, B-002(5g) ve B-003(gecmis) haric"""
+        sonuc = FinansalHesap.fatura_uyarilari(TTK_FATURALAR)
+        assert sonuc["ozet"]["ttk_adet"] == 1
+        assert sonuc["ttk_itiraz"][0]["fatura_no"] == "B-001"
+        assert sonuc["ttk_itiraz"][0]["kalan_gun"] == 2
+
+    def test_firma_id_filtresi(self):
+        """firma_id=10: FATURALAR'dan sadece firma 10'un uyarilari"""
+        sonuc = FinansalHesap.fatura_uyarilari(FATURALAR, firma_id=10)
+        assert sonuc["firma_id"] == 10
+        # Firma 10: F-001(acik, 15g gecikti) + F-006(acik, 100g gecikti)
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 2
+        for v in sonuc["vade_gecmis"]:
+            assert v["firma_id"] == 10
+
+    def test_bos_liste(self):
+        """Bos liste → sifir uyari + 'Veri yok'"""
+        sonuc = FinansalHesap.fatura_uyarilari([])
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 0
+        assert sonuc["ozet"]["yaklasan_adet"] == 0
+        assert sonuc["ozet"]["ttk_adet"] == 0
+        assert "Veri yok" in sonuc["yorum"]
+
+    def test_iptal_haric(self):
+        """F-004 (iptal, alacak) dahil edilmez"""
+        iptal = [f for f in FATURALAR if f["fatura_no"] == "F-004"]
+        sonuc = FinansalHesap.fatura_uyarilari(iptal)
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 0
+
+    def test_odenmis_haric(self):
+        """F-003 (odenmis, alacak) dahil edilmez"""
+        odenmis = [f for f in FATURALAR if f["fatura_no"] == "F-003"]
+        sonuc = FinansalHesap.fatura_uyarilari(odenmis)
+        assert sonuc["ozet"]["vade_gecmis_adet"] == 0
+        assert "Uyari yok" in sonuc["yorum"]

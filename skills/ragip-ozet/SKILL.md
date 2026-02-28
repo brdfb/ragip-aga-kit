@@ -107,6 +107,37 @@ if tamamlanan:
         print(f'  [{g[\"id\"]}] {g[\"gorev\"]}')
     print()
 
+# --- FATURA UYARILARI ---
+import sys, os
+sys.path.insert(0, os.path.join(_ROOT, 'scripts'))
+fatura_dosya = Path(_ROOT) / 'data/RAGIP_AGA/faturalar.jsonl'
+if fatura_dosya.exists() and fatura_dosya.read_text().strip():
+    faturalar = [json.loads(l) for l in fatura_dosya.read_text().strip().split('\n') if l.strip()]
+    from ragip_aga import FinansalHesap
+    u = FinansalHesap.fatura_uyarilari(faturalar)
+    toplam_uyari = u['ozet']['vade_gecmis_adet'] + u['ozet']['yaklasan_adet'] + u['ozet']['ttk_adet']
+    if toplam_uyari > 0:
+        print(f'FATURA UYARILARI ({toplam_uyari})')
+        print('-' * 40)
+        if u['vade_gecmis']:
+            vg_tl = u['ozet']['vade_gecmis_tl']
+            print(f'  VADE GECMIS ({u["ozet"]["vade_gecmis_adet"]}) — {vg_tl:,.2f} TL')
+            for v in u['vade_gecmis'][:5]:
+                print(f'  ! {v["fatura_no"]}  Firma {v["firma_id"]}  {v["kalan"]:>12,.2f} TL  {v["gecikme_gun"]} gun gecikti')
+        if u['yaklasan_vade']:
+            yv_tl = u['ozet']['yaklasan_tl']
+            print(f'  YAKLASAN VADE ({u["ozet"]["yaklasan_adet"]}) — {yv_tl:,.2f} TL')
+            for v in u['yaklasan_vade'][:5]:
+                print(f'  ~ {v["fatura_no"]}  Firma {v["firma_id"]}  {v["kalan"]:>12,.2f} TL  {v["kalan_gun"]} gun kaldi')
+        if u['ttk_itiraz']:
+            print(f'  TTK m.21/2 ITIRAZ SURESI ({u["ozet"]["ttk_adet"]})')
+            for v in u['ttk_itiraz'][:5]:
+                print(f'  ! {v["fatura_no"]}  Firma {v["firma_id"]}  {v["toplam"]:>12,.2f} TL  {v["kalan_gun"]} gun kaldi')
+        print()
+    else:
+        print('FATURA UYARILARI: Uyari yok.')
+        print()
+
 # --- OZET ISTATISTIKLER ---
 print('OZET')
 print('-' * 40)
