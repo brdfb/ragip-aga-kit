@@ -98,6 +98,7 @@ print(f'Zaman baskısı          : {zaman_baskisi}/10')
 print(f'Delil gücümüz (ters)   : {delil_gucumuz}/10')
 print(f'-------------------------------')
 print(f'Risk Skoru: {toplam}/{max_puan} → %{risk_pct:.0f} — {seviye}')
+print(f'(AI tahmini — hukuki degerlendirme degildir)')
 "
 ```
 

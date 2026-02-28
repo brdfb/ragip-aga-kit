@@ -105,9 +105,11 @@ print(f'Cikti kaydedildi: {dosya.name}')
 
 ### TARAFIMIZIN POZISYONU: GUCLU / ORTA / ZAYIF
 [Neden bu degerlendirme — somut madde referanslari ile]
+*(AI degerlendirmesi — kesin hukuki gorus icin avukata danisin)*
 
 ### KARSI TARAFIN POZISYONU: GUCLU / ORTA / ZAYIF
 [Karsi tarafin olasi argumanlari ve guclu/zayif yonleri]
+*(AI degerlendirmesi — kesin hukuki gorus icin avukata danisin)*
 
 ### MADDE BAZLI ANALIZ
 [Her ilgili yasa maddesi icin: madde ozeti + somut olaya uygulanmasi]

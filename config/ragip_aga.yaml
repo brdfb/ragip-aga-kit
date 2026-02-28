@@ -1,11 +1,11 @@
 # Ragıp Aga - Nakit Akışı & Ticari Müzakere Danışmanı
 # Bağımsız config - Ana orchestrator'a dokunmaz
-# Versiyon: 2.8.2 | Tarih: 2026-03-01
+# Versiyon: 2.8.3 | Tarih: 2026-03-01
 
 agent:
   name: "ragip_aga"
   display_name: "Ragıp Aga"
-  version: "2.8.2"
+  version: "2.8.3"
   description: "40 yıllık piyasa tecrübesiyle nakit akışı yönetimi, vade müzakeresi ve sözleşme uyuşmazlıkları uzmanı"
 
   # Model: Analitik + kapsamlı yanıt için Claude Sonnet

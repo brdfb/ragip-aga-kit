@@ -6,6 +6,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.3] - 2026-03-01
+
+### Changed — DRY Refactor + AI Disclaimer (Backlog #5, #6)
+
+- **ragip-vade-farki**: Inline hesaplamalar `FinansalHesap.vade_farki()`, `.tvm_gunluk_maliyet()`, `.erken_odeme_iskonto()` cagrilariyla degistirildi — ragip-rapor ile tutarli pattern (#5)
+- **ragip-analiz**: Risk skoru ciktisina inline AI disclaimer eklendi — `(AI tahmini — hukuki degerlendirme degildir)` (#6)
+- **ragip-degerlendirme**: TARAFIMIZIN / KARSI TARAFIN POZISYONU verdiktlerine inline AI disclaimer eklendi (#6)
+
+---
+
 ## [2.8.2] - 2026-03-01
 
 ### Fixed — Prompt & Rate Warning Fixes (Backlog #1, #2, #4)

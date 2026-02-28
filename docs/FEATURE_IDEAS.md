@@ -33,35 +33,15 @@ v2.7.1'de ragip_rates.py'ye >7 gun yaslanma uyarisi eklendi. v2.8.2'de 6 skill'i
 
 ---
 
-### 5. Skill Bash Bloklarinda DRY + FinansalHesap Tutarliligi (DUSUK)
+### ~~5. Skill Bash Bloklarinda DRY + FinansalHesap Tutarliligi (DUSUK)~~ — YAPILDI (v2.8.3)
 
-**Sorun:** Iki tutarsizlik:
-1. 7-8 skill'de ayni Bash preamble tekrarlaniyor (git rev-parse, ragip_crud import)
-2. ragip-rapor FinansalHesap metotlarini cagiriyor, ama ragip-vade-farki ayni hesaplamayi inline Python ile yaziyor. Neden?
-
-ragip_crud.py DRY helper olarak yapildi (ADR-0005) ama skill Bash bloklari hala DRY degil.
-
-**Cozum secenekleri:**
-- a) ragip-vade-farki'yi FinansalHesap.vade_farki() cagiracak sekilde guncelle (ragip-rapor ile tutarli)
-- b) Ortak preamble'i scripts/ragip_skill_preamble.sh'ye tasi
-- c) Mevcut durumu kabul et — skill'ler bagimsiz, tekrar kabul edilebilir
-
-**Effort:** Kucuk-orta
-**Risk:** Dusuk — refactor, davranis degisikligi yok
-**Not:** c secenegi de savunulabilir — her skill bagimsiz calisabilmeli, bagimlilik eklenmemeli
+ragip-vade-farki inline hesaplamalar `FinansalHesap.vade_farki()`, `.tvm_gunluk_maliyet()`, `.erken_odeme_iskonto()` cagrilariyla degistirildi — ragip-rapor ile tutarli pattern. ragip-arbitraj benzer sorun ama ayri kapsam.
 
 ---
 
-### 6. Risk Skoru AI Disclaimer Iyilestirme (DUSUK)
+### ~~6. Risk Skoru AI Disclaimer Iyilestirme (DUSUK)~~ — YAPILDI (v2.8.3)
 
-**Sorun:** ragip-analiz risk skoru veriyor (0-50), ragip-degerlendirme "GUCLU/ORTA/ZAYIF" diyor. Bunlar LLM'in subjektif degerlendirmeleri ama kullanici nesnel olcum olarak algilayabilir.
-
-"Risk skoru: 15/50 — DUSUK" gordugunde "sorun yok" diye dusunebilir. Sayisal skor disclaimer'i golgeliyor — insanlar sayiya inanir.
-
-**Cozum:** Skoru kaldirmak degil — skorun hemen altina (disclaimer'in yanina degil) "AI tahmini, hukuki degerlendirme degildir" yazmak. Disclaimer zaten var ama skordan uzakta.
-
-**Effort:** Kucuk — prompt guncellemesi
-**Risk:** Dusuk
+ragip-analiz risk skoru ciktisina ve ragip-degerlendirme verdikt basliklarinin altina inline AI disclaimer eklendi. Skor/verdikt ile disclaimer artik yan yana.
 
 ---
 
