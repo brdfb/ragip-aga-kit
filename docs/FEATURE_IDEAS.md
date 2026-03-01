@@ -90,6 +90,29 @@ Guncelleme: 2026-03-01 (v2.8.4)
 
 ---
 
+### 17. Nakit Akis Projeksiyonu (YUKSEK DEGER — VERI BAGIMLI)
+
+**Sorun:** Kit geriye bakiyor (aging, DSO, gecmis faturalar). Ama KOBi sahibini gece uyutmayan soru ileriye bakar: "ayin 15'inde maaslari odeyebilecek miyim?"
+
+**Su an cevaplanamayan sorular:**
+- "Onumuzdeki 30 gunde nakit sikisacak mi?" — forward projeksiyon yok
+- "Hangi firmanin odeme davranisi kotulesiyir?" — trend analizi yok
+- "Portfoy genelinde erken odersem ne kazanirim?" — tek fatura icin var, toplam yok
+
+**Fikir — 3 asama:**
+
+1. **Nakit akis tahmini**: Acik fatura vadeleri uzerinden 30/60/90 gun projeksiyon. `FinansalHesap.nakit_projeksiyon(faturalar, donem_gun=30)` — alacak vadeleri - borc vadeleri = net pozisyon, haftalik kirilim.
+2. **Firma odeme trend analizi**: Son N faturanin ortalama gecikme gunu trendi. Kotulesme/iyilesme tespiti. "ABC Dagitim son 3 faturada ortalama 12 gun gec odedi, trend kotulesiyir."
+3. **Portfoy erken odeme firsati**: Tum acik borc faturalarinda erken odeme iskontosu simulasyonu. "Bu ay 3 tedarikciye erken odersen toplam 4,200 TL tasarruf."
+
+**Onkosul:** `faturalar.jsonl`'de yeterli veri olmali. MCP adaptor veya toplu import ile gercek fatura akisi baslamadan anlamsiz.
+
+**Effort:** Orta — mevcut FinansalHesap motoruna 2-3 metot + ragip-rapor'a yeni tur
+**Risk:** Dusuk — mevcut sema (ADR-0007) yeterli, yeni veri yapisi gerekmiyor
+**Oncelik:** Canli veri akisi basladiginda ilk yapilacak is
+
+---
+
 ## B. Reddedilen Fikirler (Critique Sonucu)
 
 ### X1. ragip-veri Skill Tool Davranisi (haiku)
