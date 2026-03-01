@@ -69,6 +69,27 @@ Guncelleme: 2026-03-01 (v2.8.4)
 
 ---
 
+### 16. Sub-Agent Graceful Degradation (KUCUK)
+
+**Sorun:** `maxTurns` limiti zaten 5 agent'ta set edilmis (3-12). Ama limite ulasildiginda Claude Code sub-agent'i sadece **keser** — "elindekiyle cevap ver" mekanizmasi yok. Orchestrator yarim ciktiyla devam eder, eksigi bilmez.
+
+**Mevcut durum:**
+- maxTurns: 5 agent'ta var (ragip-aga:12, hesap:3, arastirma:8, veri:3, hukuk:8) — **tamam**
+- Fallback zinciri (oran cekme): API → cache → FALLBACK_RATES — **tamam**
+- Profil yoksa genel mod: ragip-aga'da var — **tamam**
+- Sub-agent'larda "veri/tool eksikse elindekiyle cevap ver": **yok**
+
+**Fikir:** 4 sub-agent prompt'una tek satirlik graceful degradation talimati ekle:
+> "Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt."
+
+**Yapilmayacak:** Turn-awareness prompt'u ("limitine yaklasiyorsan sentezle"). Arastirma sonucu: cargo cult — LLM turn sayamaz, framework-level cozum (CrewAI forced final answer, OpenAI error_handlers) var ama prompt-level cozum guvenilir degil.
+
+**Effort:** Kucuk — 4 dosyada 1-2 satir
+**Risk:** Sifir
+**Oncelik:** Dusuk — skill'ler bounded scope, agentic loop yok, pratik risk minimal
+
+---
+
 ## B. Reddedilen Fikirler (Critique Sonucu)
 
 ### X1. ragip-veri Skill Tool Davranisi (haiku)
