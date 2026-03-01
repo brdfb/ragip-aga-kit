@@ -164,6 +164,27 @@ python3 scripts/ragip_rates.py --pretty
 
 Runtime veri (`data/RAGIP_AGA/`, `scripts/.ragip_cache/`) otomatik olusturulur ve `.gitignore`'a eklenir.
 
+## Gelistirme
+
+Kit'i yeni makinede gelistirmeye devam etmek icin:
+
+```bash
+git clone https://github.com/brdfb/ragip-aga-kit.git
+cd ragip-aga-kit
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m pytest tests/ -v
+```
+
+Ortam degiskenleri (opsiyonel):
+
+| Degisken | Aciklama |
+|----------|----------|
+| `TCMB_API_KEY` | EVDS3 API anahtari (yoksa fallback degerler) |
+| `COLLECTAPI_KEY` | Banka mevduat/kredi oranlari |
+| `RAGIP_CACHE_DIR` | Cache dizini (varsayilan: `scripts/.ragip_cache/`) |
+
 ## Lisans
 
 MIT
