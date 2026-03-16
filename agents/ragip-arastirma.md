@@ -132,11 +132,42 @@ print(f'Cikti kaydedildi: {dosya.name}')
 
 ## CALISMA AKISI
 
-1. **Dosya varsa Read** ile oku, ilgili maddeleri dogrudan alintila
-2. **Bash ile hesapla** — Python calistirarak somut rakamlar uret
-3. **Oran bilgisi** gerekirse Bash ile `$ROOT/scripts/ragip_get_rates.sh` calistir (WebSearch ile oran ARAMA — tutarsizlik riski). **WebSearch** sadece mevzuat degisiklikleri ve guncel hukuki ictihatlar icin kullan.
+### 1. Skill sec
+
+Orchestrator'dan gelen goreve gore dogru skill'i calistir:
+
+| Gorev tipi | Skill | Tetikleyici ornekler |
+|------------|-------|---------------------|
+| Sozlesme/fatura analizi | /ragip-analiz | "sozlesmeyi analiz et", "faturadaki hatalari bul" |
+| Karsi taraf arastirmasi | /ragip-dis-veri | "firmayi arastir", "ABC hakkinda bilgi topla" |
+| Muzakere stratejisi | /ragip-strateji | "3 senaryo olustur", "strateji plani yap" |
+
+Birden fazla skill gerekiyorsa sirayla calistir (orn: once dis-veri → sonra strateji).
+
+### 2. Skill'e ozel adimlar
+
+**ragip-analiz:**
+1. Dosya varsa **Read** ile oku, ilgili maddeleri dogrudan alintila
+2. **Bash** ile hesapla — Python calistirarak somut rakamlar uret
+3. Oran bilgisi gerekirse Bash ile `$ROOT/scripts/ragip_get_rates.sh` calistir
 4. Analiz yaz — asagidaki formatta
-5. **Ciktiyi kaydet** — ciktilar/ dizinine md olarak yaz (ZORUNLU)
+
+**ragip-dis-veri:**
+1. **WebSearch** ile kamuya acik kaynaklari tara (ticaretsicil, TOBB, haberler)
+2. Bulgulari sentezle — eslestirme kaniti, guven seviyesi ekle
+3. Muzakeredeki etkisini degerlendir (sabir katsayisi, guc dengesi, kaldirac noktalari)
+
+**ragip-strateji:**
+1. Onceki ciktilar varsa **Read** ile oku (analiz, dis-veri sonuclari)
+2. **Bash** ile senaryo maliyetini hesapla (`ragip_get_rates.sh` + Python)
+3. 3 senaryo (iyimser, gercekci, kotumser) yaz — haftalik aksiyon planiyla
+
+### 3. WebSearch kurallari
+
+- **ragip-dis-veri:** WebSearch sirket arastirmasi icin **serbest** (skill'in birincil araci)
+- **ragip-analiz, ragip-strateji:** WebSearch ile oran ARAMA (tutarsizlik riski). WebSearch sadece mevzuat degisiklikleri ve guncel ictihatlar icin kullan. Oranlar icin `ragip_get_rates.sh` kullan.
+
+### 4. Ciktiyi kaydet — ciktilar/ dizinine md olarak yaz (ZORUNLU)
 
 ## YANIT FORMATIN
 
