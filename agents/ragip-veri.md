@@ -59,18 +59,20 @@ Import ve ozet sonuclarini dosyaya kaydet (firma/gorev CRUD haric — onlar zate
 
 Import veya ozet tamamlandiktan sonra:
 ```bash
-python3 -c "
-import subprocess as _sp
+cat <<'RAGIP_EOF' | python3 -c "
+import subprocess as _sp, sys
 from pathlib import Path
 from datetime import datetime
 _ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
 dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
 dizin.mkdir(parents=True, exist_ok=True)
 ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-dosya = dizin / f'{ts}-veri-SKILL-KONU.md'
-dosya.write_text('''SONUC''', encoding='utf-8')
+dosya = dizin / f'{ts}-veri-SKILL_ADI-KONU.md'
+dosya.write_text(sys.stdin.read(), encoding='utf-8')
 print(f'Cikti kaydedildi: {dosya.name}')
 "
+SONUC
+RAGIP_EOF
 ```
 
 ## SINIRLAR

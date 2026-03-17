@@ -68,18 +68,20 @@ Her hesaplama sonucunu dosyaya KAYDET. Diger alt-ajanlar (strateji, ihtar) bu ra
 
 Hesaplama tamamlandiktan sonra:
 ```bash
-python3 -c "
-import subprocess as _sp
+cat <<'RAGIP_EOF' | python3 -c "
+import subprocess as _sp, sys
 from pathlib import Path
 from datetime import datetime
 _ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
 dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
 dizin.mkdir(parents=True, exist_ok=True)
 ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-dosya = dizin / f'{ts}-hesap-vade-farki-KONU.md'
-dosya.write_text('''HESAPLAMA_SONUCU''', encoding='utf-8')
+dosya = dizin / f'{ts}-hesap-SKILL_ADI-KONU.md'
+dosya.write_text(sys.stdin.read(), encoding='utf-8')
 print(f'Cikti kaydedildi: {dosya.name}')
 "
+HESAPLAMA_SONUCU
+RAGIP_EOF
 ```
 
 ## SINIRLAR
