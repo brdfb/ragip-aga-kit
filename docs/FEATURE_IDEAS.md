@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-01 (v2.8.4)
+Guncelleme: 2026-03-19 (v2.8.6)
 
 ---
 
@@ -26,6 +26,8 @@ Guncelleme: 2026-03-01 (v2.8.4)
 **Sorun:** Ciktilar'da hangi kit versiyonu, hangi parametrelerle uretildigi belli degil.
 
 **Fikir:** Her cikti dosyasinin basina YAML frontmatter (version, agent, skill, parametreler, tarih).
+
+**Not (v2.8.6):** `ciktilar/` retention sorunu `ragip_temizle.sh` ile cozuldu (90 gun / 200 dosya limiti). Meta block (YAML frontmatter icerigi) hala eksik — izlenebilirlik/audit gereksinimi olursa implement edilecek.
 
 **Effort:** Kucuk-orta
 **Risk:** Dusuk
@@ -69,26 +71,6 @@ Guncelleme: 2026-03-01 (v2.8.4)
 
 ---
 
-### 16. Sub-Agent Graceful Degradation (KUCUK)
-
-**Sorun:** `maxTurns` limiti zaten 5 agent'ta set edilmis (3-12). Ama limite ulasildiginda Claude Code sub-agent'i sadece **keser** — "elindekiyle cevap ver" mekanizmasi yok. Orchestrator yarim ciktiyla devam eder, eksigi bilmez.
-
-**Mevcut durum:**
-- maxTurns: 5 agent'ta var (ragip-aga:12, hesap:3, arastirma:8, veri:3, hukuk:8) — **tamam**
-- Fallback zinciri (oran cekme): API → cache → FALLBACK_RATES — **tamam**
-- Profil yoksa genel mod: ragip-aga'da var — **tamam**
-- Sub-agent'larda "veri/tool eksikse elindekiyle cevap ver": **yok**
-
-**Fikir:** 4 sub-agent prompt'una tek satirlik graceful degradation talimati ekle:
-> "Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt."
-
-**Yapilmayacak:** Turn-awareness prompt'u ("limitine yaklasiyorsan sentezle"). Arastirma sonucu: cargo cult — LLM turn sayamaz, framework-level cozum (CrewAI forced final answer, OpenAI error_handlers) var ama prompt-level cozum guvenilir degil.
-
-**Effort:** Kucuk — 4 dosyada 1-2 satir
-**Risk:** Sifir
-**Oncelik:** Dusuk — skill'ler bounded scope, agentic loop yok, pratik risk minimal
-
----
 
 ### 17. Nakit Akis Projeksiyonu (YUKSEK DEGER — VERI BAGIMLI)
 
@@ -187,6 +169,7 @@ Normal — LLM agent'lari e2e test etmek zor. Ama inline Python Bash bloklarinin
 | 8 | Firma Bazli Rapor | v2.7.2 | 6 analiz metodu `firma_id` parametresi aldi |
 | 9 | Fatura Uyari Sistemi | v2.8.0 | `fatura_uyarilari()` — vade gecmis, yaklasan, TTK itiraz |
 | 10 | Nakit Cevrim Dongusu Dashboard | v2.8.1 | `ccc_dashboard()` — DSO + DPO + tahsilat + aging tek cagri |
+| 16 | Sub-Agent Graceful Degradation | v2.8.6 | 4 sub-agent'a kismi sonuc talimatı + orchestrator partial failure bildirimi |
 
 ---
 

@@ -182,4 +182,10 @@ Birden fazla skill gerekiyorsa sirayla calistir (orn: once dis-veri → sonra st
 
 ---
 
+## KISMI SONUC
+
+Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt.
+
+---
+
 **UYARI:** Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin.

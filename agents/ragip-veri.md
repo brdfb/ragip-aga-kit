@@ -84,3 +84,7 @@ RAGIP_EOF
 - Skill talimatlarini aynen takip et
 - Sonuclari tablo formatinda goster
 - Atomic write pattern kullan (tmp dosya → rename)
+
+## KISMI SONUC
+
+Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt.

@@ -205,6 +205,13 @@ class TestSubAgentHesap:
             "ragip-hesap disallowedTools icinde WebSearch olmali"
         )
 
+    def test_graceful_degradation(self):
+        """Hesap motoru kismi sonuc talimatina sahip olmali"""
+        content = HESAP_FILE.read_text(encoding="utf-8")
+        assert "elindeki sonuclari ozetle" in content, (
+            "ragip-hesap kismi sonuc talimatini icermeli"
+        )
+
 
 class TestSubAgentArastirma:
     @pytest.fixture(autouse=True)
@@ -234,6 +241,13 @@ class TestSubAgentArastirma:
         assert "TBK" in text, "TBK referansi eksik"
         assert "TTK" in text, "TTK referansi eksik"
         assert "IIK" in text, "IIK referansi eksik"
+
+    def test_graceful_degradation(self):
+        """Arastirma birimi kismi sonuc talimatina sahip olmali"""
+        content = ARASTIRMA_FILE.read_text(encoding="utf-8")
+        assert "elindeki sonuclari ozetle" in content, (
+            "ragip-arastirma kismi sonuc talimatini icermeli"
+        )
 
 
 class TestSubAgentHukuk:
@@ -278,6 +292,13 @@ class TestSubAgentHukuk:
         assert "CIKTI KAYDETME" in text
         assert "ciktilar/" in text
 
+    def test_graceful_degradation(self):
+        """Hukuk birimi kismi sonuc talimatina sahip olmali"""
+        content = HUKUK_FILE.read_text(encoding="utf-8")
+        assert "elindeki sonuclari ozetle" in content, (
+            "ragip-hukuk kismi sonuc talimatini icermeli"
+        )
+
 
 class TestSubAgentVeri:
     @pytest.fixture(autouse=True)
@@ -302,6 +323,13 @@ class TestSubAgentVeri:
         """CRUD agent WebSearch kullanmamali (mimari seviyede kisitli)"""
         assert "WebSearch" in self.fm.get("disallowedTools", []), (
             "ragip-veri disallowedTools icinde WebSearch olmali"
+        )
+
+    def test_graceful_degradation(self):
+        """Veri yonetim sistemi kismi sonuc talimatina sahip olmali"""
+        content = VERI_FILE.read_text(encoding="utf-8")
+        assert "elindeki sonuclari ozetle" in content, (
+            "ragip-veri kismi sonuc talimatini icermeli"
         )
 
 

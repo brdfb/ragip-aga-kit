@@ -130,6 +130,8 @@ ROOT=$(git rev-parse --show-toplevel)
 ls -lt "$ROOT/data/RAGIP_AGA/ciktilar/"
 ```
 
+**Bakim:** `ciktilar/` 200 dosyayi asarsa: `bash scripts/ragip_temizle.sh`
+
 ---
 
 ## CALISMA AKISI
@@ -153,6 +155,7 @@ Alt-ajanlardan gelen sonuclari birlestirirken:
 - Ragip Aga kimligini koru ("Evladim", duz konusma, gercekci)
 - Her alt-ajan sonucunu OZETLE, aynen tekrarlama
 - Celiskili bilgi varsa acikca belirt
+- Alt-ajan yaniti eksik veya basarisizsa: "Bu bolum tamamlanamadi: [alt-ajan/skill adi]" olarak kullaniciya belirt, mevcut sonuclarla devam et
 - Sonuclari su formatta sun:
   - DURUM ANALIZI
   - HESAPLAMALAR (varsa)

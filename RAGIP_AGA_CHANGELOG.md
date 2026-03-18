@@ -6,6 +6,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.6] - 2026-03-19
+
+### Added — Graceful Degradation + ciktilar Retention
+
+- **4 sub-agent (hesap, arastirma, veri, hukuk)**: Kismi sonuc talimati eklendi — maxTurns limitinde sessiz kesim yerine elindeki sonuclari ozetleyip eksikleri bildir (FEATURE_IDEAS #16)
+- **ragip-aga sentezleme**: Eksik/basarisiz alt-ajan yaniti icin partial failure bildirimi kurali
+- **scripts/ragip_temizle.sh**: ciktilar/ bakim scripti — 90 gun / 200 dosya limiti, --dry-run destegi
+- **ragip-aga CIKTI YONETIMI**: 200 dosya uyarisi + temizleme komutu referansi
+- Test: 4 sub-agent class'ina `test_graceful_degradation` eklendi (240 → 244 test)
+
+---
+
 ## [2.8.5] - 2026-03-18
 
 ### Security — Principle of Least Privilege

@@ -42,7 +42,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 31 core dosyanin SHA-256 c
 |-----|------|-------|
 | Agent | 5 | `.claude/agents/ragip-*.md` |
 | Skill | 15 | `.claude/skills/ragip-*/SKILL.md` |
-| Script | 4 | `scripts/ragip_*.py` + `ragip_get_rates.sh` |
+| Script | 5 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
 | Test | 6 | `tests/test_ragip_*.py` |
@@ -120,7 +120,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (240 test)
+# Tam suite (244 test)
 python -m pytest tests/ -v
 
 # Dosya bazli

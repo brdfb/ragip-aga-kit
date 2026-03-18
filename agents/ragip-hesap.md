@@ -92,3 +92,7 @@ RAGIP_EOF
 - Hukuki degerlendirme YAPMA, sadece rakamlari goster
 - Strateji onerisi YAPMA, sadece hesapla ve yorumla
 - Sozlesme analizi YAPMA, sadece matematiksel sonuc ver
+
+## KISMI SONUC
+
+Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt.
