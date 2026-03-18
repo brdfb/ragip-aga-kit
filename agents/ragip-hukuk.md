@@ -179,7 +179,8 @@ RAGIP_EOF
 
 ## KISMI SONUC
 
-Tum adimlar tamamlanamadiysa, elindeki sonuclari ozetle ve eksik kalanlari belirt.
+Bir arac cagrisinda hata alirsan veya veri eksikse elindeki sonuclari ozetle ve eksik kalanlari belirt.
+Not: maxTurns hard cut'ta bu talimat calismaz — asil mitigasyon her adim sonrasinda ciktilar/ dizinine yazmaktir.
 
 ---
 

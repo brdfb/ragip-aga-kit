@@ -159,14 +159,25 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I6. Graceful Degradation Sinirlamasi
 
-v2.8.6'da 4 sub-agent'a "elindeki sonuclari ozetle ve eksik kalanlari belirt" talimati eklendi. Bu kismen calisan bir cozum:
+v2.8.6'da 4 sub-agent'a "elindeki sonuclari ozetle ve eksik kalanlari belirt" talimati eklendi.
 
-- Sub-agent erken karar vererek duruyorsa talimat devreye girer — isler.
-- maxTurns framework cut'a carparsa talimat okunamaz — islemiyor. Framework, promptu kesip cikari; son turn'de "ozetle" talimatini isletme firsati yok.
+**Arastirma sonucu (2026-03-19):** Bu talimat maxTurns hard cut icin calismaz. Dogrulanmis:
 
-Gercek fix: CrewAI'nin `forced_final_answer` veya OpenAI Agents'in `error_handlers` gibi framework-level "cut oncesi temiz kapat" mekanizmasi. Claude Code su an bu API'yi sunmuyor.
+- Anthropic Agent SDK dokumanindaki ResultMessage tablosu: `error_max_turns` durumunda `result` alani YOK. Framework loop'u keser, son LLM cagrisi yapilmaz.
+- `claude-agent-sdk-typescript` Issue #58: Son `PostToolUse` hook'u bile atlanabiliyor.
+- GitHub Issue #29567 ("Graceful degradation for agent teams"): Anthropic kapatti, duplicate, cozum yok.
 
-**Oncelik:** Pratik etkisi minimal — skill'ler bounded scope (3-8 turn), agentic loop yok. Claude Code bu API'yi acarsa degerlendirilebilir.
+**Ne isler, ne islemez:**
+- Tool fail / veri eksikligi gibi erken karar durmalarinda talimat devreye girer — isler.
+- maxTurns hit'inde talimat okunamaz — islemez.
+- **Gercek mitigasyon (zaten uygulamada):** Her sub-agent'in `CIKTI KAYDETME (ZORUNLU)` bolumu — her adim sonucu diske yazilir. Hard stop sonrasi partial output korunur.
+
+**Framework karsilastirmasi:**
+- CrewAI `forced_final_answer`: limit dolunca framework 1 LLM cagrisi daha yapar, synthesis prompt inject eder — gercek cozum.
+- OpenAI Agents SDK `max_turns`: ayni hard stop pattern — cozum yok.
+- Claude Code: hard stop, cleanup handler yok, Claude Code bu API'yi acarsa degerlendirilebilir.
+
+**Oncelik:** Degismedi — skill'ler bounded scope, pratik etki minimal. KISMI SONUC talimati zarar vermez, genel davranis iyilestirici olarak kalabilir ama "graceful degradation sagladi" iddiasi dogruluk disi.
 
 ### I7. Uretim Hazirlik Kriterleri
 
