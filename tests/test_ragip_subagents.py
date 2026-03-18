@@ -68,6 +68,21 @@ def parse_agent_frontmatter(filepath: Path) -> dict:
                 break
     result["skills"] = skills
 
+    # disallowedTools (YAML array)
+    disallowed = []
+    in_disallowed = False
+    for line in fm.split("\n"):
+        if re.match(r"^disallowedTools:\s*$", line):
+            in_disallowed = True
+            continue
+        if in_disallowed:
+            m2 = re.match(r"^\s+-\s+(.+)$", line)
+            if m2:
+                disallowed.append(m2.group(1).strip())
+            else:
+                in_disallowed = False
+    result["disallowedTools"] = disallowed
+
     return result
 
 
@@ -157,6 +172,12 @@ class TestOrchestrator:
         text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
         assert "PARALEL" in text.upper(), "Paralel calistirma kurallari eksik"
 
+    def test_no_websearch(self):
+        """Orchestrator WebSearch kullanmamali (mimari seviyede kisitli)"""
+        assert "WebSearch" in self.fm.get("disallowedTools", []), (
+            "ragip-aga disallowedTools icinde WebSearch olmali"
+        )
+
 
 # --- Test: Sub-agent yapilandirmasi ---
 
@@ -177,6 +198,12 @@ class TestSubAgentHesap:
 
     def test_max_turns_kisa(self):
         assert self.fm["maxTurns"] <= 5, "Hesap motoru 3-5 turn yeterli"
+
+    def test_no_websearch(self):
+        """Hesap motoru WebSearch kullanmamali (mimari seviyede kisitli)"""
+        assert "WebSearch" in self.fm.get("disallowedTools", []), (
+            "ragip-hesap disallowedTools icinde WebSearch olmali"
+        )
 
 
 class TestSubAgentArastirma:
@@ -270,6 +297,12 @@ class TestSubAgentVeri:
 
     def test_max_turns_kisa(self):
         assert self.fm["maxTurns"] <= 5, "CRUD islemleri 3-5 turn yeterli"
+
+    def test_no_websearch(self):
+        """CRUD agent WebSearch kullanmamali (mimari seviyede kisitli)"""
+        assert "WebSearch" in self.fm.get("disallowedTools", []), (
+            "ragip-veri disallowedTools icinde WebSearch olmali"
+        )
 
 
 # --- Test: Skill dagilimi butunlugu ---

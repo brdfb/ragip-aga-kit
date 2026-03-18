@@ -68,7 +68,7 @@ Testler kit kaynagi (`agents/`) veya kurulu repo (`.claude/agents/`) otomatik te
 - FinansalHesap analiz metotlari: tarih-bagli metotlara `bugun` parametresi ekle (aging_raporu, dso, dpo). Test edilebilirlik icin zorunlu.
 - Kit ust orchestrator'e ihtiyac duymaz — tek domain (KOBi finans). Ikinci domain agent dogdugunda degerlendir.
 - Adaptor arayuzu gereksiz — ADR-0007 JSON semasi yeterli sozlesme. MCP tarafinda dto yazilir.
-- Agent tool kisitlama: frontmatter'da `tools:` (allowlist) veya `disallowedTools:` (denylist). Simdilik prompt sertlestirme ile cozuldu, gerekirse yapisal kisitlamaya gecilir.
+- Agent tool kisitlama: ragip-aga, ragip-hesap, ragip-veri'de `disallowedTools: [WebSearch, WebFetch]` frontmatter ile mimari seviyede uygulandı. ragip-arastirma ve ragip-hukuk'ta bazi skill'ler WebSearch gerektirdiginden prompt kisitlamasi devam eder.
 - MCP tool gorunurlugu: Agent, MCP tool gorunce system prompt talimatini atlayabiliyor — prosedurel skill'lerde `disable-model-invocation` ile korunuyor.
 
 ## Commit Kurali (ZORUNLU)

@@ -13,3 +13,8 @@ Kurallar:
 - LLM skill'leri (analiz, dis-veri, strateji, vade-farki, arbitraj, degerlendirme, delil, ihtar) model cagirir
 - Sub-agent'lar ciktilari data/RAGIP_AGA/ciktilar/ altina yazar
 - Format: YYYYMMDD_HHMMSS-{agent}-{skill}-{konu}.md
+
+Tool kisitlama (Principle of Least Privilege):
+- ragip-aga, ragip-hesap, ragip-veri: disallowedTools frontmatter ile WebSearch+WebFetch engellendi (mimari seviye)
+- ragip-arastirma, ragip-hukuk: WebSearch bazi skill'lerde gerekli (dis-veri, degerlendirme) — prompt kisitlamasi devam eder
+- Test: TestOrchestrator.test_no_websearch, TestSubAgentHesap.test_no_websearch, TestSubAgentVeri.test_no_websearch

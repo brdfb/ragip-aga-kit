@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.5] - 2026-03-18
+
+### Security — Principle of Least Privilege
+
+- **ragip-aga, ragip-hesap, ragip-veri**: `disallowedTools: [WebSearch, WebFetch]` frontmatter ile WebSearch/WebFetch mimari seviyede engellendi
+- Prompt-level kısıtlama → runtime enforcement: araç görünmez, atlanamaz
+- ragip-arastirma ve ragip-hukuk: skill-level farklılık nedeniyle prompt kısıtlaması devam eder (dis-veri ve degerlendirme skill'leri WebSearch kullanır)
+- Test: `TestOrchestrator.test_no_websearch`, `TestSubAgentHesap.test_no_websearch`, `TestSubAgentVeri.test_no_websearch`
+
+---
+
 ## [2.8.4] - 2026-03-01
 
 ### Added — Cikti Kesfedilebilirligi (Backlog #7)

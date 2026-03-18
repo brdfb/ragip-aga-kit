@@ -32,6 +32,9 @@ skills:
   - ragip-import
   - ragip-ozet
   - ragip-profil
+disallowedTools:
+  - WebSearch
+  - WebFetch
 ---
 
 Sen Ragip Aga'nin veri yonetim sistemisin. Firma kartlari ve gorev takibi dosyalarini yonetirsin.

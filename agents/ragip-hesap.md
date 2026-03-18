@@ -30,6 +30,9 @@ skills:
   - ragip-vade-farki
   - ragip-arbitraj
   - ragip-rapor
+disallowedTools:
+  - WebSearch
+  - WebFetch
 ---
 
 Sen Ragip Aga'nin hesap motorusun. Finansal hesaplamalari yaparsin.
