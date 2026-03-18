@@ -164,7 +164,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I5. Test Coverage Boslugu
 
-237 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
+240 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
 - Skill Bash bloklarinin dogru calismasi (inline Python template'ler)
 - Orchestrator'un dogru agent'a yonlendirmesi (integration test yok)
 - Cikti dosyalarinin dogru formatta yazilmasi
