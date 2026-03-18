@@ -132,6 +132,8 @@ Bu maddeler "sorun olabilir ama simdi mudahale gereksiz" kategorisinde.
 
 CLI + FinansalHesap + dosya okuma + LLM + REPL tek dosyada. FinansalHesap ayri modul olabilir. Ama: tek consumer var, YAGNI. **Soru:** CLI standalone modu gercekten kullaniliyor mu? Kullanilmiyorsa monolitin maliyeti artmadan duruyor. Kullaniliyorsa bolme anlamli olur.
 
+**Degerlendirme zamani:** MCP entegrasyonu tamamlaninca kullanim verisi degerlendirilebilir. "CLI standalone hic cagrilmadi" sonucu cikacak olursa module kaldirmak yerine silmek daha temiz.
+
 ### I2. Arbitraj Skill Kullanim Degerlendirmesi
 
 CIP ve carry trade banka hazine masasi araclari. Hedef kullanici KOBI. Canli kullaninda bu skill'ler ne kadar cagrildi? Kullanilmiyorsa karmasiklik bedava tasiniyor. Vade-mevduat mantikli (herkesin isi), CIP/carry trade ise nis.
@@ -146,12 +148,36 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 ### I5. Test Coverage Boslugu
 
-240 test yapisal dogrulama yapiyor (frontmatter, skill dagilimi, portability). Ama test EDİLMEYEN alanlar:
-- Skill Bash bloklarinin dogru calismasi (inline Python template'ler)
-- Orchestrator'un dogru agent'a yonlendirmesi (integration test yok)
-- Cikti dosyalarinin dogru formatta yazilmasi
+244 test var (v2.8.6). Katman 1 (structural) ve Katman 2 (unit) saglamdir. Eksik katmanlar:
 
-Normal — LLM agent'lari e2e test etmek zor. Ama inline Python Bash bloklarinin birim testi olabilir.
+- **Katman 3 (integration):** Gercek fatura verisiyle FinansalHesap dogrulamasi. MCP veri akisi baslayana kadar anlamli fixture olusturulamaz — sifir gercek fatura var.
+- **Katman 4 (e2e LLM):** Orchestrator'un dogru agent'a yonlendirmesi, skill ciktisi kalitesi. Non-deterministic + maliyetli — bilerek kapsam disi. ADR-0008.
+
+**Degerlendirme zamani:** MCP entegrasyonu tamamlaninca Katman 3 yazilir. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
+
+### I6. Graceful Degradation Sinirlamasi
+
+v2.8.6'da 4 sub-agent'a "elindeki sonuclari ozetle ve eksik kalanlari belirt" talimati eklendi. Bu kismen calisan bir cozum:
+
+- Sub-agent erken karar vererek duruyorsa talimat devreye girer — isler.
+- maxTurns framework cut'a carparsa talimat okunamaz — islemiyor. Framework, promptu kesip cikari; son turn'de "ozetle" talimatini isletme firsati yok.
+
+Gercek fix: CrewAI'nin `forced_final_answer` veya OpenAI Agents'in `error_handlers` gibi framework-level "cut oncesi temiz kapat" mekanizmasi. Claude Code su an bu API'yi sunmuyor.
+
+**Oncelik:** Pratik etkisi minimal — skill'ler bounded scope (3-8 turn), agentic loop yok. Claude Code bu API'yi acarsa degerlendirilebilir.
+
+### I7. Uretim Hazirlik Kriterleri
+
+Kit su an prototype asama: mimari saglam, hesaplama motoru yazilmis, test altyapisi kurulu. Ama uretim hazir degil:
+
+- Sifir gercek fatura verisi — FinansalHesap hic gercek veri gorMEDI
+- Sifir MCP adaptoru — Parasut/D365 entegrasyonu yok
+- Kullanim verisi yok — hangi skill kac kez cagrildi bilinmiyor
+- LLM routing dogru calisiyor mu — test edilmemis
+
+**Uretim = en az bir MCP adaptoru + gercek fatura akisi + FinansalHesap gercek veriyle dogrulandi.**
+
+MCP entegrasyonu bu kit'in gercek deger testidir. Oncesinde yapilan her iyilestirme hipoteze dayanir.
 
 ---
 
