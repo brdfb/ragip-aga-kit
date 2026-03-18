@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.7] - 2026-03-19
+
+### Added — Test Coverage: ragip_temizle.sh
+
+- **tests/test_ragip_temizle.py**: ragip_temizle.sh icin 20 fonksiyonel test eklendi
+  - TestScriptSaglik: varlik + calistirilabilir + graceful exit
+  - TestYasBazliTemizlik: 91 gun+ silme, sinir (89 gun) koruma, coklu silme
+  - TestLimitBazliTemizlik: 200 siniri, en eski silme, mesaj dogrulamasi
+  - TestDryRun: silme yok, mesaj var, bos dizin
+  - TestDosyaFiltresi: sadece .md, alt dizin korunur
+  - TestCiktiMesaji: "Tamamlandi. Kalan:" her zaman var
+- Manifest sayisi 32 → 33 (7 test dosyasi)
+- Toplam test: 244 → 264
+
+---
+
 ## [2.8.6] - 2026-03-19
 
 ### Added — Graceful Degradation + ciktilar Retention

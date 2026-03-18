@@ -45,7 +45,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 31 core dosyanin SHA-256 c
 | Script | 5 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 6 | `tests/test_ragip_*.py` |
+| Test | 7 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -120,7 +120,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (244 test)
+# Tam suite (264 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -130,15 +130,17 @@ python -m pytest tests/test_ragip_fatura_analiz.py -v   # Fatura analiz motorlar
 python -m pytest tests/test_ragip_rates.py -v           # TCMB rate fetcher
 python -m pytest tests/test_ragip_crud.py -v            # CRUD helper
 python -m pytest tests/test_ragip_install.py -v         # Install/update
+python -m pytest tests/test_ragip_temizle.py -v         # ragip_temizle.sh
 ```
 
-Testler 6 katmani kapsar:
+Testler 7 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
 4. **Fatura analiz** — Aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti, CCC dashboard
 5. **TCMB** — Oran cekme, cache, fallback, format
 6. **Install/Update** — Fresh install, manifest, checksum, update senaryolari (kullanici degisikligi koruma, conflict backup, dry-run)
+7. **Temizle** — ragip_temizle.sh yas bazli + limit bazli silme, dry-run, dosya filtresi
 
 ## Bagimlilklar
 

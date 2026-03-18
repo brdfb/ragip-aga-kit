@@ -23,6 +23,7 @@ python -m pytest tests/test_ragip_rates.py -v        # TCMB rate fetcher
 python -m pytest tests/test_ragip_fatura_analiz.py -v # Fatura analiz motorlari
 python -m pytest tests/test_ragip_crud.py -v         # CRUD helper
 python -m pytest tests/test_ragip_install.py -v      # Install/update
+python -m pytest tests/test_ragip_temizle.py -v      # ragip_temizle.sh
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v
