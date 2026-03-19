@@ -376,6 +376,22 @@ class TestMusteriKonsantrasyonu:
         assert sonuc["hhi"] == 0.0
         assert "Veri yok" in sonuc["yorum"]
 
+    def test_tek_firma_raporu_false(self):
+        """Varsayilan: tek_firma_raporu alani yok"""
+        sonuc = FinansalHesap.musteri_konsantrasyonu(FATURALAR)
+        assert "tek_firma_raporu" not in sonuc
+
+    def test_tek_firma_raporu_true(self):
+        """tek_firma_raporu=True: alan ve yorum icinde 'tek firma raporu' var"""
+        sonuc = FinansalHesap.musteri_konsantrasyonu(FATURALAR, tek_firma_raporu=True)
+        assert sonuc["tek_firma_raporu"] is True
+        assert "tek firma raporu" in sonuc["yorum"]
+
+    def test_tek_firma_raporu_bos_veri(self):
+        """Bos veri + tek_firma_raporu=True"""
+        sonuc = FinansalHesap.musteri_konsantrasyonu([], tek_firma_raporu=True)
+        assert sonuc["tek_firma_raporu"] is True
+
 
 class TestKdvDonemOzeti:
     def test_net_hesap(self):

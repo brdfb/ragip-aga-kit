@@ -1,6 +1,6 @@
 # Ragip Aga Kit — Proje Genel Bakis
 
-**Versiyon:** 2.8.11 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+**Versiyon:** 2.8.12 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
 
 ---
 
@@ -92,7 +92,7 @@ Yeni ERP eklemek = yeni MCP adaptor yazmak. Kit'e dokunulmaz.
 | Ozellik | Deger |
 |---------|-------|
 | Python | 3.12+ |
-| Test | 297 (7 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle) |
+| Test | 300 (7 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle) |
 | Agent | 5 (1 orchestrator + 4 sub-agent) |
 | Skill | 15 (8 prosedurel + 7 LLM) |
 | Hesaplama metodu | 21 |
@@ -175,7 +175,7 @@ ragip-aga-kit/
     ragip_temizle.sh  # Cikti dizini temizleme
   config/             # ragip_aga.yaml + dispatch kuralları
   data/RAGIP_AGA/     # Runtime veri (firmalar, faturalar, gorevler, ciktilar)
-  tests/              # 7 test dosyasi, 297 test
+  tests/              # 7 test dosyasi, 300 test
   docs/               # ADR'ler, FEATURE_IDEAS, bu dokuman
   install.sh          # Hedef repoya kurulum
   update.sh           # Guncelleme (uclu checksum)

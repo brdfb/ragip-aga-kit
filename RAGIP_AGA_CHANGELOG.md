@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.12] - 2026-03-20
+
+### Fixed — DTO Uyumluluk (ragip-workspace)
+
+- **scripts/ragip_aga.py**: `musteri_konsantrasyonu()` metodu `tek_firma_raporu=False` parametresi aldi — D365 DTO uyumlulugu (tek firma raporlarinda konsantrasyon bilgisi)
+- **tests/test_ragip_fatura_analiz.py**: 3 yeni test (tek_firma_raporu True/False/bos veri)
+- Toplam test: 297 → 300
+- **ragip-workspace'teki 26 DTO test fail'i bu degisiklikle cozulur**
+
+---
+
 ## [2.8.11] - 2026-03-20
 
 ### Fixed — MCP Entegrasyon Hazirlik (Ongorulen Patlama Noktalari)

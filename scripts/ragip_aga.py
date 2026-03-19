@@ -821,11 +821,12 @@ class FinansalHesap:
         }
 
     @staticmethod
-    def musteri_konsantrasyonu(faturalar):
+    def musteri_konsantrasyonu(faturalar, tek_firma_raporu=False):
         """
         Musteri konsantrasyon riski (HHI endeksi).
         Alacak faturalarini firma_id bazinda gruplar, top 3 + HHI hesaplar.
         HHI > 2500: yuksek, 1500-2500: orta, < 1500: dagitik.
+        tek_firma_raporu: True ise sonuca tek firma raporu bilgisi eklenir.
         """
         firma_tutar = {}
         for f in faturalar:
@@ -838,7 +839,7 @@ class FinansalHesap:
 
         toplam_gelir = sum(firma_tutar.values())
         if toplam_gelir == 0:
-            return {
+            sonuc = {
                 "firma_adedi": 0,
                 "toplam_gelir_tl": 0.0,
                 "top3": [],
@@ -846,6 +847,9 @@ class FinansalHesap:
                 "hhi": 0.0,
                 "yorum": "Veri yok.",
             }
+            if tek_firma_raporu:
+                sonuc["tek_firma_raporu"] = True
+            return sonuc
 
         sirali = sorted(firma_tutar.items(), key=lambda x: x[1], reverse=True)
         hhi = sum((tutar / toplam_gelir * 100) ** 2 for _, tutar in sirali)
@@ -867,14 +871,21 @@ class FinansalHesap:
         else:
             risk = "dagitik — dusuk risk"
 
-        return {
+        yorum = f"{len(firma_tutar)} firma, HHI: {hhi:,.0f} — {risk}."
+        if tek_firma_raporu:
+            yorum += " tek firma raporu."
+
+        sonuc = {
             "firma_adedi": len(firma_tutar),
             "toplam_gelir_tl": round(toplam_gelir, 2),
             "top3": top3,
             "top3_pay_pct": round(top3_pay, 2),
             "hhi": round(hhi, 0),
-            "yorum": f"{len(firma_tutar)} firma, HHI: {hhi:,.0f} — {risk}.",
+            "yorum": yorum,
         }
+        if tek_firma_raporu:
+            sonuc["tek_firma_raporu"] = True
+        return sonuc
 
     @staticmethod
     def kdv_donem_ozeti(faturalar, firma_id=None):
