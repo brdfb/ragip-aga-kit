@@ -2,7 +2,7 @@
 Tarih: 2026-03-19
 Durum: Guncellendi — 2026-03-19 (framework kısıtları netleşti)
 
-## Bagiam
+## Baglam
 
 ragip-aga.md, orchestrator + 4 sub-agent dispatch pattern'i ile tasarlandi (ADR-0001).
 Ilk gercek dunya testinde dispatch akisi basarisiz oldu. Kok neden analizi yapildi.

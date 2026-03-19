@@ -44,7 +44,7 @@ MCP veri akisi basladiginda Katman 3 ilk yapilacak istir (FEATURE_IDEAS #17 ile 
 
 ### Neden Katman 4 kapsam disi
 
-LLM davranisi non-deterministic: ayni girdi farkli turde farkli cikti uretebilir. E2E test her calistirmada farkli sonuc verebilir, bu da testin gurelirligi yoktur. Ayrica her LLM cagrisinin maliyeti var. Bu iki sebepten Katman 4 sistematik test icin uygun degil.
+LLM davranisi non-deterministic: ayni girdi farkli turde farkli cikti uretebilir. E2E test her calistirmada farkli sonuc verebilir, bu da testin guvenilirligi yoktur. Ayrica her LLM cagrisinin maliyeti var. Bu iki sebepten Katman 4 sistematik test icin uygun degil.
 
 Pratik alternatif: Bir senaryo seti elle calistirilip sonuclar incelenir (golden path review), otomasyon degil.
 
@@ -55,7 +55,10 @@ Pratik alternatif: Bir senaryo seti elle calistirilip sonuclar incelenir (golden
 ## Alternativler
 
 **Alternatif A: Simdi sentetik fixture yaz**
-Elle olusturulmus sahte fatura verisiyle FinansalHesap calistir. Avantaj: beklemeden test katmani eklenir. Dezavantaj: Sahte veri gercek uretim verisiyle farkli dagilim gosTerir — agirlikli yanlis guven saglar. Reddedildi.
+Elle olusturulmus sahte fatura verisiyle FinansalHesap calistir. Avantaj: beklemeden test katmani eklenir. Dezavantaj: Sahte veri gercek uretim verisiyle farkli dagilim gosterir — agirlikli yanlis guven saglar. Reddedildi.
+
+**Alternatif C: Sentetik fatura verisiyle FinansalHesap regresyon testi**
+Bilerek basitlestirilmis, el ile dogrulanmis sentetik veriyle temel hesaplama dogruluğu testi. Avantaj: MCP'ye bagimli degil, regresyon yakalar. Dezavantaj: Gercek veri dagilimini yansitmaz. **Degerlendiriliyor** — Katman 3'un ilk adimi olabilir.
 
 **Alternatif B: E2E test framework kur (LangSmith, Braintrust)**
 LLM ciktilarini degerlendirecek bir framework entegre et. Avantaj: Katman 4 test edilir. Dezavantaj: Kit'in dis bagimlilik politikasini bozar (ADR-0005), maliyetli, tek kullanici icin overengineering. Reddedildi.

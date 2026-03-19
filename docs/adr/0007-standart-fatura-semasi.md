@@ -60,6 +60,8 @@ acik ──→ iptal       (fatura iptal)
 | Musteri konsantrasyonu | yon=alacak, firma_id, toplam |
 | KDV donem ozeti | kdv_tutar, fatura_tarihi, yon |
 | DPO (veri varsa) | yon=borc, fatura_tarihi, odeme_tarihi, toplam |
+| CCC dashboard | DSO + DPO + aging + tahsilat birlesik rapor |
+| Fatura uyarilari | vade_tarihi, fatura_tarihi, yon, durum, toplam, odeme_tutari |
 
 ### Kit sinirinda kalan metrikler (ayri veri gerekir)
 - Brut kar: maliyet verisi (ERP)
@@ -77,7 +79,7 @@ acik ──→ iptal       (fatura iptal)
 
 ## Sonuc
 - Kit'in hesaplama motorlari tek bir veri sozlesmesine baglanir, ERP bagimliligi sifir
-- 7 metrik (aging, DSO, tahsilat, trend, konsantrasyon, KDV, DPO) bu sema ile hesaplanabilir
+- 9 metrik (aging, DSO, DPO, tahsilat, trend, konsantrasyon, KDV, CCC, fatura uyarilari) bu sema ile hesaplanabilir
 - Farkli ERP kullanan firmalar ayni kit'i kullanabilir — sadece MCP adaptorleri farkli
 - Trade-off: MCP adaptorleri normalize etme yukunu tasir; her yeni ERP icin bir adaptor yazilmali
 - Trade-off: Kismi odeme ve coklu doviz destegi semayi biraz karistiriyor, ama gercek hayat boyle

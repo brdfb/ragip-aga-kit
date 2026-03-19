@@ -21,4 +21,4 @@ Orchestrator + sub-agent mimarisine gecildi. Baslangicta 3, ADR-0006 ile 4 sub-a
 - Model maliyeti ~%40 azaldi (haiku sub-agent'lar ucuz)
 - Her sub-agent kendi kontekstinde calisir, prompt uzunlugu kisaldi
 - Yeni skill eklemek icin sadece ilgili sub-agent'a atama yeterli
-- Trade-off: Dispatch overhead (orchestrator -> sub-agent arasi Task call)
+- Trade-off: Dispatch overhead (orchestrator -> sub-agent arasi Agent call)

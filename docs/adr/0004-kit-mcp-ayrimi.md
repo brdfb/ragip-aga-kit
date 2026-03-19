@@ -1,6 +1,6 @@
 # ADR-0004: Kit vs MCP Ayrimi
 Tarih: 2025-02-22
-Durum: Guncellendi — 2026-03-19 (MCP katmani netlesti)
+Durum: Guncellendi — 2026-03-20 (semantic tool zorunlulugu + MCP katmani netlesti)
 
 ## Baglam
 Kit, Parasut (ERP) ve Dynamics 365 Sales (CRM) kullanan bir ortamda calisacak. Soru: veri erisimi kit'in icinde mi olmali, disinda mi?
@@ -11,7 +11,7 @@ Uc katmanli ayrim:
 - **MCP server'lar = veri + ERP-aware normalizasyon katmani.** Kit'in parcasi degil. Ayri repo'larda gelistirilir.
   - D365 Sales MCP: Custom FastMCP server (ragip_dataverse_mcp.py)
   - Parasut MCP: Gerekirse ayri repo olarak yazilacak
-  - **DTO katmani:** ERP-specific normalizasyon (brut/net duzeltme, doviz cevrimi, kismi odeme, durum mapping) MCP repo'sunda yasaR, kit'te degil.
+  - **DTO katmani:** ERP-specific normalizasyon (brut/net duzeltme, doviz cevrimi, kismi odeme, durum mapping) MCP repo'sunda yasar, kit'te degil.
 - **Hedef repo = bulusma noktasi.** install.sh ile kit kurulur, MCP config eklenir.
 
 Akis: ERP/CRM -> MCP server (ham veri) -> DTO (normalizasyon) -> faturalar.jsonl (ADR-0007) -> validate_fatura() (kit) -> FinansalHesap (kit) -> sonuc
