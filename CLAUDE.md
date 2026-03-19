@@ -48,6 +48,8 @@ Detayli kurallar `.claude/rules/` altinda:
 - `portability.md` — Path cozumleme, standalone moduller
 - `update-mechanism.md` — Manifest mantigi, uclu checksum, kullanici koruma
 - `data-schema.md` — Firma tip alani, jsonl/json yapilari, ortam degiskenleri
+- `commit-checklist.md` — Commit ve release kontrol listesi
+- `conventions.md` — Genel konvansiyonlar, hardcode yasagi, ADR/FEATURE_IDEAS politikasi
 
 ## Mimari Kararlar
 
@@ -73,29 +75,10 @@ Testler kit kaynagi (`agents/`) veya kurulu repo (`.claude/agents/`) otomatik te
 - MCP tool gorunurlugu: Agent, MCP tool gorunce system prompt talimatini atlayabiliyor — prosedurel skill'lerde `disable-model-invocation` ile korunuyor.
 - Persona ve domain knowledge: Ragip Aga system prompt ile tanimlanan bir persona. Model bilgisinin otesinde ozel domain knowledge saglamiyor. Kit'in gercek degeri: dogru yonlendirme + FinansalHesap hesaplama motoru + ERP-agnostik veri duzeni (ADR-0007).
 
-## Commit Kurali (ZORUNLU)
+## Commit & Release Kurallari
 
-Kod veya prompt degisikligi yapan HER commit'te asagidaki kontrolleri yap:
-
-1. VERSION bump gerekiyor mu? (fix/prompt → patch, feat → minor)
-2. config/ragip_aga.yaml version eslesme
-3. RAGIP_AGA_CHANGELOG.md yeni giris
-4. README.md: test sayisi, tablo sayilari guncel mi
-5. CLAUDE.md: test dosya listesi guncel mi
-6. install.sh: agent/skill sayilari guncel mi
-7. docs/FEATURE_IDEAS.md: eski sayilar var mi
-
-Bu kontrolleri AYRI commit olarak DEGIL, ayni commit icinde yap.
-Sadece docs-only degisikliklerde (ADR, FEATURE_IDEAS) versiyon bump gerekmez.
-
-## Release Checklist
-
-- Yukaridaki commit kontrolleri tamam mi
-- Testleri calistir
-- Tag olustur, push, `gh release create`
+Detaylar `.claude/rules/commit-checklist.md` altinda.
 
 ## Genel Kurallar
 
-- Sayilari hardcode etme — source'tan oku (`cat VERSION`, `pytest tests/ -v`)
-- Yeni mimari karar → ADR yaz (`docs/adr/`)
-- Gelecek degerlendirme / YAGNI maddeleri → `docs/FEATURE_IDEAS.md`
+Detaylar `.claude/rules/conventions.md` altinda.

@@ -1,6 +1,6 @@
 # Ragip Aga Kit — Proje Genel Bakis
 
-**Versiyon:** 2.8.9 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+**Versiyon:** 2.8.10 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
 
 ---
 

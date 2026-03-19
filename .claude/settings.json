@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(git:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(bash:*)",
+      "Bash(source:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(chmod +x:*)",
+      "Bash(pip install -r requirements.txt)"
+    ]
+  }
+}

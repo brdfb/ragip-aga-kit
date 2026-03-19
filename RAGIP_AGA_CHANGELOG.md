@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.10] - 2026-03-20
+
+### Changed — .claude/ Best Practice Refactoring
+
+- **`.claude/settings.json`**: Paylasilan izinler ayrildi (settings.local.json kisisel kaldi, gitignore'a alindi)
+- **`.claude/rules/commit-checklist.md`**: CLAUDE.md'den commit/release kontrol listesi tasindi (always-loaded rule)
+- **`.claude/rules/conventions.md`**: CLAUDE.md'den genel konvansiyonlar tasindi (always-loaded rule)
+- **`CLAUDE.md`**: Tasnan bolumler yerine rules referanslari, 101 → 84 satir
+
+---
+
 ## [2.8.9] - 2026-03-19
 
 ### Added — Data Quality Contract (ADR-0007 Validasyon)

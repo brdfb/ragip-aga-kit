@@ -5,3 +5,4 @@ __pycache__/
 scripts/.ragip_cache/
 data/RAGIP_AGA/
 *.kullanici-yedek*
+.claude/settings.local.json
