@@ -6,6 +6,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.8] - 2026-03-19
+
+### Fixed — Orchestrator Dispatch: Task tool → Agent tool
+
+- **agents/ragip-aga.md**: "Task tool" → "Agent tool" (8 occurrence) — araç adı ilk committe yanlış yazılmıştı, hiç test edilmemişti
+- **agents/ragip-aga.md**: subagent_type invocation formatı düzeltildi — `subagent_type: "ragip-X", prompt: [görev]`
+- **tests/e2e_ragip_scenario/SENARYO_VE_TEST_REHBERI.md**: "Task tool" → "Agent tool"
+
+### Added — Hybrid Orchestrator + Dispatch Rules
+
+- **config/ragip_dispatch.md**: Hedef repoya kurulan routing dosyası (YENİ) — Senaryo B (ana session direkt dispatch) için
+- **install.sh**: `.claude/rules/ragip_dispatch.md` kurulumu eklendi
+- **.claude/rules/architecture.md**: "Dispatch Kuralları" bölümü eklendi — routing tablosu + Senaryo A/B açıklaması
+- **docs/adr/0009-hybrid-orchestrator.md**: Nested spawn bulgusu, Senaryo A/B kararı dokümante edildi
+- **tests/test_ragip_subagents.py**: `TestOrchestratorDispatch` — 5 yeni test:
+  - `test_no_task_tool_in_orchestrator`: "Task tool" kalmadığını doğrula
+  - `test_agent_tool_dispatch_in_orchestrator`: "Agent tool" varlığını doğrula
+  - `test_subagent_type_format_in_orchestrator`: Her sub-agent için subagent_type formatını doğrula
+  - `test_dispatch_file_exists`: config/ragip_dispatch.md varlığını doğrula
+  - `test_dispatch_file_has_routing_table`: Routing tablosu içeriğini doğrula
+- Toplam test: 264 → 269
+
+---
+
 ## [2.8.7] - 2026-03-19
 
 ### Added — Test Coverage: ragip_temizle.sh

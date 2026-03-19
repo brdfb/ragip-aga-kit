@@ -153,7 +153,7 @@ Microsoft --> Yildiz Dagitim (Indirect Provider) --> Orka Teknoloji (Bayi/Son Ku
 
 **Mimari:** ragip-aga (orchestrator) → 3 sub-agent (ragip-hesap, ragip-arastirma, ragip-veri)
 
-Her adimda ragip-aga orchestrator ilgili sub-agent'a Task tool ile yonlendirir.
+Her adimda ragip-aga orchestrator ilgili sub-agent'a Agent tool ile yonlendirir.
 Dogrudan skill cagirmak yerine dogal dil kullanilir.
 
 ### FAZ 1: VERI TOPLAMA (PARALEL)

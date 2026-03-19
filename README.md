@@ -120,7 +120,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (264 test)
+# Tam suite (269 test)
 python -m pytest tests/ -v
 
 # Dosya bazli

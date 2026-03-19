@@ -894,3 +894,51 @@ class TestBashBlocks:
         firma_skill = SKILLS_DIR / "ragip-firma" / "SKILL.md"
         text = firma_skill.read_text(encoding="utf-8")
         assert "VALID_TIP" in text, "Firma ekle komutunda tip validasyonu eksik"
+
+
+# --- Test: Orchestrator Dispatch (Agent tool) ---
+
+
+class TestOrchestratorDispatch:
+    """ragip-aga.md dogru dispatch terminolojisini kullanmali"""
+
+    def test_no_task_tool_in_orchestrator(self):
+        """ragip-aga.md'de 'Task tool' referansi olmamali — dogru adi 'Agent tool'"""
+        text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
+        assert "Task tool" not in text, (
+            "ragip-aga.md'de 'Task tool' referansi bulundu — 'Agent tool' kullanilmali"
+        )
+
+    def test_agent_tool_dispatch_in_orchestrator(self):
+        """ragip-aga.md'de Agent tool ile dispatch talimati olmali"""
+        text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
+        assert "Agent tool" in text, (
+            "ragip-aga.md'de 'Agent tool' referansi bulunamadi"
+        )
+
+    def test_subagent_type_format_in_orchestrator(self):
+        """ragip-aga.md her sub-agent icin subagent_type belirtmeli"""
+        text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
+        for agent in ["ragip-hesap", "ragip-arastirma", "ragip-hukuk", "ragip-veri"]:
+            assert f'subagent_type: "{agent}"' in text, (
+                f"ragip-aga.md'de subagent_type: \"{agent}\" bulunamadi"
+            )
+
+    def test_dispatch_file_exists(self):
+        """config/ragip_dispatch.md hedef repo kurulumu icin mevcut olmali"""
+        # Kit kaynak dizininde ara
+        kit_root = _REPO_ROOT if (_REPO_ROOT / "agents").is_dir() else _REPO_ROOT
+        dispatch_file = kit_root / "config" / "ragip_dispatch.md"
+        assert dispatch_file.exists(), (
+            "config/ragip_dispatch.md bulunamadi — install.sh bu dosyayi hedef repoya kopyalar"
+        )
+
+    def test_dispatch_file_has_routing_table(self):
+        """ragip_dispatch.md routing tablosunu icermeli"""
+        kit_root = _REPO_ROOT if (_REPO_ROOT / "agents").is_dir() else _REPO_ROOT
+        dispatch_file = kit_root / "config" / "ragip_dispatch.md"
+        if not dispatch_file.exists():
+            pytest.skip("ragip_dispatch.md bulunamadi")
+        text = dispatch_file.read_text(encoding="utf-8")
+        for agent in ["ragip-hesap", "ragip-arastirma", "ragip-hukuk", "ragip-veri"]:
+            assert agent in text, f"ragip_dispatch.md'de {agent} referansi eksik"

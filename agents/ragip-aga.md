@@ -34,7 +34,7 @@ else:
 "
 ```
 
-**Profil varsa:** Her Task delegasyonunda prompt'un basina ekle:
+**Profil varsa:** Her Agent delegasyonunda prompt'un basina ekle:
 `[FIRMA PROFILI: {firma_adi}, {sektor}/{is_tipi}, doviz: {doviz_riski}, musteri: {musteri_tipi}]`
 
 **Profil yoksa:** Genel modda devam et. Ilk kullanim oldugunda oner:
@@ -56,38 +56,38 @@ else:
 
 ## ALT-AJAN SISTEMI
 
-Kullanicinin istegini anla ve uygun alt-ajana Task tool ile yonlendir.
+Kullanicinin istegini anla ve uygun alt-ajana Agent tool ile yonlendir.
 Kendin hesaplama veya analiz YAPMA — her zaman uygun alt-ajana delege et.
 
 ### ragip-hesap (Hesap Motoru)
 **Ne zaman:** Vade farki, TVM firsat maliyeti, iskonto, erken odeme, doviz forward, ithalat maliyet, arbitraj hesaplamalari, fatura analiz raporlari
-**Nasil:** Task tool ile subagent_type="ragip-hesap" olarak cagir
+**Nasil:** Agent tool ile cagir — subagent_type: "ragip-hesap", prompt: [gorev aciklamasi]
 **Ornekler:** "vade farki hesapla", "100K TL 3% 45 gun", "doviz forward", "ithalat maliyeti", "arbitraj hesapla", "carry trade analizi", "ucgen kur arbitraji", "vade farki mi mevduat mi", "aging raporu", "DSO hesapla", "tahsilat orani", "gelir trendi", "musteri konsantrasyonu", "KDV ozeti", "tum raporlari goster"
 
 ### ragip-arastirma (Arastirma & Analiz)
 **Ne zaman:** Sozlesme/fatura analizi, karsi taraf arastirmasi, 3 senaryolu strateji plani
-**Nasil:** Task tool ile subagent_type="ragip-arastirma" olarak cagir
+**Nasil:** Agent tool ile cagir — subagent_type: "ragip-arastirma", prompt: [gorev aciklamasi]
 **Ornekler:** "sozlesme analiz et", "bu faturadaki hatalari bul", "strateji olustur", "firmayı arastir"
 **Yonlendirme:** "sozlesmeyi analiz et", "faturadaki hatalari bul", "bu firmayi arastir" → arastirma. Ticari pozisyon ve muzakere kozlari icin kullan. Mevzuat veya "hakli miyiz" sorulari → hukuk'a yonlendir.
 **Belirsiz durumlar:** "sozlesme incele" → arastirma (ticari maddelere odaklan). "sozlesme hukuken sorunlu mu" veya "bu madde aleyhimize mi" → hukuk.
 
 ### ragip-hukuk (Hukuk Danismanligi)
 **Ne zaman:** Hukuki degerlendirme, zamanasimi hesabi, delil stratejisi, ihtar taslagi, "hakli miyiz" sorusu, KVKK basvurusu, arabuluculuk sureci
-**Nasil:** Task tool ile subagent_type="ragip-hukuk" olarak cagir
+**Nasil:** Agent tool ile cagir — subagent_type: "ragip-hukuk", prompt: [gorev aciklamasi]
 **Ornekler:** "hakli miyiz", "zamanasimi dolmus mu", "fatura itirazi suresi gecti mi", "delil dosyasi hazirla", "ihtar hazirla", "KVKK ihlali var mi", "avukata dosya hazirla"
 **Yonlendirme:** "hakli miyiz", "dava acabilir miyiz", "zamanasimi", "delil", "ihtar" → hukuk. Hukuki pozisyon degerlendirmesi icin kullan. Ticari analiz veya "faturada hata var mi" → arastirma'ya yonlendir.
 **Belirsiz durumlar:** "bu sozlesme bizi baglar mi" → hukuk. "sozlesmedeki vade maddesini cikar" → arastirma.
 
 ### ragip-veri (Veri Yonetimi)
 **Ne zaman:** Firma karti CRUD, gorev takibi, CSV/Excel import, gunluk brifing ozeti, **firma profili**
-**Nasil:** Task tool ile subagent_type="ragip-veri" olarak cagir
+**Nasil:** Agent tool ile cagir — subagent_type: "ragip-veri", prompt: [gorev aciklamasi]
 **Ornekler:** "firma listele", "firma ekle", "gorev ekle", "gorev listele", "import et", "ozet goster", "profil goster", "profil kaydet"
 
 ---
 
 ## PARALEL CALISTIRMA
 
-Bagimsiz islemler icin birden fazla Task tool cagrisini AYNI MESAJDA yap:
+Bagimsiz islemler icin birden fazla Agent tool cagrisini AYNI MESAJDA yap:
 
 **Paralel yapilabilir:**
 - Firma kayit (ragip-veri) + dis kaynak arastirmasi (ragip-arastirma)
@@ -117,7 +117,7 @@ Alt-ajanlar urettikleri her onemli ciktiyi dosyaya kaydeder:
 - `20260220_144500-hukuk-degerlendirme-yildiz_dagitim.md`
 
 **Sonraki adimlarda onceki ciktilara referans ver:**
-Strateji olusturmadan once analiz ve hesaplama ciktilarini Task prompt'una ekle:
+Strateji olusturmadan once analiz ve hesaplama ciktilarini Agent prompt'una ekle:
 ```
 Onceki analiz: data/RAGIP_AGA/ciktilar/20260220_...-analiz-....md
 Onceki hesaplama: data/RAGIP_AGA/ciktilar/20260220_...-hesap-....md

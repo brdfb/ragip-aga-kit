@@ -88,6 +88,11 @@ info "Konfigurasyon kopyalaniyor..."
 mkdir -p "$HEDEF/config"
 cp "$SCRIPT_DIR"/config/ragip_aga.yaml "$HEDEF/config/"
 
+# 4b. Dispatch kuralları (.claude/rules/)
+info "Dispatch kurallari kopyalaniyor..."
+mkdir -p "$HEDEF/.claude/rules"
+cp "$SCRIPT_DIR/config/ragip_dispatch.md" "$HEDEF/.claude/rules/ragip_dispatch.md"
+
 # 5. Tests (opsiyonel)
 if [ -d "$SCRIPT_DIR/tests" ]; then
     info "Test dosyalari kopyalaniyor..."
@@ -224,6 +229,7 @@ echo "  Agents:  5  (.claude/agents/ragip-*.md)"
 echo "  Skills:  15 (.claude/skills/ragip-*/SKILL.md)"
 echo "  Scripts: 5  (scripts/ragip_*.py + ragip_get_rates.sh + ragip_temizle.sh)"
 echo "  Config:  1  (config/ragip_aga.yaml)"
+echo "  Rules:   1  (.claude/rules/ragip_dispatch.md)"
 echo ""
 echo "Kullanim:"
 echo "  /ragip-firma listele          — Firma kartlari"

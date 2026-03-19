@@ -18,3 +18,20 @@ Tool kisitlama (Principle of Least Privilege):
 - ragip-aga, ragip-hesap, ragip-veri: disallowedTools frontmatter ile WebSearch+WebFetch engellendi (mimari seviye)
 - ragip-arastirma, ragip-hukuk: WebSearch bazi skill'lerde gerekli (dis-veri, degerlendirme) — prompt kisitlamasi devam eder
 - Test: TestOrchestrator.test_no_websearch, TestSubAgentHesap.test_no_websearch, TestSubAgentVeri.test_no_websearch
+
+## Dispatch Kurallari
+
+| Kullanici istegi | Sub-agent |
+|-----------------|-----------|
+| Hesaplama, vade farki, TVM, arbitraj, rapor | ragip-hesap |
+| Sozlesme/fatura analizi, arastirma, strateji | ragip-arastirma |
+| Hukuki degerlendirme, zamanasimi, delil, ihtar | ragip-hukuk |
+| Firma CRUD, gorev, import, ozet, profil | ragip-veri |
+
+Cagri formati (Agent tool):
+  subagent_type: "ragip-X"
+  prompt: [gorev aciklamasi + varsa firma profili]
+
+Senaryo A (cok adimli is): `claude --agent ragip-aga` — ragip-aga Level 0 olarak 4 sub-agent'i dispatch eder.
+Senaryo B (hizli/gelistirme): Ana session dogrudan sub-agent spawn eder — ayni routing tablosu gecerli.
+Not: ragip-aga sub-agent olarak spawn edilirse (Level 1), Agent tool ile baska sub-agent spawn etmesi guvenilmez (ADR-0009).

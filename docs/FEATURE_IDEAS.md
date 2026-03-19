@@ -154,6 +154,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 - **Katman 4 (e2e LLM):** Orchestrator'un dogru agent'a yonlendirmesi, skill ciktisi kalitesi. Non-deterministic + maliyetli — bilerek kapsam disi. ADR-0008.
 
 **Not (v2.8.7):** ragip_temizle.sh icin Katman 2 testi yazildi (20 test, test_ragip_temizle.py). Toplam 264 test.
+**Not (v2.8.8):** TestOrchestratorDispatch eklendi (5 test) — Task tool → Agent tool dogrulamasi. Toplam 269 test.
 
 **Degerlendirme zamani:** MCP entegrasyonu tamamlaninca Katman 3 yazilir. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
 
