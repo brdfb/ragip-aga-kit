@@ -99,7 +99,7 @@ Yeni ERP eklemek = yeni MCP adaptor yazmak. Kit'e dokunulmaz.
 | ADR (mimari karar) | 9 |
 | Dis bagimlilik | 4 (pdfplumber, pandas, openpyxl, pyyaml) |
 | TCMB entegrasyonu | EVDS3 + CollectAPI, 4 saat cache, 3 katman fallback |
-| Kurulum | `bash install.sh` — hedef repoya 31 dosya kopyalar |
+| Kurulum | `bash install.sh` — hedef repoya 33 dosya kopyalar |
 | Guncelleme | `bash update.sh` — uclu checksum, kullanici degisikliklerini korur |
 | Portability | Tum path'ler `git rev-parse --show-toplevel`, hardcoded path yok |
 

@@ -4,7 +4,7 @@ Durum: Kabul edildi
 
 ## Baglam
 
-Kit'te 244 test var. Bu sayi guvenilir bir test altyapisi izlenimi verebilir. Ancak testlerin buyuk cogunlugu structural dogrulama yapiyor:
+Kit'te 290 test var (v2.8.9). Bu sayi guvenilir bir test altyapisi izlenimi verebilir. Ancak testlerin buyuk cogunlugu structural dogrulama yapiyor:
 
 - Frontmatter alanlari dogru mu? (name, model, maxTurns, skills, disallowedTools)
 - Dosyalar dogru yerde mi?
@@ -31,7 +31,7 @@ Davranissal / e2e testler (Katman 3-4) MCP veri akisi baslayana kadar out-of-sco
 
 | Katman | Tip | Durum | Araç |
 |--------|-----|-------|------|
-| 1 | Structural — frontmatter, dosya, port., versiyon | Mevcut (244 test) | pytest |
+| 1 | Structural — frontmatter, dosya, port., versiyon | Mevcut (290 test) | pytest |
 | 2 | Unit — FinansalHesap, CRUD, rates | Mevcut (~80 test) | pytest |
 | 3 | Integration — gercek fatura akisi ile hesaplama dogrulugu | **Eksik — MCP sonrasi** | pytest + fixture |
 | 4 | E2E — LLM routing, skill ciktisi kalitesi | **Kapsam disi** | — |
@@ -50,7 +50,7 @@ Pratik alternatif: Bir senaryo seti elle calistirilip sonuclar incelenir (golden
 
 ### Mevcut durumun sonucu
 
-"244 test geciyor" ifadesi dogruydu: **structural butunluk saglamlidir.** Ama "kit dogru cevap veriyor mu?" sorusu test edilmemistir ve bu bilerek kabul edilmis bir trade-off.
+"290 test geciyor" ifadesi dogruydu: **structural butunluk saglamlidir.** Ama "kit dogru cevap veriyor mu?" sorusu test edilmemistir ve bu bilerek kabul edilmis bir trade-off.
 
 ## Alternativler
 

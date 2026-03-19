@@ -58,7 +58,7 @@ Detayli kurallar `.claude/rules/` altinda:
 - **`scripts/ragip_aga.py`**: CLI + `FinansalHesap` sinifi. `FALLBACK_RATES`'i ragip_rates.py'den import eder.
 - **`scripts/ragip_rates.py`**: TCMB EVDS3 + CollectAPI. Standalone, stdlib only, 4 saat cache TTL.
 - **`scripts/ragip_get_rates.sh`**: Skill'ler icin TCMB oran helper. Fallback: API -> cache -> FALLBACK_RATES.
-- **`scripts/ragip_crud.py`**: CRUD skill'leri icin paylasimli helper (get_root, load/save, parse_kv, atomic_write).
+- **`scripts/ragip_crud.py`**: CRUD skill'leri icin paylasimli helper (get_root, load/save, parse_kv, atomic_write) + ADR-0007 sema dogrulamasi (validate_fatura, validate_faturalar).
 
 ## Test Yapisi
 

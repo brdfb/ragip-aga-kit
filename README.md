@@ -36,7 +36,7 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 31 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 33 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
 
 ## Ne Kuruluyor
 
@@ -117,7 +117,7 @@ ragip-aga (orchestrator, sonnet)
 ### Paylasimli Yardimci Moduller (v2.5.0)
 
 - **`scripts/ragip_get_rates.sh`** — TCMB oranlarini cekmek icin tek kaynak. Fallback zinciri: canli API → cache → FALLBACK_RATES. Tum oran kullanan skill'ler (vade-farki, arbitraj, strateji) bu helper'i cagirir.
-- **`scripts/ragip_crud.py`** — CRUD skill'leri (firma, gorev, profil) icin paylasimli yardimci modul. `load/save_jsonl`, `load/save_json`, `parse_kv`, `atomic_write`, `next_id` fonksiyonlari.
+- **`scripts/ragip_crud.py`** — CRUD skill'leri icin paylasimli yardimci modul. `load/save_jsonl`, `load/save_json`, `parse_kv`, `atomic_write`, `next_id` + ADR-0007 sema dogrulamasi (`validate_fatura`, `validate_faturalar`).
 
 ## Test
 
