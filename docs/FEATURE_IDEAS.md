@@ -180,6 +180,26 @@ v2.8.6'da 4 sub-agent'a "elindeki sonuclari ozetle ve eksik kalanlari belirt" ta
 
 **Oncelik:** Degismedi — skill'ler bounded scope, pratik etki minimal. KISMI SONUC talimati zarar vermez, genel davranis iyilestirici olarak kalabilir ama "graceful degradation sagladi" iddiasi dogruluk disi.
 
+### I8. Senaryo A (ragip-aga Dedicated Session) Guvenilirligi
+
+ragip-aga'nin `claude --agent ragip-aga` ile Level 0 olarak dispatch yapması teorik olarak destekleniyor (Level 0 → Level 1 nesting). Ancak iki ayrı framework sınırı var:
+
+**Sinir 1 — Auto-delegation guvenilmez:**
+Sonnet gorevi dispatch etmek yerine kendisi yapmayı tercih ediyor.
+GitHub Issue #18352 (kapali, "Not Planned"): Forced delegation mekanizmasi istegi reddedildi.
+Duplicate'ler: #7475, #16373, #5915 — Anthropic'in roadmap'inde degil.
+
+**Sinir 2 — @mention CLI'da calışmıyor:**
+Interaktif @mention tek güvenilir forced dispatch mekanizması ama sadece UI'da geçerli.
+`claude --agent ragip-aga -p "@ragip-arastirma ..."` → çalışmaz.
+
+**Mevcut durum (v2.8.8):** Senaryo B (ana session direkt dispatch) onaylanmış ve güvenilir.
+Senaryo A deneysel, auto-delegation sınırı nedeniyle üretim için önerilmez.
+
+**Degerlendirme zamani:** Anthropic forced delegation API açarsa veya @mention CLI desteği gelirse. ADR-0009.
+
+---
+
 ### I7. Uretim Hazirlik Kriterleri
 
 Kit su an prototype asama: mimari saglam, hesaplama motoru yazilmis, test altyapisi kurulu. Ama uretim hazir degil:
