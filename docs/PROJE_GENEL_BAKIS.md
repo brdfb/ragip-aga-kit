@@ -72,6 +72,8 @@ Yeni ERP eklemek = yeni MCP adaptor yazmak. Kit'e dokunulmaz.
 
 **Standart sema** (ADR-0007): `faturalar.jsonl` — 15 alan, ISO 8601 tarih, ISO 4217 para birimi, alacak/borc yonu, kismi odeme destegi.
 
+**Veri kalitesi sozlesmesi** (v2.8.9): `validate_fatura()` — MCP'den gelen her kayit ADR-0007 semasina karsi dogrulanir. Hatali kayitlar uyari ile atlanir, gecerli kayitlarla hesaplama devam eder. Zorunlu alan, tip, enum, tarih formati, kismi odeme tutarliligi kontrolleri.
+
 ### 4. Hukuki Danismanlik Modulu
 
 4 skill, TBK/TTK/IIK/KVKK/HMK referansli:
@@ -152,7 +154,7 @@ Kit: ragip-degerlendirme → TTK m.21/2 kapsaminda itiraz suresi analizi
 | 0001 | Sub-Agent Mimarisi | Orchestrator + 4 sub-agent, skill izolasyonu |
 | 0002 | Version-Manifest-Update | SHA-256 checksum ile guncelleme |
 | 0003 | Manifest Kit Hash | Kullanici degisikliklerini koruma |
-| 0004 | Kit vs MCP Ayrimi | Kit = zeka, MCP = veri, hedef repo = bulusma noktasi |
+| 0004 | Kit vs MCP Ayrimi | Kit = zeka + validasyon, MCP = veri + ERP-aware normalizasyon |
 | 0005 | DRY Helpers | ragip_get_rates.sh + ragip_crud.py |
 | 0006 | Hukuk Sub-Agent | ragip-hukuk + 4 skill |
 | 0007 | Standart Fatura Semasi | ERP-agnostik veri sozlesmesi |
@@ -173,7 +175,7 @@ ragip-aga-kit/
     ragip_temizle.sh  # Cikti dizini temizleme
   config/             # ragip_aga.yaml + dispatch kuralları
   data/RAGIP_AGA/     # Runtime veri (firmalar, faturalar, gorevler, ciktilar)
-  tests/              # 7 test dosyasi, 269 test
+  tests/              # 7 test dosyasi, 290 test
   docs/               # ADR'ler, FEATURE_IDEAS, bu dokuman
   install.sh          # Hedef repoya kurulum
   update.sh           # Guncelleme (uclu checksum)
@@ -181,12 +183,13 @@ ragip-aga-kit/
 
 ## Sonraki Adimlar
 
-1. **MCP adaptor entegrasyonu** — Parasut ve/veya D365 adaptoru yazilarak kit'in gercek ERP verisiyle calismasi saglanacak
+1. **MCP adaptor entegrasyonu** — Parasut ve/veya D365 adaptoru yazilarak kit'in gercek ERP verisiyle calismasi saglanacak. Rehber: [MCP_ENTEGRASYON_REHBERI.md](MCP_ENTEGRASYON_REHBERI.md)
 2. **Senaryo A guvenilirligi** — Anthropic forced delegation API acarsa ragip-aga dedicated session guvenilir hale gelecek
 3. **CLI modu degerlendirmesi** — ragip_aga.py'nin standalone CLI modu kullanim verisi toplanacak (FEATURE_IDEAS I1)
 
 ---
 
 *Teknik kurulum, test calistirma ve gelistirme ortami icin: [README.md](../README.md)*
+*MCP adaptor yazma rehberi: [MCP_ENTEGRASYON_REHBERI.md](MCP_ENTEGRASYON_REHBERI.md)*
 *Gelecek degerlendirmeleri: [FEATURE_IDEAS.md](FEATURE_IDEAS.md)*
 *Mimari karar detaylari: [docs/adr/](adr/)*
