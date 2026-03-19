@@ -6,6 +6,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.11] - 2026-03-20
+
+### Fixed — MCP Entegrasyon Hazirlik (Ongorulen Patlama Noktalari)
+
+- **scripts/ragip_aga.py**: `firma_id` karsilastirmasi `str()` ile tip-guvenli yapildi — int/str/GUID hepsi calisiyor (7 metot)
+- **scripts/ragip_aga.py**: `_para_birimi_uyarisi()` helper — farkli para birimleri karisik toplaninca uyari
+- **scripts/ragip_aga.py**: `ccc_dashboard` sonucuna `para_birimi_uyarisi` alani eklendi
+- **scripts/ragip_crud.py**: `validate_fatura()` firma_id tip kontrolu eklendi (int veya str kabul, diger tipler hata)
+- **tests/test_ragip_crud.py**: 3 yeni test (firma_id int/str/gecersiz tip)
+- **tests/test_ragip_fatura_analiz.py**: 4 yeni test (firma_id string filtre, int/str eslesme, para birimi uyari var/yok)
+- Toplam test: 290 → 297
+
+---
+
 ## [2.8.10] - 2026-03-20
 
 ### Changed — .claude/ Best Practice Refactoring

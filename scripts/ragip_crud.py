@@ -128,6 +128,11 @@ def validate_fatura(record):
     if record['durum'] not in _DURUM_DEGERLERI:
         errors.append(f"gecersiz durum: '{record['durum']}' (beklenen: acik|odendi|kismi|iptal)")
 
+    # firma_id tip kontrolü (int veya str kabul, diger tipler hata)
+    fid = record['firma_id']
+    if not isinstance(fid, (int, str)):
+        errors.append(f"firma_id int veya str olmali: {type(fid).__name__}")
+
     # Sayısal alan tip kontrolü
     for alan in ('tutar', 'toplam'):
         val = record[alan]

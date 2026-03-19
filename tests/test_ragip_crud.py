@@ -206,6 +206,19 @@ class TestValidateFatura:
         """int tipi de kabul edilmeli (1000 vs 1000.0)."""
         assert validate_fatura(_gecerli_fatura(tutar=1000, toplam=1200)) == []
 
+    def test_firma_id_int_gecerli(self):
+        """firma_id int kabul edilmeli."""
+        assert validate_fatura(_gecerli_fatura(firma_id=10)) == []
+
+    def test_firma_id_str_gecerli(self):
+        """firma_id string (GUID) kabul edilmeli — D365 gibi ERP'lerden gelir."""
+        assert validate_fatura(_gecerli_fatura(firma_id="a1b2c3d4-e5f6-7890")) == []
+
+    def test_firma_id_gecersiz_tip(self):
+        """firma_id ne int ne str ise hata vermeli."""
+        hatalar = validate_fatura(_gecerli_fatura(firma_id=[10]))
+        assert any("firma_id" in h for h in hatalar)
+
 
 class TestValidateFaturalar:
     """validate_faturalar() — toplu doğrulama."""

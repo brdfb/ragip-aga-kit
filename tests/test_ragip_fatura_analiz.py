@@ -178,6 +178,19 @@ class TestAgingRaporu:
         assert sonuc["fatura_adedi"] == 2
         assert sonuc["toplam_acik_alacak_tl"] == 48000.0
 
+    def test_firma_id_string_filtresi(self):
+        """firma_id string (GUID) olarak verildiginde de filtreleme calismali."""
+        str_faturalar = [dict(f, firma_id=str(f["firma_id"])) for f in FATURALAR]
+        sonuc = FinansalHesap.aging_raporu(str_faturalar, firma_id="10")
+        assert sonuc["fatura_adedi"] == 2
+        assert sonuc["toplam_acik_alacak_tl"] == 48000.0
+
+    def test_firma_id_int_vs_str_eslesme(self):
+        """firma_id=10 (int) ile firma_id="10" (str) ayni sonucu vermeli."""
+        str_faturalar = [dict(f, firma_id=str(f["firma_id"])) for f in FATURALAR]
+        sonuc = FinansalHesap.aging_raporu(str_faturalar, firma_id=10)
+        assert sonuc["fatura_adedi"] == 2
+
 
 class TestDso:
     def test_dso_hesap(self):
@@ -513,6 +526,26 @@ class TestCccDashboard:
         assert "b_31_60" in sonuc["aging"]
         assert "b_61_90" in sonuc["aging"]
         assert "b_90_plus" in sonuc["aging"]
+
+    def test_para_birimi_uyarisi_yok(self):
+        """Tek para birimi (TRY) → uyari yok"""
+        sonuc = FinansalHesap.ccc_dashboard(FATURALAR, donem_gun=90)
+        assert "para_birimi_uyarisi" not in sonuc
+
+    def test_para_birimi_uyarisi_var(self):
+        """Farkli para birimleri karisik → uyari var"""
+        karisik = list(FATURALAR) + [
+            {
+                "id": 99, "fatura_no": "USD-001", "firma_id": 10,
+                "yon": "alacak", "tutar": 1000.0, "toplam": 1200.0,
+                "fatura_tarihi": _gun_once(10), "vade_tarihi": _gun_once(5),
+                "durum": "acik", "para_birimi": "USD",
+            }
+        ]
+        sonuc = FinansalHesap.ccc_dashboard(karisik, donem_gun=90)
+        assert "para_birimi_uyarisi" in sonuc
+        assert "USD" in sonuc["para_birimi_uyarisi"]
+        assert "TRY" in sonuc["para_birimi_uyarisi"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

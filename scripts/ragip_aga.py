@@ -575,6 +575,20 @@ class FinansalHesap:
         return f["toplam"] - (f.get("odeme_tutari") or 0.0)
 
     @staticmethod
+    def _para_birimi_uyarisi(faturalar) -> str | None:
+        """Farkli para birimleri varsa uyari dondur. None = tek para birimi."""
+        birimler = set()
+        for f in faturalar:
+            if f.get("durum") == "iptal":
+                continue
+            birimler.add(f.get("para_birimi", "TRY"))
+        if len(birimler) > 1:
+            return (f"UYARI: Farkli para birimleri karisik toplanıyor: "
+                    f"{', '.join(sorted(birimler))}. "
+                    f"Tutarlar normalize edilmedi.")
+        return None
+
+    @staticmethod
     def aging_raporu(faturalar, bugun=None, firma_id=None):
         """
         Alacak yaslandirma raporu (0-30 / 31-60 / 61-90 / 90+ gun).
@@ -597,7 +611,7 @@ class FinansalHesap:
         fatura_adedi = 0
 
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("yon") != "alacak":
                 continue
@@ -666,7 +680,7 @@ class FinansalHesap:
         acik_alacak = 0.0
 
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("yon") != "alacak":
                 continue
@@ -717,7 +731,7 @@ class FinansalHesap:
         adet = 0
 
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("yon") != "alacak":
                 continue
@@ -764,7 +778,7 @@ class FinansalHesap:
         """
         aylik = {}
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("yon") != "alacak":
                 continue
@@ -873,7 +887,7 @@ class FinansalHesap:
         """
         aylik = {}
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("durum") == "iptal":
                 continue
@@ -945,7 +959,7 @@ class FinansalHesap:
         acik_borc = 0.0
 
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("yon") != "borc":
                 continue
@@ -1003,7 +1017,7 @@ class FinansalHesap:
         else:
             yorum = "Tedarikciler seni finanse ediyor."
 
-        return {
+        sonuc = {
             "firma_id": firma_id if firma_id is not None else "tumu",
             "donem_gun": donem_gun,
             "ccc_gun": ccc,
@@ -1020,6 +1034,10 @@ class FinansalHesap:
             },
             "yorum": yorum,
         }
+        pb_uyari = FinansalHesap._para_birimi_uyarisi(faturalar)
+        if pb_uyari:
+            sonuc["para_birimi_uyarisi"] = pb_uyari
+        return sonuc
 
     @staticmethod
     def fatura_uyarilari(faturalar, bugun=None, firma_id=None):
@@ -1038,7 +1056,7 @@ class FinansalHesap:
         ttk_itiraz = []
 
         for f in faturalar:
-            if firma_id is not None and f.get("firma_id") != firma_id:
+            if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
                 continue
             if f.get("durum") not in ("acik", "kismi"):
                 continue
