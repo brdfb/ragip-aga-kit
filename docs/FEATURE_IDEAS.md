@@ -3,21 +3,11 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-19 (v2.8.9)
+Guncelleme: 2026-03-20 (v2.8.10)
 
 ---
 
 ## A. Aktif Fikirler
-
-### 11. Agent Tool Kisitlama (MCP BAGIMLI)
-
-**Sorun:** Agent, hedef repoda MCP tool gorunde system prompt talimatini atlayip dogrudan MCP'ye yoneliyor.
-
-**Cozum:** Claude Code frontmatter'da `tools:` allowlist. Simdi prompt sertlestirme ile cozuldu (v3) ama yapisal enforcement daha guvenilir.
-
-**Effort:** Kucuk — tek satir frontmatter degisikligi + test
-**Risk:** Dusuk
-**Oncelik:** MCP entegrasyonu cogaldikca artar
 
 ---
 
@@ -230,6 +220,7 @@ MCP entegrasyonu bu kit'in gercek deger testidir. Oncesinde yapilan her iyilesti
 | 8 | Firma Bazli Rapor | v2.7.2 | 6 analiz metodu `firma_id` parametresi aldi |
 | 9 | Fatura Uyari Sistemi | v2.8.0 | `fatura_uyarilari()` — vade gecmis, yaklasan, TTK itiraz |
 | 10 | Nakit Cevrim Dongusu Dashboard | v2.8.1 | `ccc_dashboard()` — DSO + DPO + tahsilat + aging tek cagri |
+| 11 | Agent Tool Kisitlama (MCP) | v2.8.10 | Semantic tool zorunlu + ham tool'lar tum agent'larda disallowedTools ile bloke (MCP rehberi + ADR-0004) |
 | 16 | Sub-Agent Graceful Degradation | v2.8.6 | 4 sub-agent'a kismi sonuc talimatı + orchestrator partial failure bildirimi |
 
 ---

@@ -72,7 +72,7 @@ Testler kit kaynagi (`agents/`) veya kurulu repo (`.claude/agents/`) otomatik te
 - Kit ust orchestrator'e ihtiyac duymaz — tek domain (KOBi finans). Ikinci domain agent dogdugunda degerlendir.
 - Adaptor arayuzu gereksiz — ADR-0007 JSON semasi yeterli sozlesme. MCP tarafinda dto yazilir.
 - Agent tool kisitlama: ragip-aga, ragip-hesap, ragip-veri'de `disallowedTools: [WebSearch, WebFetch]` frontmatter ile mimari seviyede uygulandı. ragip-arastirma ve ragip-hukuk'ta bazi skill'ler WebSearch gerektirdiginden prompt kisitlamasi devam eder.
-- MCP tool gorunurlugu: Agent, MCP tool gorunce system prompt talimatini atlayabiliyor — prosedurel skill'lerde `disable-model-invocation` ile korunuyor.
+- MCP tool gorunurlugu: Agent, MCP tool gorunce system prompt talimatini atlayabiliyor — prosedurel skill'lerde `disable-model-invocation` ile korunuyor. Hedef repoda ham MCP tool'lari TUM agent'larda `disallowedTools` ile bloke edilmeli, yalnizca semantic tool (firma_raporu vb.) acik kalmali (ADR-0004, MCP rehberi).
 - Persona ve domain knowledge: Ragip Aga system prompt ile tanimlanan bir persona. Model bilgisinin otesinde ozel domain knowledge saglamiyor. Kit'in gercek degeri: dogru yonlendirme + FinansalHesap hesaplama motoru + ERP-agnostik veri duzeni (ADR-0007).
 
 ## Commit & Release Kurallari

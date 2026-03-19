@@ -29,11 +29,23 @@ Ilk versiyonda "MCP = saf veri katmani" tanimlandi. Gercek uygulama (D365 MCP) g
 
 **DTO katmani kit'e alinmaz.** Her ERP'nin normalizasyon kurallari farkli — bu is mantigi ERP'ye ozgu. Kit yalnizca ADR-0007 semasini dogrular ve hesaplar.
 
+### Guncelleme: Semantic Tool Zorunlulugu (2026-03-20)
+
+Gercek uygulama (D365 MCP) gosterdi ki agent'lar ham MCP tool'larina (query_records, fatura_listele) dogrudan eristiginde normalize edilmemis veriyi yanlis yorumluyor. Ornekte ham tool 24 acik fatura / $124K raporlarken, normalize semantic tool 2 acik fatura / $20K (gercek) sonuc uretti.
+
+**Karar:** Her MCP adaptorunde semantic tool (orn: `firma_raporu`) ZORUNLU. Ham tool'lar TUM agent'larda `disallowedTools` ile bloke edilmeli — sadece orchestrator'da degil.
+
+**Neden prompt kisitlamasi yetmez:** Agent MCP tool gorunde system prompt talimatini atlayip dogrudan ham tool'u cagiriyor. `disallowedTools` frontmatter ile runtime'da engellenir.
+
+Detay: MCP_ENTEGRASYON_REHBERI.md Adim 3 (Semantic Tool) ve Adim 5 (disallowedTools).
+
 ## Sonuc
 - Kit bagimsiz kalir, herhangi bir veri kaynagi ile calisabilir
 - MCP server'lar bagimsiz gelistirilir/test edilir
 - Kit'e MCP kodu girmez, skill'ler veri kaynagini bilmez
 - Kit sema validasyonu yapar (validate_fatura) — MCP'den gelen verinin ADR-0007'ye uygunlugunu dogrular
 - DTO normalizasyonu (brut/net, doviz, durum mapping) MCP repo'sunda kalir
+- Semantic tool zorunlu — agent'lar ham MCP tool'larina erismemeli
+- Ham MCP tool'lari tum agent'larda disallowedTools ile bloke edilmeli
 - Trade-off: Entegrasyon testi hedef repoda yapilmali (kit'te yapilmaz)
 - Trade-off: DTO katmani her yeni ERP icin yazilmali — kit dokunulmaz, ama MCP+DTO eforu var
