@@ -8,7 +8,8 @@ import pytest
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
-from ragip_crud import parse_kv, load_jsonl, save_jsonl, load_json, save_json, next_id, today
+from ragip_crud import (parse_kv, load_jsonl, save_jsonl, load_json, save_json,
+                        next_id, today, validate_fatura, validate_faturalar)
 
 
 class TestParseKv:
@@ -108,3 +109,131 @@ class TestToday:
         assert len(result) == 10
         assert result[4] == "-"
         assert result[7] == "-"
+
+
+# --- Fatura Validasyon Testleri (ADR-0007) ---
+
+def _gecerli_fatura(**overrides):
+    """Geçerli bir fatura kaydı oluşturur, overrides ile alan değiştirilebilir."""
+    base = {
+        "id": 1, "fatura_no": "FT-001", "firma_id": 10,
+        "yon": "alacak", "tutar": 1000.0, "toplam": 1200.0,
+        "fatura_tarihi": "2026-01-15", "vade_tarihi": "2026-02-15",
+        "durum": "acik"
+    }
+    base.update(overrides)
+    return base
+
+
+class TestValidateFatura:
+    """validate_fatura() — ADR-0007 şema doğrulaması."""
+
+    def test_gecerli_kayit(self):
+        assert validate_fatura(_gecerli_fatura()) == []
+
+    def test_gecerli_tum_alanlar(self):
+        """Tüm opsiyonel alanlar dahil geçerli kayıt."""
+        f = _gecerli_fatura(
+            kdv_oran_pct=20.0, kdv_tutar=200.0, para_birimi="TRY",
+            odeme_tarihi="2026-02-10", odeme_tutari=1200.0,
+            durum="odendi", kategori="hizmet", kaynak="parasut",
+            aciklama="Test faturası"
+        )
+        assert validate_fatura(f) == []
+
+    def test_zorunlu_alan_eksik(self):
+        f = _gecerli_fatura()
+        del f["firma_id"]
+        hatalar = validate_fatura(f)
+        assert any("firma_id" in h for h in hatalar)
+
+    def test_birden_fazla_zorunlu_alan_eksik(self):
+        f = _gecerli_fatura()
+        del f["yon"]
+        del f["durum"]
+        hatalar = validate_fatura(f)
+        assert len(hatalar) >= 2
+
+    def test_gecersiz_yon(self):
+        hatalar = validate_fatura(_gecerli_fatura(yon="gelir"))
+        assert any("yon" in h for h in hatalar)
+
+    def test_gecersiz_durum(self):
+        hatalar = validate_fatura(_gecerli_fatura(durum="beklemede"))
+        assert any("durum" in h for h in hatalar)
+
+    def test_tutar_string_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(tutar="1000"))
+        assert any("tutar" in h and "sayisal" in h for h in hatalar)
+
+    def test_toplam_string_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(toplam="1200"))
+        assert any("toplam" in h and "sayisal" in h for h in hatalar)
+
+    def test_tarih_format_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(fatura_tarihi="15/01/2026"))
+        assert any("fatura_tarihi" in h for h in hatalar)
+
+    def test_vade_tarihi_format_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(vade_tarihi="2026-1-5"))
+        assert any("vade_tarihi" in h for h in hatalar)
+
+    def test_odeme_tutari_string_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(odeme_tutari="500"))
+        assert any("odeme_tutari" in h for h in hatalar)
+
+    def test_odeme_tarihi_format_hatasi(self):
+        hatalar = validate_fatura(_gecerli_fatura(odeme_tarihi="2026/02/10"))
+        assert any("odeme_tarihi" in h for h in hatalar)
+
+    def test_para_birimi_gecersiz(self):
+        hatalar = validate_fatura(_gecerli_fatura(para_birimi="TRYY"))
+        assert any("para_birimi" in h for h in hatalar)
+
+    def test_kismi_odeme_tutari_eksik(self):
+        hatalar = validate_fatura(_gecerli_fatura(durum="kismi"))
+        assert any("kismi" in h and "odeme_tutari" in h for h in hatalar)
+
+    def test_kismi_odeme_tutari_buyuk(self):
+        hatalar = validate_fatura(_gecerli_fatura(durum="kismi", odeme_tutari=1500.0))
+        assert any("kismi" in h and "odeme_tutari" in h for h in hatalar)
+
+    def test_kismi_odeme_dogru(self):
+        f = _gecerli_fatura(durum="kismi", odeme_tutari=600.0)
+        assert validate_fatura(f) == []
+
+    def test_int_tutar_gecerli(self):
+        """int tipi de kabul edilmeli (1000 vs 1000.0)."""
+        assert validate_fatura(_gecerli_fatura(tutar=1000, toplam=1200)) == []
+
+
+class TestValidateFaturalar:
+    """validate_faturalar() — toplu doğrulama."""
+
+    def test_tumu_gecerli(self):
+        kayitlar = [_gecerli_fatura(id=i) for i in range(1, 4)]
+        gecerli, hatali = validate_faturalar(kayitlar)
+        assert len(gecerli) == 3
+        assert len(hatali) == 0
+
+    def test_karisik(self):
+        kayitlar = [
+            _gecerli_fatura(id=1),
+            _gecerli_fatura(id=2, yon="YANLIS"),
+            _gecerli_fatura(id=3),
+        ]
+        gecerli, hatali = validate_faturalar(kayitlar)
+        assert len(gecerli) == 2
+        assert len(hatali) == 1
+        assert "_hatalar" in hatali[0]
+
+    def test_bos_liste(self):
+        gecerli, hatali = validate_faturalar([])
+        assert gecerli == []
+        assert hatali == []
+
+    def test_orijinal_degismez(self):
+        """Orijinal kayıt mutate edilmemeli."""
+        kayit = _gecerli_fatura(yon="HATALI")
+        validate_faturalar([kayit])
+        assert "_hatalar" not in kayit

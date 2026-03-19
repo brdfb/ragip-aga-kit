@@ -38,11 +38,24 @@ python3 -c "
 import sys, os, json
 sys.path.insert(0, os.path.join('$ROOT', 'scripts'))
 from ragip_aga import FinansalHesap
-from ragip_crud import data_path, load_jsonl
+from ragip_crud import data_path, load_jsonl, validate_faturalar
 
 faturalar = load_jsonl(data_path('faturalar.jsonl'))
 if not faturalar:
     print('Fatura verisi bulunamadi. Once /ragip-import ile fatura yukleyin veya MCP adaptoru araciligiyla faturalar.jsonl dosyasini olusturun.')
+    sys.exit(0)
+
+# ADR-0007 sema validasyonu
+faturalar, hatali = validate_faturalar(faturalar)
+if hatali:
+    print(f'UYARI: {len(hatali)} fatura sema hatasi nedeniyle atlanıyor:')
+    for h in hatali[:5]:
+        print(f'  - id={h.get(\"id\",\"?\")} fatura_no={h.get(\"fatura_no\",\"?\")}: {h[\"_hatalar\"][0]}')
+    if len(hatali) > 5:
+        print(f'  ... ve {len(hatali)-5} daha')
+    print()
+if not faturalar:
+    print('Gecerli fatura kaydi bulunamadi. Tum kayitlar sema hatali.')
     sys.exit(0)
 
 tur = '$RAPOR_TUR'

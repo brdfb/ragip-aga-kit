@@ -6,6 +6,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.9] - 2026-03-19
+
+### Added — Data Quality Contract (ADR-0007 Validasyon)
+
+- **scripts/ragip_crud.py**: `validate_fatura()` ve `validate_faturalar()` — ADR-0007 sema dogrulamasi. Zorunlu alan, tip, enum, tarih formati, kismi odeme tutarliligi kontrolleri.
+- **skills/ragip-rapor/SKILL.md**: Rapor uretmeden once sema validasyonu. Hatali kayitlar uyari ile atlanir, gecerli kayitlarla devam eder.
+- **tests/test_ragip_crud.py**: 21 yeni test (TestValidateFatura 17 + TestValidateFaturalar 4). Toplam test: 269 → 290.
+
+### Added — Orchestrator Dispatch Uyarisi
+
+- **agents/ragip-aga.md**: BILINEN SINIRLAR bolumu eklendi — Senaryo A (dedicated session) dispatch sinirlamasi, Senaryo B (ana session) onerilir.
+- **agents/ragip-aga.md**: maxTurns 12 → 16. FIRMA DEGERLENDIRME AKISI + TURN LIMITI bolumleri eklendi.
+
+### Changed — ADR-0004 Guncelleme
+
+- **docs/adr/0004-kit-mcp-ayrimi.md**: "MCP = veri" → "MCP = veri + ERP-aware normalizasyon". DTO katmani, validate_fatura rolleri netlesti.
+
+### Added — MCP Entegrasyon Rehberi
+
+- **docs/MCP_ENTEGRASYON_REHBERI.md**: Yeni ERP/CRM MCP adaptoru yazma rehberi. MCP server, DTO normalizasyonu, validasyon, yapilandirma adimlari.
+
 ## [2.8.8] - 2026-03-19
 
 ### Fixed — Orchestrator Dispatch: Task tool → Agent tool

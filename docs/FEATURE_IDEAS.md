@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-19 (v2.8.6)
+Guncelleme: 2026-03-19 (v2.8.9)
 
 ---
 
@@ -155,6 +155,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 **Not (v2.8.7):** ragip_temizle.sh icin Katman 2 testi yazildi (20 test, test_ragip_temizle.py). Toplam 264 test.
 **Not (v2.8.8):** TestOrchestratorDispatch eklendi (5 test) — Task tool → Agent tool dogrulamasi. Toplam 269 test.
+**Not (v2.8.9):** validate_fatura/validate_faturalar testleri eklendi (21 test). Toplam 290 test.
 
 **Degerlendirme zamani:** MCP entegrasyonu tamamlaninca Katman 3 yazilir. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
 

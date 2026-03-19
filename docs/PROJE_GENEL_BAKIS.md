@@ -1,6 +1,6 @@
 # Ragip Aga Kit — Proje Genel Bakis
 
-**Versiyon:** 2.8.8 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+**Versiyon:** 2.8.9 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
 
 ---
 
@@ -90,7 +90,7 @@ Yeni ERP eklemek = yeni MCP adaptor yazmak. Kit'e dokunulmaz.
 | Ozellik | Deger |
 |---------|-------|
 | Python | 3.12+ |
-| Test | 269 (7 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle) |
+| Test | 290 (7 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle) |
 | Agent | 5 (1 orchestrator + 4 sub-agent) |
 | Skill | 15 (8 prosedurel + 7 LLM) |
 | Hesaplama metodu | 21 |

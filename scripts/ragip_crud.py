@@ -80,3 +80,112 @@ def next_id(records):
 def today():
     """Bugünün tarihini string olarak döndürür."""
     return str(date.today())
+
+
+# --- Fatura Validasyonu (ADR-0007 sema uyumu) ---
+
+_FATURA_ZORUNLU = ('id', 'fatura_no', 'firma_id', 'yon', 'tutar', 'toplam',
+                   'fatura_tarihi', 'vade_tarihi', 'durum')
+_YON_DEGERLERI = ('alacak', 'borc')
+_DURUM_DEGERLERI = ('acik', 'odendi', 'kismi', 'iptal')
+_ISO_DATE_RE = None  # lazy compile
+
+
+def _iso_date_pattern():
+    """ISO 8601 tarih regex'i (YYYY-MM-DD). Lazy compile."""
+    global _ISO_DATE_RE
+    if _ISO_DATE_RE is None:
+        import re
+        _ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    return _ISO_DATE_RE
+
+
+def validate_fatura(record):
+    """Tek fatura kaydını ADR-0007 şemasına göre doğrular.
+
+    Args:
+        record: dict — fatura kaydı
+
+    Returns:
+        list[str] — hata mesajları listesi (boş = geçerli)
+    """
+    errors = []
+
+    # Zorunlu alan kontrolü
+    for alan in _FATURA_ZORUNLU:
+        if alan not in record:
+            errors.append(f"zorunlu alan eksik: {alan}")
+
+    # Erken dönüş — zorunlu alanlar yoksa tip kontrolleri anlamsız
+    if errors:
+        return errors
+
+    # yon enum kontrolü
+    if record['yon'] not in _YON_DEGERLERI:
+        errors.append(f"gecersiz yon: '{record['yon']}' (beklenen: alacak|borc)")
+
+    # durum enum kontrolü
+    if record['durum'] not in _DURUM_DEGERLERI:
+        errors.append(f"gecersiz durum: '{record['durum']}' (beklenen: acik|odendi|kismi|iptal)")
+
+    # Sayısal alan tip kontrolü
+    for alan in ('tutar', 'toplam'):
+        val = record[alan]
+        if not isinstance(val, (int, float)):
+            errors.append(f"{alan} sayisal olmali: {type(val).__name__}")
+
+    # Tarih format kontrolü (ISO 8601)
+    pat = _iso_date_pattern()
+    for alan in ('fatura_tarihi', 'vade_tarihi'):
+        val = record[alan]
+        if not isinstance(val, str) or not pat.match(val):
+            errors.append(f"{alan} ISO 8601 formatta olmali (YYYY-MM-DD): '{val}'")
+
+    # Opsiyonel alan tip kontrolleri
+    if 'odeme_tutari' in record and record['odeme_tutari'] is not None:
+        if not isinstance(record['odeme_tutari'], (int, float)):
+            errors.append(f"odeme_tutari sayisal olmali: {type(record['odeme_tutari']).__name__}")
+
+    if 'odeme_tarihi' in record and record['odeme_tarihi'] is not None:
+        val = record['odeme_tarihi']
+        if not isinstance(val, str) or not pat.match(val):
+            errors.append(f"odeme_tarihi ISO 8601 formatta olmali: '{val}'")
+
+    if 'para_birimi' in record:
+        pb = record['para_birimi']
+        if not isinstance(pb, str) or len(pb) != 3:
+            errors.append(f"para_birimi ISO 4217 (3 harf) olmali: '{pb}'")
+
+    # Kısmi ödeme tutarlılığı
+    if record['durum'] == 'kismi':
+        ot = record.get('odeme_tutari')
+        if ot is None:
+            errors.append("durum=kismi ama odeme_tutari yok")
+        elif isinstance(ot, (int, float)) and isinstance(record['toplam'], (int, float)):
+            if ot >= record['toplam']:
+                errors.append(f"durum=kismi ama odeme_tutari({ot}) >= toplam({record['toplam']})")
+
+    return errors
+
+
+def validate_faturalar(records):
+    """Birden fazla fatura kaydını doğrular.
+
+    Args:
+        records: list[dict] — fatura kayıtları
+
+    Returns:
+        tuple(list[dict], list[dict]) — (gecerli_kayitlar, hatali_kayitlar)
+        Hatalı kayıtlara '_hatalar' anahtarı eklenir.
+    """
+    gecerli = []
+    hatali = []
+    for r in records:
+        hatalar = validate_fatura(r)
+        if hatalar:
+            r_copy = dict(r)
+            r_copy['_hatalar'] = hatalar
+            hatali.append(r_copy)
+        else:
+            gecerli.append(r)
+    return gecerli, hatali
