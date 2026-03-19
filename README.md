@@ -4,6 +4,8 @@ Claude Code icin nakit akisi yonetimi, vade muzakeresi ve sozlesme uyusmazliklar
 
 40 yillik piyasa tecrubesiyle: vade farki hesaplama, TCMB canli oranlar, sozlesme analizi, 3 senaryolu strateji, ihtar taslagi, firma/gorev takibi.
 
+> Proje tanitimi, deger onerisi ve mimari ozet: [docs/PROJE_GENEL_BAKIS.md](docs/PROJE_GENEL_BAKIS.md)
+
 ## Hizli Kurulum
 
 ```bash
