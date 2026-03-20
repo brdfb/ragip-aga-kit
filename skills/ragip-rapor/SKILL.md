@@ -1,7 +1,7 @@
 ---
 name: ragip-rapor
-description: Fatura analiz raporlari — aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti, CCC dashboard
-argument-hint: "[tur: aging|dso|dpo|tahsilat|gelir-trendi|konsantrasyon|kdv|ccc|hepsi] [firma_id=] [donem_gun=90]"
+description: Fatura analiz raporlari — aging, DSO, DPO, tahsilat orani, gelir trendi, musteri konsantrasyonu, KDV donem ozeti, CCC dashboard, nakit projeksiyon, odeme trend
+argument-hint: "[tur: aging|dso|dpo|tahsilat|gelir-trendi|konsantrasyon|kdv|ccc|projeksiyon|trend|hepsi] [firma_id=] [donem_gun=90]"
 allowed-tools: Bash, Read
 disable-model-invocation: true
 ---
@@ -25,6 +25,8 @@ Tur belirtilmemisse `hepsi` olarak calistir.
 | konsantrasyon | musteri_konsantrasyonu | Musteri konsantrasyon riski |
 | kdv | kdv_donem_ozeti | KDV donem ozeti |
 | ccc | ccc_dashboard | Nakit cevrim dongusu (CCC = DSO - DPO) |
+| projeksiyon | nakit_projeksiyon | 30/60/90 gun nakit akis projeksiyonu (haftalik kirilim) |
+| trend | odeme_trend_analizi | Firma bazli odeme gecikme trendi (iyilesme/kotulesme) |
 
 ## Calisma Akisi
 
@@ -80,12 +82,16 @@ def rapor_calistir(tur, faturalar, donem_gun, firma_id):
         return 'KDV DONEM OZETI', FinansalHesap.kdv_donem_ozeti(faturalar, firma_id=firma_id)
     elif tur == 'ccc':
         return 'NAKIT CEVRIM DONGUSU (CCC)', FinansalHesap.ccc_dashboard(faturalar, donem_gun, firma_id=firma_id)
+    elif tur == 'projeksiyon':
+        return 'NAKIT AKIS PROJEKSIYONU', FinansalHesap.nakit_projeksiyon(faturalar, donem_gun, firma_id=firma_id)
+    elif tur == 'trend':
+        return 'ODEME TREND ANALIZI', FinansalHesap.odeme_trend_analizi(faturalar, firma_id=firma_id)
     else:
         print(f'Bilinmeyen rapor turu: {tur}')
-        print('Gecerli turler: aging, dso, dpo, tahsilat, gelir-trendi, konsantrasyon, kdv, ccc, hepsi')
+        print('Gecerli turler: aging, dso, dpo, tahsilat, gelir-trendi, konsantrasyon, kdv, ccc, projeksiyon, trend, hepsi')
         sys.exit(1)
 
-turler = ['aging', 'dso', 'dpo', 'tahsilat', 'gelir-trendi', 'konsantrasyon', 'kdv', 'ccc'] if tur == 'hepsi' else [tur]
+turler = ['aging', 'dso', 'dpo', 'tahsilat', 'gelir-trendi', 'konsantrasyon', 'kdv', 'ccc', 'projeksiyon', 'trend'] if tur == 'hepsi' else [tur]
 
 sonuclar = []
 for t in turler:

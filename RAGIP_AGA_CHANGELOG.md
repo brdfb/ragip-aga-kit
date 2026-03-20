@@ -6,6 +6,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.13] - 2026-03-21
+
+### Added — Nakit Projeksiyon + Cikti Altyapisi (Faz 5)
+
+- **scripts/ragip_aga.py**: `nakit_projeksiyon()` — 30/60/90 gun forward nakit akis projeksiyonu, haftalik kirilim, vadesi gecmis alacak
+- **scripts/ragip_aga.py**: `odeme_trend_analizi()` — firma bazli gecikme trendi (iyilesme/kotulesme tespiti)
+- **scripts/ragip_output.py**: Merkezi cikti yonetimi — firma bazli klasor, YAML frontmatter, manifest.jsonl, slug donusumu
+- **skills/ragip-rapor**: `projeksiyon` ve `trend` rapor turleri eklendi
+- **tests/test_ragip_output.py**: 19 test (slug, frontmatter, kaydet, manifest sorgu)
+- **tests/test_ragip_integration.py**: 11 yeni test (nakit projeksiyon + odeme trend)
+- Toplam test: 327 → 357
+
+### Changed — Agent Dispatch Iyilestirmesi (Faz 5 E2E bulgulari)
+
+- **agents/ragip-aga.md**: Dispatch zorunlulugu guclendirildi — "kendin YAPMA" + neden aciklamasi + "tam analiz" anahtar kelimesi
+- **agents/ragip-aga.md**: Firma degerlendirme akisi 5 adima cikti — Adim 3'te kullaniciya "arastirma/hukuk ister misin?" sorusu
+- **agents/ragip-aga.md**: Onceki cikti referansi ZORUNLU — sub-agent dispatch prompt'una dosya yolu eklenmeli
+- **agents/ragip-arastirma.md, ragip-hesap.md, ragip-hukuk.md**: "Once analiz et, SONRA kaydet" siralama kurali eklendi
+
+---
+
 ## [2.8.12] - 2026-03-20
 
 ### Fixed — DTO Uyumluluk (ragip-workspace)

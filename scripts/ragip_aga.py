@@ -1151,6 +1151,251 @@ class FinansalHesap:
         }
 
 
+    @staticmethod
+    def nakit_projeksiyon(faturalar, donem_gun=30, bugun=None, firma_id=None):
+        """Acik fatura vadelerine dayali nakit akis projeksiyonu.
+
+        Onumuzdeki donem_gun icerisinde vadesi gelecek alacak ve borc faturalarini
+        haftalik kirilimiyla gosterir.
+
+        Args:
+            faturalar: ADR-0007 fatura listesi
+            donem_gun: Projeksiyon donemi (varsayilan: 30 gun)
+            bugun: date veya 'YYYY-MM-DD' str. None ise today().
+            firma_id: None ise tum firmalar.
+
+        Returns:
+            dict: haftalik kirilim, toplam alacak/borc, net pozisyon
+        """
+        from datetime import date as _date, timedelta
+
+        if bugun is None:
+            bugun = _date.today()
+        elif isinstance(bugun, str):
+            bugun = _date.fromisoformat(bugun)
+
+        bitis = bugun + timedelta(days=donem_gun)
+
+        acik = []
+        for f in faturalar:
+            if f.get("durum") in ("iptal", "odendi"):
+                continue
+            if firma_id and str(f.get("firma_id", "")) != str(firma_id):
+                continue
+            try:
+                vade = _date.fromisoformat(f["vade_tarihi"])
+            except (ValueError, KeyError):
+                continue
+            kalan = FinansalHesap._kalan_tutar(f)
+            if kalan <= 0:
+                continue
+            acik.append({
+                "fatura_no": f.get("fatura_no", ""),
+                "firma_id": str(f.get("firma_id", "")),
+                "yon": f.get("yon", "alacak"),
+                "vade": vade,
+                "kalan_tl": kalan,
+            })
+
+        # Haftalik kirilim
+        haftalik = []
+        hafta_baslangic = bugun
+        while hafta_baslangic < bitis:
+            hafta_bitis = min(hafta_baslangic + timedelta(days=7), bitis)
+            alacak_tl = 0.0
+            borc_tl = 0.0
+            fatura_listesi = []
+            for a in acik:
+                if hafta_baslangic <= a["vade"] < hafta_bitis:
+                    if a["yon"] == "alacak":
+                        alacak_tl += a["kalan_tl"]
+                    else:
+                        borc_tl += a["kalan_tl"]
+                    fatura_listesi.append({
+                        "fatura_no": a["fatura_no"],
+                        "yon": a["yon"],
+                        "kalan_tl": round(a["kalan_tl"], 2),
+                        "vade": str(a["vade"]),
+                    })
+
+            haftalik.append({
+                "hafta": f"{hafta_baslangic} — {hafta_bitis - timedelta(days=1)}",
+                "alacak_tl": round(alacak_tl, 2),
+                "borc_tl": round(borc_tl, 2),
+                "net_tl": round(alacak_tl - borc_tl, 2),
+                "faturalar": fatura_listesi,
+            })
+            hafta_baslangic = hafta_bitis
+
+        # Vadesi gecmis (bugun oncesi)
+        gecmis_alacak = sum(a["kalan_tl"] for a in acik if a["vade"] < bugun and a["yon"] == "alacak")
+        gecmis_borc = sum(a["kalan_tl"] for a in acik if a["vade"] < bugun and a["yon"] != "alacak")
+
+        # Donem toplami
+        donem_alacak = sum(h["alacak_tl"] for h in haftalik)
+        donem_borc = sum(h["borc_tl"] for h in haftalik)
+
+        toplam_alacak = gecmis_alacak + donem_alacak
+        toplam_borc = gecmis_borc + donem_borc
+
+        yorum_parcalari = []
+        if gecmis_alacak > 0:
+            yorum_parcalari.append(f"Vadesi gecmis {gecmis_alacak:,.2f} TL alacak tahsil edilmeli.")
+        if donem_alacak > 0:
+            yorum_parcalari.append(f"Onumuzdeki {donem_gun} gunde {donem_alacak:,.2f} TL alacak vadesi geliyor.")
+        if donem_borc > 0:
+            yorum_parcalari.append(f"Onumuzdeki {donem_gun} gunde {donem_borc:,.2f} TL borc odemesi var.")
+        if not yorum_parcalari:
+            yorum_parcalari.append("Donemde acik fatura yok.")
+
+        return {
+            "firma_id": firma_id or "tumu",
+            "bugun": str(bugun),
+            "donem_gun": donem_gun,
+            "vadesi_gecmis": {
+                "alacak_tl": round(gecmis_alacak, 2),
+                "borc_tl": round(gecmis_borc, 2),
+            },
+            "donem_toplam": {
+                "alacak_tl": round(donem_alacak, 2),
+                "borc_tl": round(donem_borc, 2),
+                "net_tl": round(donem_alacak - donem_borc, 2),
+            },
+            "toplam_acik": {
+                "alacak_tl": round(toplam_alacak, 2),
+                "borc_tl": round(toplam_borc, 2),
+                "net_tl": round(toplam_alacak - toplam_borc, 2),
+            },
+            "haftalik": haftalik,
+            "yorum": " ".join(yorum_parcalari),
+        }
+
+    @staticmethod
+    def odeme_trend_analizi(faturalar, bugun=None, firma_id=None):
+        """Firma bazli odeme gecikme trendi — iyilesme/kotulesme tespiti.
+
+        Son N faturanin ortalama gecikme gununu donem bazli hesaplar.
+
+        Args:
+            faturalar: ADR-0007 fatura listesi
+            bugun: date veya 'YYYY-MM-DD' str. None ise today().
+            firma_id: None ise tum firmalar (firma bazli kirilim).
+
+        Returns:
+            dict: firma bazli trend (ort gecikme, son 3/6/12 ay, iyilesme/kotulesme)
+        """
+        from datetime import date as _date
+        from collections import defaultdict
+
+        if bugun is None:
+            bugun = _date.today()
+        elif isinstance(bugun, str):
+            bugun = _date.fromisoformat(bugun)
+
+        # Odenmis faturalarin gecikme gunlerini topla
+        firma_gecikmeler = defaultdict(list)
+        for f in faturalar:
+            if f.get("durum") in ("iptal",):
+                continue
+            if firma_id and str(f.get("firma_id", "")) != str(firma_id):
+                continue
+            try:
+                vade = _date.fromisoformat(f["vade_tarihi"])
+            except (ValueError, KeyError):
+                continue
+
+            fid = str(f.get("firma_id", "bilinmeyen"))
+
+            if f.get("durum") == "odendi" and f.get("odeme_tarihi"):
+                try:
+                    odeme = _date.fromisoformat(f["odeme_tarihi"])
+                    gecikme = (odeme - vade).days
+                    firma_gecikmeler[fid].append({
+                        "fatura_no": f.get("fatura_no", ""),
+                        "vade": str(vade),
+                        "odeme": str(odeme),
+                        "gecikme_gun": gecikme,
+                        "fatura_tarihi": f.get("fatura_tarihi", ""),
+                    })
+                except (ValueError, KeyError):
+                    pass
+            elif f.get("durum") in ("acik", "kismi"):
+                gecikme = (bugun - vade).days
+                if gecikme > 0:
+                    firma_gecikmeler[fid].append({
+                        "fatura_no": f.get("fatura_no", ""),
+                        "vade": str(vade),
+                        "odeme": None,
+                        "gecikme_gun": gecikme,
+                        "fatura_tarihi": f.get("fatura_tarihi", ""),
+                    })
+
+        firmalar = []
+        for fid, gecikmeler in firma_gecikmeler.items():
+            if not gecikmeler:
+                continue
+
+            # Tarihe gore sirala
+            gecikmeler.sort(key=lambda g: g["fatura_tarihi"])
+
+            tum_gecikmeler = [g["gecikme_gun"] for g in gecikmeler]
+            ort = sum(tum_gecikmeler) / len(tum_gecikmeler)
+
+            # Son 3 ve ilk 3 karsilastir — trend
+            if len(tum_gecikmeler) >= 6:
+                ilk_yari = tum_gecikmeler[:len(tum_gecikmeler)//2]
+                son_yari = tum_gecikmeler[len(tum_gecikmeler)//2:]
+                ilk_ort = sum(ilk_yari) / len(ilk_yari)
+                son_ort = sum(son_yari) / len(son_yari)
+                fark = son_ort - ilk_ort
+                if fark < -5:
+                    trend = "iyilesiyor"
+                elif fark > 5:
+                    trend = "kotulesiyor"
+                else:
+                    trend = "stabil"
+            else:
+                ilk_ort = ort
+                son_ort = ort
+                fark = 0
+                trend = "yetersiz_veri"
+
+            firmalar.append({
+                "firma_id": fid,
+                "fatura_adedi": len(gecikmeler),
+                "ortalama_gecikme_gun": round(ort, 1),
+                "max_gecikme_gun": max(tum_gecikmeler),
+                "min_gecikme_gun": min(tum_gecikmeler),
+                "ilk_donem_ort": round(ilk_ort, 1),
+                "son_donem_ort": round(son_ort, 1),
+                "trend": trend,
+                "trend_degisim_gun": round(fark, 1),
+            })
+
+        # Sirala: en kotu trendden en iyiye
+        firmalar.sort(key=lambda f: -f["trend_degisim_gun"])
+
+        toplam = len(firmalar)
+        iyilesen = sum(1 for f in firmalar if f["trend"] == "iyilesiyor")
+        kotulesen = sum(1 for f in firmalar if f["trend"] == "kotulesiyor")
+
+        yorum_parcalari = []
+        if kotulesen:
+            yorum_parcalari.append(f"{kotulesen} firmada odeme disiplini kotulesiyor.")
+        if iyilesen:
+            yorum_parcalari.append(f"{iyilesen} firmada iyilesme var.")
+
+        return {
+            "bugun": str(bugun),
+            "firma_adedi": toplam,
+            "iyilesen": iyilesen,
+            "kotulesen": kotulesen,
+            "stabil": toplam - iyilesen - kotulesen,
+            "firmalar": firmalar,
+            "yorum": " ".join(yorum_parcalari) or "Trend verisi yok.",
+        }
+
+
 # ─── Dosya Okuma ─────────────────────────────────────────────────────────────
 
 def _parse_turkish_number(s: str) -> float:

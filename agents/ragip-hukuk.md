@@ -128,6 +128,8 @@ Analizlerde ve degerlendirmelerde su maddelere referans ver:
 
 Her degerlendirme, zamanasimi hesabi, delil stratejisi ve ihtar ciktisini dosyaya KAYDET.
 
+**SIRALAMA KURALI:** Once TUM analizi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
+
 **Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
 
 **Kaydetme kodu (her ciktinin sonunda calistir):**

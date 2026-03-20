@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-20 (v2.8.10)
+Guncelleme: 2026-03-20 (v2.8.12 — Faz 3 gercek veri sonrasi)
 
 ---
 
@@ -21,7 +21,7 @@ Guncelleme: 2026-03-20 (v2.8.10)
 
 **Effort:** Kucuk-orta
 **Risk:** Dusuk
-**Oncelik:** Izlenebilirlik/audit gereksinimi olursa
+**Oncelik:** ~~Izlenebilirlik/audit gereksinimi olursa~~ **TAMAMLANDI (v2.8.13):** `ragip_output.py` — YAML frontmatter, firma bazli klasor, manifest.jsonl otomatik.
 
 ---
 
@@ -31,9 +31,11 @@ Guncelleme: 2026-03-20 (v2.8.10)
 
 **Fikir:** Fatura analiz metotlarinda para birimi filtresi veya TCMB kuru ile TRY normalize.
 
+**Gercek veri notu (Faz 3):** 127 gercek faturanin %94'u USD. DTO katmani (dto_to_faturalar) fatura_kuru ile TL'ye cevirip kit'e gonderiyor. Kit TL bazli calistiginda dogru sonuc veriyor. Doviz bazli raporlama (orn: "acik borc USD bazinda") kit'te henuz yok — MCP tarafinda (firma_raporu.ozet.doviz_bazli_acik_borc) var.
+
 **Effort:** Orta
-**Risk:** Orta — kur hangi tarihin kuru? Spot mu, fatura tarihindeki mi?
-**Oncelik:** Doviz faturasi olan firmalar icin
+**Risk:** Orta — kur hangi tarihin kuru? DTO katmani fatura_kuru kullaniyor (dogru yaklasim).
+**Oncelik:** Dusuk — DTO zaten TL normalize ediyor. Doviz bazli rapor ihtiyaci cikarsa degerlendirilir.
 
 ---
 
@@ -77,11 +79,11 @@ Guncelleme: 2026-03-20 (v2.8.10)
 2. **Firma odeme trend analizi**: Son N faturanin ortalama gecikme gunu trendi. Kotulesme/iyilesme tespiti. "ABC Dagitim son 3 faturada ortalama 12 gun gec odedi, trend kotulesiyir."
 3. **Portfoy erken odeme firsati**: Tum acik borc faturalarinda erken odeme iskontosu simulasyonu. "Bu ay 3 tedarikciye erken odersen toplam 4,200 TL tasarruf."
 
-**Onkosul:** `faturalar.jsonl`'de yeterli veri olmali. MCP adaptor veya toplu import ile gercek fatura akisi baslamadan anlamsiz.
+**Onkosul:** ~~`faturalar.jsonl`'de yeterli veri olmali. MCP adaptor veya toplu import ile gercek fatura akisi baslamadan anlamsiz.~~ **KARSILANDI (Faz 3):** 3 firma, 127 fatura, 52 ay veri. Projeksiyon icin yeterli.
 
 **Effort:** Orta — mevcut FinansalHesap motoruna 2-3 metot + ragip-rapor'a yeni tur
 **Risk:** Dusuk — mevcut sema (ADR-0007) yeterli, yeni veri yapisi gerekmiyor
-**Oncelik:** Canli veri akisi basladiginda ilk yapilacak is
+**Oncelik:** ~~YUKSEK~~ **TAMAMLANDI (v2.8.13):** `nakit_projeksiyon()` + `odeme_trend_analizi()` eklendi. ragip-rapor skill'ine `projeksiyon` ve `trend` turleri eklendi.
 
 ---
 
@@ -140,14 +142,16 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 
 244 test var (v2.8.6). Katman 1 (structural) ve Katman 2 (unit) saglamdir. Eksik katmanlar:
 
-- **Katman 3 (integration):** Gercek fatura verisiyle FinansalHesap dogrulamasi. MCP veri akisi baslayana kadar anlamli fixture olusturulamaz — sifir gercek fatura var.
+- **Katman 3 (integration):** ~~Gercek fatura verisiyle FinansalHesap dogrulamasi. MCP veri akisi baslayana kadar anlamli fixture olusturulamaz — sifir gercek fatura var.~~ **TAMAMLANDI (v2.8.12):** `test_ragip_integration.py` — 27 test. Gercek D365 veri yapisina dayali (GUID firma_id, USD/TRL karisik, kismi odeme, vade==fatura).
 - **Katman 4 (e2e LLM):** Orchestrator'un dogru agent'a yonlendirmesi, skill ciktisi kalitesi. Non-deterministic + maliyetli — bilerek kapsam disi. ADR-0008.
 
 **Not (v2.8.7):** ragip_temizle.sh icin Katman 2 testi yazildi (20 test, test_ragip_temizle.py). Toplam 264 test.
 **Not (v2.8.8):** TestOrchestratorDispatch eklendi (5 test) — Task tool → Agent tool dogrulamasi. Toplam 269 test.
 **Not (v2.8.9):** validate_fatura/validate_faturalar testleri eklendi (21 test). Toplam 290 test.
+**Not (v2.8.12):** Katman 3 integration testleri eklendi (27 test). Toplam 327 test.
+**Not (v2.8.13):** Nakit projeksiyon + odeme trend + ragip_output testleri eklendi (30 test). Toplam 357 test.
 
-**Degerlendirme zamani:** MCP entegrasyonu tamamlaninca Katman 3 yazilir. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
+**Degerlendirme zamani:** Katman 3 tamamlandi. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
 
 ### I6. Graceful Degradation Sinirlamasi
 
@@ -187,22 +191,29 @@ Interaktif @mention tek güvenilir forced dispatch mekanizması ama sadece UI'da
 **Mevcut durum (v2.8.8):** Senaryo B (ana session direkt dispatch) onaylanmış ve güvenilir.
 Senaryo A deneysel, auto-delegation sınırı nedeniyle üretim için önerilmez.
 
+**Faz 5 E2E test sonucu (v2.8.13):** ragip-aga interaktif modda kismen calisiyor:
+- Ilk mesajda dispatch YAPMIYOR (bilinen sinir — model kendisi yapmayı tercih ediyor)
+- Takip sorulariyla dispatch YAPIYOR ("arastir" → ragip-arastirma, "hukuki degerlendir" → ragip-hukuk)
+- "Tam analiz" anahtar kelimesi icin zorunlu dispatch talimati eklendi (v2.8.13)
+- Interaktif mod + takip sorulari seklinde kullanim en guvenilir pattern
+
 **Degerlendirme zamani:** Anthropic forced delegation API açarsa veya @mention CLI desteği gelirse. ADR-0009.
 
 ---
 
 ### I7. Uretim Hazirlik Kriterleri
 
-Kit su an prototype asama: mimari saglam, hesaplama motoru yazilmis, test altyapisi kurulu. Ama uretim hazir degil:
+~~Kit su an prototype asama.~~ **Faz 3 sonrasi durum (v2.8.12):**
 
-- Sifir gercek fatura verisi — FinansalHesap hic gercek veri gorMEDI
-- Sifir MCP adaptoru — Parasut/D365 entegrasyonu yok
+- ~~Sifir gercek fatura verisi~~ → **127 gercek fatura, 3 firma, D365 kaynakli**
+- ~~Sifir MCP adaptoru~~ → **D365 Sales MCP adaptoru calisiyor (ragip-workspace)**
+- ~~FinansalHesap hic gercek veri gorMEDI~~ → **8 rapor gercek veriyle dogrulandi (aging, DSO, tahsilat, gelir trendi, konsantrasyon, KDV, DPO, CCC)**
 - Kullanim verisi yok — hangi skill kac kez cagrildi bilinmiyor
 - LLM routing dogru calisiyor mu — test edilmemis
 
-**Uretim = en az bir MCP adaptoru + gercek fatura akisi + FinansalHesap gercek veriyle dogrulandi.**
+**Uretim = en az bir MCP adaptoru + gercek fatura akisi + FinansalHesap gercek veriyle dogrulandi.** ✅ Ilk uc kriter karsilandi.
 
-MCP entegrasyonu bu kit'in gercek deger testidir. Oncesinde yapilan her iyilestirme hipoteze dayanir.
+Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basladikca degerlendirilecek.
 
 ---
 

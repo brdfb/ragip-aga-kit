@@ -122,7 +122,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (300 test)
+# Tam suite (357 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -133,9 +133,11 @@ python -m pytest tests/test_ragip_rates.py -v           # TCMB rate fetcher
 python -m pytest tests/test_ragip_crud.py -v            # CRUD helper
 python -m pytest tests/test_ragip_install.py -v         # Install/update
 python -m pytest tests/test_ragip_temizle.py -v         # ragip_temizle.sh
+python -m pytest tests/test_ragip_integration.py -v    # Katman 3 integration (D365)
+python -m pytest tests/test_ragip_output.py -v         # Cikti yonetimi
 ```
 
-Testler 7 katmani kapsar:
+Testler 9 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
@@ -143,6 +145,8 @@ Testler 7 katmani kapsar:
 5. **TCMB** — Oran cekme, cache, fallback, format
 6. **Install/Update** — Fresh install, manifest, checksum, update senaryolari (kullanici degisikligi koruma, conflict backup, dry-run)
 7. **Temizle** — ragip_temizle.sh yas bazli + limit bazli silme, dry-run, dosya filtresi
+8. **Integration** — Gercek D365 veri yapisina dayali (GUID firma_id, USD/TRL karisik, kismi odeme, vade==fatura, CCC, nakit projeksiyon, odeme trend)
+9. **Cikti yonetimi** — Firma bazli klasor, manifest, YAML frontmatter, slug donusumu
 
 ## Bagimlilklar
 

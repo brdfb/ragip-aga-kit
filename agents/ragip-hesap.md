@@ -67,6 +67,8 @@ python3 "$ROOT/scripts/ragip_rates.py" --pretty
 
 Her hesaplama sonucunu dosyaya KAYDET. Diger alt-ajanlar (strateji, ihtar) bu rakamlara ihtiyac duyar.
 
+**SIRALAMA KURALI:** Once TUM hesaplamayi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
+
 **Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
 
 Hesaplama tamamlandiktan sonra:

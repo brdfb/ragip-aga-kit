@@ -24,6 +24,8 @@ python -m pytest tests/test_ragip_fatura_analiz.py -v # Fatura analiz motorlari
 python -m pytest tests/test_ragip_crud.py -v         # CRUD helper
 python -m pytest tests/test_ragip_install.py -v      # Install/update
 python -m pytest tests/test_ragip_temizle.py -v      # ragip_temizle.sh
+python -m pytest tests/test_ragip_integration.py -v  # Katman 3 integration (D365 veri yapisi)
+python -m pytest tests/test_ragip_output.py -v       # Cikti yonetimi (firma klasor, manifest)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

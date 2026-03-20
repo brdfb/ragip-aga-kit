@@ -103,6 +103,8 @@ Analizlerde ve tavsiyelerde su maddelere referans ver:
 
 Her analiz, strateji ve ihtar ciktisini dosyaya KAYDET. Diger alt-ajanlar ve gelecek session'lar bu ciktilara ihtiyac duyar.
 
+**SIRALAMA KURALI:** Once TUM analizi tamamla, SONRA kaydet. Erken kaydetme — eksik icerikle dosya olusur. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
+
 **Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
 
 **Kaydetme kodu (her ciktinin sonunda calistir):**
