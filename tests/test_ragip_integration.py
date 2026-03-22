@@ -451,3 +451,94 @@ class TestD365OdemeTrend:
         trend = FinansalHesap.odeme_trend_analizi(D365_FATURALAR, bugun=BUGUN)
         # 3 firma var, en az birinde gecikme olmali
         assert trend["firma_adedi"] >= 1
+
+
+# ── Kur Farkı Hesaplama ──────────────────────────────────────────────────────
+
+class TestKurFarkiHesapla:
+    """ADR-0007 kur farki hesaplama testleri."""
+
+    def _fatura_kur(self, fatura_kuru, odeme_kuru, tutar=1000.0, pb="USD", durum="odendi"):
+        """Kur farki testi icin minimal fatura."""
+        return {
+            "id": 99, "fatura_no": "KF-TEST", "firma_id": "test-firma",
+            "yon": "alacak", "tutar": tutar, "toplam": tutar * 1.2,
+            "fatura_tarihi": "2025-06-01", "vade_tarihi": "2025-07-01",
+            "odeme_tarihi": "2025-07-15", "odeme_tutari": tutar * 1.2,
+            "durum": durum, "para_birimi": pb,
+            "fatura_kuru": fatura_kuru, "odeme_kuru": odeme_kuru,
+        }
+
+    def test_kur_kaybi(self):
+        """TRY zayifladi — kur farki pozitif (kayip)."""
+        f = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=35.0, tutar=1000.0)
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        # (35 - 30) × 1000 = 5000 TL kayip
+        assert sonuc["toplam_kur_farki_tl"] == 5000.0
+        assert sonuc["toplam_kayip_tl"] == 5000.0
+        assert sonuc["toplam_kazanc_tl"] == 0.0
+        assert sonuc["islenen_fatura"] == 1
+
+    def test_kur_kazanci(self):
+        """TRY guclendi — kur farki negatif (kazanc)."""
+        f = self._fatura_kur(fatura_kuru=35.0, odeme_kuru=30.0, tutar=1000.0)
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        # (30 - 35) × 1000 = -5000 TL kazanc
+        assert sonuc["toplam_kur_farki_tl"] == -5000.0
+        assert sonuc["toplam_kazanc_tl"] == 5000.0
+        assert sonuc["toplam_kayip_tl"] == 0.0
+
+    def test_try_fatura_atlanir(self):
+        """TRY faturalar kur farki hesabina girmemeli."""
+        f = self._fatura_kur(fatura_kuru=1.0, odeme_kuru=1.0, pb="TRY")
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        assert sonuc["islenen_fatura"] == 0
+
+    def test_eksik_odeme_kuru(self):
+        """odeme_kuru=None → eksik_kur sayaci artmali."""
+        f = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=None)
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        assert sonuc["eksik_kur_fatura"] == 1
+        assert sonuc["islenen_fatura"] == 0
+
+    def test_eksik_fatura_kuru(self):
+        """fatura_kuru=None → eksik_kur sayaci artmali."""
+        f = self._fatura_kur(fatura_kuru=None, odeme_kuru=35.0)
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        assert sonuc["eksik_kur_fatura"] == 1
+
+    def test_iptal_atlanir(self):
+        """iptal faturalar hesaba girmemeli."""
+        f = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=35.0, durum="iptal")
+        sonuc = FinansalHesap.kur_farki_hesapla([f])
+        assert sonuc["islenen_fatura"] == 0
+
+    def test_karisik_faturalar(self):
+        """Kayip + kazanc karisik — net sonuc doğru olmali."""
+        kayip = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=35.0, tutar=1000.0)
+        kazanc = self._fatura_kur(fatura_kuru=35.0, odeme_kuru=32.0, tutar=500.0)
+        kazanc["fatura_no"] = "KF-TEST-2"
+        sonuc = FinansalHesap.kur_farki_hesapla([kayip, kazanc])
+        # kayip: (35-30)*1000 = 5000, kazanc: (32-35)*500 = -1500
+        assert sonuc["toplam_kur_farki_tl"] == 3500.0
+        assert sonuc["toplam_kayip_tl"] == 5000.0
+        assert sonuc["toplam_kazanc_tl"] == 1500.0
+        assert sonuc["islenen_fatura"] == 2
+
+    def test_firma_filtresi(self):
+        """firma_id filtresi calismali."""
+        f1 = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=35.0)
+        f1["firma_id"] = "firma-A"
+        f2 = self._fatura_kur(fatura_kuru=30.0, odeme_kuru=35.0)
+        f2["firma_id"] = "firma-B"
+        f2["fatura_no"] = "KF-TEST-B"
+        sonuc = FinansalHesap.kur_farki_hesapla([f1, f2], firma_id="firma-A")
+        assert sonuc["islenen_fatura"] == 1
+
+    def test_d365_verisi_eksik_kur(self):
+        """D365 verisinde odeme_kuru null — tum faturalar eksik_kur'a dusmeli."""
+        sonuc = FinansalHesap.kur_farki_hesapla(D365_FATURALAR)
+        # D365 test verisinde odeme_kuru yok — hepsi eksik
+        usd = [f for f in D365_FATURALAR if f.get("para_birimi") == "USD"]
+        assert sonuc["eksik_kur_fatura"] == len(usd)
+        assert sonuc["islenen_fatura"] == 0

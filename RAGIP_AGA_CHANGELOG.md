@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.16] - 2026-03-22
+
+### Added — Kur Farki Hesaplama
+
+- **scripts/ragip_aga.py**: `kur_farki_hesapla()` — dovizli faturalarin kur farki analizi. Formul: (odeme_kuru - fatura_kuru) × tutar. Kayip/kazanc ayirimi, firma filtresi, eksik kur uyarisi.
+- **tests/test_ragip_integration.py**: 9 yeni kur farki testi (kayip, kazanc, TRY atlama, eksik kur, iptal, karisik, firma filtre, D365 veri)
+- **docs/FEATURE_IDEAS.md**: M13 guncelleme — kur farki metodu ve MCP standardizasyonu belgelendi
+- Toplam test: 377 → 386, Hesaplama metodu: 23 → 24
+
+---
+
 ## [2.8.15] - 2026-03-22
 
 ### Changed — ADR-0007 Doviz Kuru Semasi

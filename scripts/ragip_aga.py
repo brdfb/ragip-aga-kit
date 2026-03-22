@@ -1396,6 +1396,79 @@ class FinansalHesap:
         }
 
 
+    @staticmethod
+    def kur_farki_hesapla(faturalar, firma_id=None):
+        """Dovizli faturalarin kur farki analizi — odenmis faturalar icin.
+
+        Formul: kur_farki_tl = (odeme_kuru - fatura_kuru) × tutar
+        Pozitif = kur kaybimiz (TRY zayifladi), Negatif = kur kazancimiz.
+
+        Args:
+            faturalar: ADR-0007 fatura listesi (para_birimi, fatura_kuru, odeme_kuru)
+            firma_id: None ise tum firmalar.
+
+        Returns:
+            dict: toplam kur farki, fatura bazli detay, ozet
+        """
+        detaylar = []
+        toplam_kur_farki = 0.0
+        eksik_kur = 0
+        islenen = 0
+
+        for f in faturalar:
+            pb = f.get("para_birimi", "TRY")
+            if pb == "TRY":
+                continue
+            if f.get("durum") == "iptal":
+                continue
+            if firma_id and str(f.get("firma_id", "")) != str(firma_id):
+                continue
+
+            fatura_kuru = f.get("fatura_kuru")
+            odeme_kuru = f.get("odeme_kuru")
+
+            if not fatura_kuru or not odeme_kuru:
+                eksik_kur += 1
+                continue
+
+            tutar = f.get("tutar", 0)
+            kur_farki = round((odeme_kuru - fatura_kuru) * tutar, 2)
+            toplam_kur_farki += kur_farki
+            islenen += 1
+
+            detaylar.append({
+                "fatura_no": f.get("fatura_no", ""),
+                "firma_id": f.get("firma_id", ""),
+                "para_birimi": pb,
+                "tutar": tutar,
+                "fatura_kuru": fatura_kuru,
+                "odeme_kuru": odeme_kuru,
+                "kur_farki_tl": kur_farki,
+                "durum": "kayip" if kur_farki > 0 else "kazanc",
+            })
+
+        # Buyukten kucuge sirala (en buyuk kayip once)
+        detaylar.sort(key=lambda d: -d["kur_farki_tl"])
+
+        toplam_kayip = sum(d["kur_farki_tl"] for d in detaylar if d["kur_farki_tl"] > 0)
+        toplam_kazanc = abs(sum(d["kur_farki_tl"] for d in detaylar if d["kur_farki_tl"] < 0))
+
+        return {
+            "toplam_kur_farki_tl": round(toplam_kur_farki, 2),
+            "toplam_kayip_tl": round(toplam_kayip, 2),
+            "toplam_kazanc_tl": round(toplam_kazanc, 2),
+            "islenen_fatura": islenen,
+            "eksik_kur_fatura": eksik_kur,
+            "detaylar": detaylar,
+            "yorum": (
+                f"{islenen} fatura islendi, {eksik_kur} faturada kur bilgisi eksik. "
+                f"Net kur farki: {round(toplam_kur_farki, 2):+,.2f} TL."
+                if islenen > 0 else
+                "Kur farki hesaplanamadi — odeme_kuru bilgisi eksik."
+            ),
+        }
+
+
 # ─── Dosya Okuma ─────────────────────────────────────────────────────────────
 
 def _parse_turkish_number(s: str) -> float:

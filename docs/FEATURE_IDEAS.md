@@ -37,6 +37,8 @@ Guncelleme: 2026-03-20 (v2.8.12 — Faz 3 gercek veri sonrasi)
 **Risk:** Orta — kur hangi tarihin kuru? DTO katmani fatura_kuru kullaniyor (dogru yaklasim).
 **Oncelik:** Dusuk — DTO zaten TL normalize ediyor. Doviz bazli rapor ihtiyaci cikarsa degerlendirilir.
 
+**Guncelleme (v2.8.16):** ADR-0007'ye `fatura_kuru`, `odeme_kuru` alanlari eklendi. `kur_farki_hesapla()` metodu eklendi: `(odeme_kuru - fatura_kuru) × tutar`. MCP/DTO: TRL→TRY normalize, doviz→para_birimi standardize edildi. Darbogazda `odeme_kuru` — Parasut'ten D365'e akmasi bekleniyor.
+
 ---
 
 ### 14. Odeme Plani Takibi (BUYUK)
@@ -152,6 +154,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 **Not (v2.8.13):** Nakit projeksiyon + odeme trend + ragip_output testleri eklendi (30 test). Toplam 357 test.
 **Not (v2.8.14):** ragip_output entegrasyon testleri eklendi (2 test). Toplam 364 test.
 **Not (v2.8.15):** ADR-0007 doviz kuru semasi + validasyon testleri eklendi (13 test). Toplam 377 test.
+**Not (v2.8.16):** kur_farki_hesapla() metodu + 9 test eklendi. Toplam 386 test.
 
 **Degerlendirme zamani:** Katman 3 tamamlandi. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
 

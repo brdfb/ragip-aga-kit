@@ -1,6 +1,6 @@
 # Ragip Aga Kit — Proje Genel Bakis
 
-**Versiyon:** 2.8.15 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+**Versiyon:** 2.8.16 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
 
 ---
 
@@ -31,7 +31,7 @@ Hedef: Isletme sahibi veya muhasebecinin "bu tedarikciyle vade farkini nasil hes
 
 ### 1. Hesaplama Motoru (FinansalHesap)
 
-23 metot, tamami test edilmis, Python sinifi:
+24 metot, tamami test edilmis, Python sinifi:
 
 | Kategori | Metotlar |
 |----------|----------|
@@ -39,7 +39,7 @@ Hedef: Isletme sahibi veya muhasebecinin "bu tedarikciyle vade farkini nasil hes
 | **Doviz & Ithalat** | doviz_forward, ithalat_maliyet |
 | **Arbitraj** | covered_interest_arbitrage, ucgen_kur_arbitraji, vade_mevduat_arbitraji, carry_trade_analizi |
 | **Fatura Analiz** | aging_raporu, dso, dpo, tahsilat_orani, gelir_trendi, musteri_konsantrasyonu, kdv_donem_ozeti, ccc_dashboard, fatura_uyarilari |
-| **Nakit Akisi** | nakit_projeksiyon, odeme_trend_analizi |
+| **Nakit Akisi** | nakit_projeksiyon, odeme_trend_analizi, kur_farki_hesapla |
 | **Operasyonel** | nakit_cevrim_dongusu |
 
 Tum hesaplamalar **canli TCMB oranlarıyla** calisir. Fallback zinciri: EVDS3 API → CollectAPI → 4 saat cache → hardcoded fallback.
@@ -93,10 +93,10 @@ Yeni ERP eklemek = yeni MCP adaptor yazmak. Kit'e dokunulmaz.
 | Ozellik | Deger |
 |---------|-------|
 | Python | 3.12+ |
-| Test | 377 (9 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle, integration, cikti) |
+| Test | 386 (9 katman: yapisal, bash block, finansal, fatura analiz, TCMB, install/update, temizle, integration, cikti) |
 | Agent | 5 (1 orchestrator + 4 sub-agent) |
 | Skill | 15 (8 prosedurel + 7 LLM) |
-| Hesaplama metodu | 23 |
+| Hesaplama metodu | 24 |
 | ADR (mimari karar) | 9 |
 | Dis bagimlilik | 4 (pdfplumber, pandas, openpyxl, pyyaml) |
 | TCMB entegrasyonu | EVDS3 + CollectAPI, 4 saat cache, 3 katman fallback |
@@ -177,7 +177,7 @@ ragip-aga-kit/
     ragip_temizle.sh  # Cikti dizini temizleme
   config/             # ragip_aga.yaml + dispatch kuralları
   data/RAGIP_AGA/     # Runtime veri (firmalar, faturalar, gorevler, ciktilar)
-  tests/              # 9 test dosyasi, 377 test
+  tests/              # 9 test dosyasi, 386 test
   docs/               # ADR'ler, FEATURE_IDEAS, bu dokuman
   install.sh          # Hedef repoya kurulum
   update.sh           # Guncelleme (uclu checksum)
