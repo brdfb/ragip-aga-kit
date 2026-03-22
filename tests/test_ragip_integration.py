@@ -34,7 +34,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 7932.0, "kdv_tutar": 1586.4, "toplam": 9518.4,
         "fatura_tarihi": "2024-02-07", "vade_tarihi": "2024-02-07",
         "odeme_tarihi": "2024-03-15", "odeme_tutari": 9285.63, "durum": "kismi",
-        "doviz": "USD", "fatura_kuru": 30.6,
+        "para_birimi": "USD", "fatura_kuru": 30.6,
     },
     # Güven Pres — USD, açık, vade==fatura
     {
@@ -42,7 +42,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 10707.22, "kdv_tutar": 2141.44, "toplam": 12848.66,
         "fatura_tarihi": "2025-10-06", "vade_tarihi": "2025-10-06",
         "odeme_tarihi": None, "odeme_tutari": None, "durum": "acik",
-        "doviz": "USD", "fatura_kuru": 41.1816,
+        "para_birimi": "USD", "fatura_kuru": 41.1816,
     },
     # Güven Pres — USD, ödenmiş
     {
@@ -50,7 +50,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 4835.27, "kdv_tutar": 870.35, "toplam": 5705.62,
         "fatura_tarihi": "2022-11-04", "vade_tarihi": "2022-11-04",
         "odeme_tarihi": "2022-11-28", "odeme_tutari": 5705.62, "durum": "odendi",
-        "doviz": "USD", "fatura_kuru": 18.5972,
+        "para_birimi": "USD", "fatura_kuru": 18.5972,
     },
     # Plastay — USD, açık, vade != fatura (3 gün)
     {
@@ -58,7 +58,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 101397.86, "kdv_tutar": 20279.57, "toplam": 121677.43,
         "fatura_tarihi": "2026-01-08", "vade_tarihi": "2026-01-11",
         "odeme_tarihi": "2026-02-10", "odeme_tutari": 59173.89, "durum": "kismi",
-        "doviz": "USD", "fatura_kuru": 35.42,
+        "para_birimi": "USD", "fatura_kuru": 35.42,
     },
     # Plastay — USD, ödenmiş
     {
@@ -66,7 +66,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 104580.93, "kdv_tutar": 20916.19, "toplam": 125497.12,
         "fatura_tarihi": "2025-09-09", "vade_tarihi": "2025-09-12",
         "odeme_tarihi": "2025-10-08", "odeme_tutari": 125497.12, "durum": "odendi",
-        "doviz": "USD", "fatura_kuru": 34.18,
+        "para_birimi": "USD", "fatura_kuru": 34.18,
     },
     # AR Tarım — TRL, ödenmiş, kur=1.0
     {
@@ -74,7 +74,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 4873.33, "kdv_tutar": 974.67, "toplam": 5848.0,
         "fatura_tarihi": "2022-04-25", "vade_tarihi": "2022-04-25",
         "odeme_tarihi": "2022-05-20", "odeme_tutari": 5848.0, "durum": "odendi",
-        "doviz": "TRL", "fatura_kuru": 1.0,
+        "para_birimi": "TRY", "fatura_kuru": 1.0,
     },
     # AR Tarım — TRL, ödenmiş
     {
@@ -82,7 +82,7 @@ D365_FATURALAR = [
         "yon": "alacak", "tutar": 3505.67, "kdv_tutar": 701.13, "toplam": 4206.8,
         "fatura_tarihi": "2022-05-25", "vade_tarihi": "2022-05-25",
         "odeme_tarihi": "2022-06-30", "odeme_tutari": 4206.8, "durum": "odendi",
-        "doviz": "TRL", "fatura_kuru": 1.0,
+        "para_birimi": "TRY", "fatura_kuru": 1.0,
     },
 ]
 
@@ -300,11 +300,61 @@ class TestD365CokluDoviz:
         aging = FinansalHesap.aging_raporu(gecerli, BUGUN)
         assert aging["toplam_acik_alacak_tl"] > 0
 
-    def test_kur_1_trl(self):
-        """TRL faturalarda kur=1.0 olmalı."""
-        trl = [f for f in D365_FATURALAR if f.get("doviz") == "TRL"]
-        for f in trl:
+    def test_kur_1_try(self):
+        """TRY faturalarda kur=1.0 olmalı."""
+        try_faturalar = [f for f in D365_FATURALAR if f.get("para_birimi") == "TRY"]
+        assert len(try_faturalar) >= 1, "Test verisinde TRY fatura olmali"
+        for f in try_faturalar:
             assert f.get("fatura_kuru") == 1.0
+
+    def test_fatura_kuru_pozitif(self):
+        """Tum fatura kurlari pozitif olmali."""
+        for f in D365_FATURALAR:
+            kur = f.get("fatura_kuru")
+            if kur is not None:
+                assert kur > 0, f"{f['fatura_no']}: fatura_kuru={kur} pozitif olmali"
+
+    def test_fatura_kuru_validasyon(self):
+        """fatura_kuru=0 veya negatif validate_fatura'da hata vermeli."""
+        f = D365_FATURALAR[0].copy()
+        f["fatura_kuru"] = 0
+        hatalar = validate_fatura(f)
+        assert any("fatura_kuru" in h and "pozitif" in h for h in hatalar)
+
+        f["fatura_kuru"] = -5.0
+        hatalar = validate_fatura(f)
+        assert any("fatura_kuru" in h and "pozitif" in h for h in hatalar)
+
+    def test_odeme_kuru_validasyon(self):
+        """odeme_kuru tip ve pozitiflik kontrolu."""
+        f = D365_FATURALAR[0].copy()
+        # Gecerli odeme_kuru
+        f["odeme_kuru"] = 32.5
+        hatalar = validate_fatura(f)
+        assert not any("odeme_kuru" in h for h in hatalar)
+
+        # Gecersiz: string
+        f["odeme_kuru"] = "otuz"
+        hatalar = validate_fatura(f)
+        assert any("odeme_kuru" in h and "sayisal" in h for h in hatalar)
+
+        # Gecersiz: negatif
+        f["odeme_kuru"] = -1.0
+        hatalar = validate_fatura(f)
+        assert any("odeme_kuru" in h and "pozitif" in h for h in hatalar)
+
+    def test_odeme_kuru_null_gecerli(self):
+        """odeme_kuru=null (odenmemis) gecerli olmali."""
+        f = D365_FATURALAR[1].copy()  # acik fatura
+        f["odeme_kuru"] = None
+        hatalar = validate_fatura(f)
+        assert not any("odeme_kuru" in h for h in hatalar)
+
+    def test_para_birimi_standart_alan_adi(self):
+        """ADR-0007 standart alan adi para_birimi olmali, doviz degil."""
+        for f in D365_FATURALAR:
+            assert "para_birimi" in f, f"{f['fatura_no']}: para_birimi alani eksik"
+            assert "doviz" not in f, f"{f['fatura_no']}: doviz yerine para_birimi kullanilmali"
 
 
 # ── Vade == Fatura Tarihi Senaryosu ──────────────────────────────────────────

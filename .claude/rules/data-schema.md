@@ -10,11 +10,14 @@ ERP-agnostik standart sema. MCP adaptorleri yazar, kit hesaplama motorlari okur.
 - yon: alacak | borc (alacak = satis faturasi, borc = alis faturasi)
 - durum: acik | odendi | kismi | iptal
 - Zorunlu alanlar: id, fatura_no, firma_id, yon, tutar, toplam, fatura_tarihi, vade_tarihi, durum
-- Opsiyonel: kdv_oran_pct (vars: 20), kdv_tutar, para_birimi (vars: TRY), odeme_tarihi, odeme_tutari, kategori, kaynak, aciklama
+- Opsiyonel: kdv_oran_pct (vars: 20), kdv_tutar, para_birimi (vars: TRY), fatura_kuru, odeme_tarihi, odeme_tutari, odeme_kuru, kategori, kaynak, aciklama
 - Kismi odeme: odeme_tutari < toplam → durum=kismi
-- firma_id → firmalar.jsonl id referansi
+- firma_id → firmalar.jsonl id referansi (int veya GUID string)
 - kaynak alani: veriyi yazan MCP/sistem (orn: parasut, d365)
 - Tarihler ISO 8601 (YYYY-MM-DD), para_birimi ISO 4217
+- fatura_kuru: Fatura tarihindeki doviz kuru (1 birim doviz = X TRY). TRY'de 1.0 veya null. Pozitif sayisal.
+- odeme_kuru: Odeme tarihindeki doviz kuru. Kur farki = (odeme_kuru - fatura_kuru) × tutar. null = odenmedi.
+- MCP/DTO alan esleme: Kaynak sistemdeki alan adlari (D365: doviz, Parasut: currency) → para_birimi olarak normalize edilir
 
 ## Paylasimli Moduller
 - scripts/ragip_get_rates.sh — TCMB oran helper (fallback: API -> cache -> FALLBACK_RATES)

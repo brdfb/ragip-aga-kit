@@ -161,6 +161,15 @@ def validate_fatura(record):
         if not isinstance(pb, str) or len(pb) != 3:
             errors.append(f"para_birimi ISO 4217 (3 harf) olmali: '{pb}'")
 
+    # Doviz kuru kontrolleri (fatura_kuru, odeme_kuru)
+    for kur_alan in ('fatura_kuru', 'odeme_kuru'):
+        if kur_alan in record and record[kur_alan] is not None:
+            val = record[kur_alan]
+            if not isinstance(val, (int, float)):
+                errors.append(f"{kur_alan} sayisal olmali: {type(val).__name__}")
+            elif val <= 0:
+                errors.append(f"{kur_alan} pozitif olmali: {val}")
+
     # Kısmi ödeme tutarlılığı
     if record['durum'] == 'kismi':
         ot = record.get('odeme_tutari')

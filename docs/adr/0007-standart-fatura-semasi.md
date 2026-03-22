@@ -1,5 +1,5 @@
 # ADR-0007: Standart Fatura Semasi — ERP-Agnostik Veri Sozlesmesi
-Tarih: 2026-02-26
+Tarih: 2026-02-26 (guncelleme: 2026-03-22)
 Durum: Kabul edildi
 
 ## Baglam
@@ -20,17 +20,19 @@ Dosya yolu: `data/RAGIP_AGA/faturalar.jsonl`
 |------|-----|---------|----------|
 | id | int | evet | Otomatik artan (next_id) |
 | fatura_no | str | evet | Kaynak sistemdeki fatura numarasi |
-| firma_id | int | evet | firmalar.jsonl'deki id referansi |
+| firma_id | int\|str | evet | firmalar.jsonl'deki id referansi (int veya GUID string) |
 | yon | str | evet | `alacak` \| `borc` |
-| tutar | float | evet | KDV haric net tutar |
+| tutar | float | evet | KDV haric net tutar (fatura para biriminde) |
 | kdv_oran_pct | float | hayir | KDV orani (orn: 20.0). Varsayilan: 20 |
 | kdv_tutar | float | hayir | KDV tutari. Bos ise tutar × kdv_oran_pct/100 |
-| toplam | float | evet | KDV dahil toplam |
+| toplam | float | evet | KDV dahil toplam (fatura para biriminde) |
 | para_birimi | str | hayir | ISO 4217 (TRY, USD, EUR). Varsayilan: TRY |
+| fatura_kuru | float\|null | hayir | Fatura tarihindeki doviz kuru (1 birim doviz = X TRY). TRY faturalarda 1.0 veya null. para_birimi != TRY ise zorunlu olarak degerlendirilmeli |
 | fatura_tarihi | str | evet | ISO 8601 (YYYY-MM-DD) |
 | vade_tarihi | str | evet | ISO 8601 |
 | odeme_tarihi | str\|null | hayir | null = odenmedi |
 | odeme_tutari | float\|null | hayir | Kismi odeme destegi. null = odenmedi |
+| odeme_kuru | float\|null | hayir | Odeme tarihindeki doviz kuru (1 birim doviz = X TRY). Kur farki hesabi icin. null = odenmedi veya bilinmiyor |
 | durum | str | evet | `acik` \| `odendi` \| `kismi` \| `iptal` |
 | kategori | str | hayir | Serbest etiket (orn: hizmet, lisans, mal) |
 | kaynak | str | hayir | Veriyi yazan MCP/sistem (orn: parasut, d365) |
@@ -63,6 +65,34 @@ acik ──→ iptal       (fatura iptal)
 | CCC dashboard | DSO + DPO + aging + tahsilat birlesik rapor |
 | Fatura uyarilari | vade_tarihi, fatura_tarihi, yon, durum, toplam, odeme_tutari |
 
+| Kur farki hesabi | para_birimi, fatura_kuru, odeme_kuru, tutar, odeme_tarihi |
+| Doviz bazli acik pozisyon | para_birimi, toplam, fatura_kuru, durum=acik\|kismi |
+
+### Doviz ve kur alanlari
+
+**para_birimi** ADR-0007 standart alan adidir. MCP/DTO adaptorleri kaynak sistemdeki alan adini (orn: D365'teki `doviz`, Parasut'teki `currency`) bu alana normalize etmelidir.
+
+**fatura_kuru** fatura kesildiginde gecerli doviz kuru. MCP/DTO fatura tarihindeki TCMB kurundan veya ERP'nin kendi kur tablosundan alabilir. TRY faturalarda 1.0 veya null.
+
+**odeme_kuru** odeme yapildiginda gecerli doviz kuru. Parasut odeme kaydinda veya banka dekontu uzerinde bulunur. MCP/DTO odeme eslestirmesi sirasinda doldurur.
+
+**Kur farki hesabi:**
+```
+kur_farki_tl = (odeme_kuru - fatura_kuru) × tutar
+```
+- Pozitif → kur kaybimiz (TRY zayifladi, doviz pahalilasti)
+- Negatif → kur kazancimiz (TRY guclendi)
+- Kit bu hesaplamayi yapar, sonuc depolanmaz (turetilmis veri)
+
+**MCP/DTO sorumlulugu:**
+| Kaynak alan (ERP) | ADR-0007 alan | Ornek |
+|-------------------|---------------|-------|
+| D365: `doviz` | `para_birimi` | "USD" → "USD" |
+| D365: `fatura_kuru` | `fatura_kuru` | 30.6 |
+| Parasut: `currency` | `para_birimi` | "USD" |
+| Parasut: `exchange_rate` | `fatura_kuru` | 30.6 |
+| Parasut: odeme kaydindaki kur | `odeme_kuru` | 32.1 |
+
 ### Kit sinirinda kalan metrikler (ayri veri gerekir)
 - Brut kar: maliyet verisi (ERP)
 - DIO: stok verisi (ERP)
@@ -75,7 +105,8 @@ acik ──→ iptal       (fatura iptal)
 3. **ragip_crud.py kullanilir.** load_jsonl/save_jsonl, next_id, atomic_write — ayni altyapi.
 4. **kaynak alani izlenebilirlik saglar.** Hangi MCP'den geldi, belli.
 5. **Kismi odeme desteklenir.** odeme_tutari < toplam → durum=kismi.
-6. **para_birimi alani coklu doviz destegi saglar.** Hesaplamalar TRY bazli, kur cevrimi gerekirse ragip_rates.py'den alinir.
+6. **para_birimi + fatura_kuru + odeme_kuru coklu doviz destegi saglar.** tutar/toplam fatura para biriminde saklanir. TRY'ye cevrim fatura_kuru ile yapilir. Kur farki hesabi kit tarafinda (odeme_kuru - fatura_kuru) × tutar ile turetilir.
+7. **Alan isimleri kit standardidir.** MCP/DTO adaptorleri kaynak sistemdeki alan adlarini (doviz, currency, exchange_rate vb.) ADR-0007 alan adlarina normalize eder.
 
 ## Sonuc
 - Kit'in hesaplama motorlari tek bir veri sozlesmesine baglanir, ERP bagimliligi sifir

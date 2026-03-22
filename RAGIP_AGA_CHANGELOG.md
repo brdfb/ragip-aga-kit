@@ -6,6 +6,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.15] - 2026-03-22
+
+### Changed — ADR-0007 Doviz Kuru Semasi
+
+- **docs/adr/0007-standart-fatura-semasi.md**: `fatura_kuru` ve `odeme_kuru` alanlari eklendi, `doviz` → `para_birimi` standardizasyonu belgelendi, kur farki hesaplama formulu ve MCP/DTO esleme tablosu eklendi
+- **scripts/ragip_crud.py**: `validate_fatura()` — fatura_kuru/odeme_kuru pozitiflik ve tip kontrolu eklendi
+- **tests/test_ragip_integration.py**: Test verisi `doviz` → `para_birimi` standardize edildi, `TRL` → `TRY` (ISO 4217), 7 yeni doviz kuru testi
+- **tests/test_ragip_crud.py**: 8 yeni fatura_kuru/odeme_kuru validasyon testi
+- **.claude/rules/data-schema.md**: Doviz kuru alanlari ve MCP esleme kurali eklendi
+- Toplam test: 364 → 377
+
+---
+
 ## [2.8.14] - 2026-03-22
 
 ### Changed — ragip_output Entegrasyonu + Sentez Kaydetme

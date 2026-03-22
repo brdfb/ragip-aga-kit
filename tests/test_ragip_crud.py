@@ -190,6 +190,44 @@ class TestValidateFatura:
         hatalar = validate_fatura(_gecerli_fatura(para_birimi="TRYY"))
         assert any("para_birimi" in h for h in hatalar)
 
+    # --- Doviz kuru validasyonu (ADR-0007 guncelleme 2026-03-22) ---
+
+    def test_fatura_kuru_gecerli(self):
+        """Pozitif fatura_kuru gecerli olmali."""
+        assert validate_fatura(_gecerli_fatura(fatura_kuru=30.6)) == []
+
+    def test_fatura_kuru_null_gecerli(self):
+        """fatura_kuru=null (TRY fatura) gecerli olmali."""
+        assert validate_fatura(_gecerli_fatura(fatura_kuru=None)) == []
+
+    def test_fatura_kuru_sifir_hatasi(self):
+        """fatura_kuru=0 hata vermeli."""
+        hatalar = validate_fatura(_gecerli_fatura(fatura_kuru=0))
+        assert any("fatura_kuru" in h and "pozitif" in h for h in hatalar)
+
+    def test_fatura_kuru_negatif_hatasi(self):
+        """fatura_kuru negatif hata vermeli."""
+        hatalar = validate_fatura(_gecerli_fatura(fatura_kuru=-10.5))
+        assert any("fatura_kuru" in h and "pozitif" in h for h in hatalar)
+
+    def test_fatura_kuru_string_hatasi(self):
+        """fatura_kuru string hata vermeli."""
+        hatalar = validate_fatura(_gecerli_fatura(fatura_kuru="30.6"))
+        assert any("fatura_kuru" in h and "sayisal" in h for h in hatalar)
+
+    def test_odeme_kuru_gecerli(self):
+        """Pozitif odeme_kuru gecerli olmali."""
+        assert validate_fatura(_gecerli_fatura(odeme_kuru=32.1)) == []
+
+    def test_odeme_kuru_null_gecerli(self):
+        """odeme_kuru=null gecerli olmali."""
+        assert validate_fatura(_gecerli_fatura(odeme_kuru=None)) == []
+
+    def test_odeme_kuru_negatif_hatasi(self):
+        """odeme_kuru negatif hata vermeli."""
+        hatalar = validate_fatura(_gecerli_fatura(odeme_kuru=-1.0))
+        assert any("odeme_kuru" in h and "pozitif" in h for h in hatalar)
+
     def test_kismi_odeme_tutari_eksik(self):
         hatalar = validate_fatura(_gecerli_fatura(durum="kismi"))
         assert any("kismi" in h and "odeme_tutari" in h for h in hatalar)
