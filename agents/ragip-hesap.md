@@ -25,7 +25,7 @@ description: >
 
   </example>
 model: haiku
-maxTurns: 3
+maxTurns: 5
 skills:
   - ragip-vade-farki
   - ragip-arbitraj
