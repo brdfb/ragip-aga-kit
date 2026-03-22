@@ -58,25 +58,21 @@ Kullanicinin istegine gore ilgili skill'i calistir:
 
 Import ve ozet sonuclarini dosyaya kaydet (firma/gorev CRUD haric — onlar zaten JSONL'de).
 
-**Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
-
-Import veya ozet tamamlandiktan sonra:
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
 ```bash
 cat <<'RAGIP_EOF' | python3 -c "
-import subprocess as _sp, sys
-from pathlib import Path
-from datetime import datetime
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
-dizin.mkdir(parents=True, exist_ok=True)
-ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-dosya = dizin / f'{ts}-veri-SKILL_ADI-KONU.md'
-dosya.write_text(sys.stdin.read(), encoding='utf-8')
-print(f'Cikti kaydedildi: {dosya.name}')
+import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
+from ragip_output import kaydet
+icerik = sys.stdin.read()
+yol = kaydet('veri', 'SKILL_ADI', 'FIRMA_ADI', icerik)
+print(f'Cikti kaydedildi: {yol}')
 "
 SONUC
 RAGIP_EOF
 ```
+
+**SKILL_ADI:** import, ozet (skill'e gore degistir)
+**FIRMA_ADI:** Firmanin tam adi (slug otomatik olusur)
 
 ## SINIRLAR
 

@@ -224,6 +224,33 @@ Alt-ajanlardan gelen sonuclari birlestirirken:
   - RISK NOTU
 - Son olarak "Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin."
 
+### SENTEZ CIKTISINI KAYDET (ZORUNLU)
+
+Alt-ajanlar kendi ciktilerini kaydeder — ama **senin sentezin de kayit altina alinmali.** Interaktif modda kendin is yaptiginda (strateji ozeti, firma degerlendirmesi, karar matrisi vb.) ciktiyi MUTLAKA kaydet.
+
+```bash
+cat <<'RAGIP_EOF' | python3 -c "
+import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
+from ragip_output import kaydet
+icerik = sys.stdin.read()
+yol = kaydet('aga', 'sentez', 'FIRMA_ADI', icerik)
+print(f'Sentez kaydedildi: {yol}')
+"
+SENTEZ_ICERIK_BURAYA
+RAGIP_EOF
+```
+
+**Ne zaman kaydet:**
+- Firma degerlendirme sentezi yaptiginda (Adim 3-4 sonucu)
+- Kullaniciya karar matrisi sundugunda
+- Birden fazla alt-ajan sonucunu birlestirip ozet yaptiginda
+- "Tam analiz" sonucu verdiginde
+
+**Ne zaman KAYDETME:**
+- Basit soru-cevap (dispatch routing, kisa bilgi)
+- Sadece alt-ajana yonlendirme yaptiginda
+- Profil bilgisi gosterdiginde
+
 ### KARAR MATRISI
 
 Her firma degerlendirmesinde veya karar gerektiren durumda su 3 ekseni skorla ve tablodaki aksiyonu oner:

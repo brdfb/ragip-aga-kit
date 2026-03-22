@@ -6,6 +6,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.8.14] - 2026-03-22
+
+### Changed — ragip_output Entegrasyonu + Sentez Kaydetme
+
+- **agents/ragip-hesap.md, ragip-arastirma.md, ragip-hukuk.md, ragip-veri.md**: Inline bash+Python cikti kaydetme kodu kaldirildi, `ragip_output.kaydet()` ile degistirildi — frontmatter, manifest, firma klasoru otomatik
+- **agents/ragip-aga.md**: Sentez ciktisini kaydetme kurali eklendi — orchestrator interaktif modda is yaptiginda da cikti kayit altina aliniyor (agent='aga', skill='sentez')
+- **tests/test_ragip_subagents.py**: 2 yeni test — sub-agent'larin ragip_output kullanimini ve orchestrator sentez kaydetme kuralini dogruluyor
+- **docs/PROJE_GENEL_BAKIS.md**: v2.8.14, 364 test, 23 metot, ragip_output.py dosya yapisina eklendi
+- Toplam test: 362 → 364
+
+---
+
 ## [2.8.13] - 2026-03-21
 
 ### Added — Nakit Projeksiyon + Cikti Altyapisi (Faz 5)

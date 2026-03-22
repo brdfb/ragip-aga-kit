@@ -130,31 +130,21 @@ Her degerlendirme, zamanasimi hesabi, delil stratejisi ve ihtar ciktisini dosyay
 
 **SIRALAMA KURALI:** Once TUM analizi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
 
-**Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
-
-**Kaydetme kodu (her ciktinin sonunda calistir):**
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
 ```bash
 cat <<'RAGIP_EOF' | python3 -c "
-import subprocess as _sp, sys
-from pathlib import Path
-from datetime import datetime
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
-dizin.mkdir(parents=True, exist_ok=True)
-ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-dosya = dizin / f'{ts}-hukuk-SKILL_ADI-KONU.md'
-dosya.write_text(sys.stdin.read(), encoding='utf-8')
-print(f'Cikti kaydedildi: {dosya.name}')
+import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
+from ragip_output import kaydet
+icerik = sys.stdin.read()
+yol = kaydet('hukuk', 'SKILL_ADI', 'FIRMA_ADI', icerik)
+print(f'Cikti kaydedildi: {yol}')
 "
 ICERIK_BURAYA
 RAGIP_EOF
 ```
 
-**Dosya adi kurallari:**
-- `{ts}-hukuk-degerlendirme-{konu}.md` — hukuki degerlendirme raporu
-- `{ts}-hukuk-zamanasimi-{tur}.md` — zamanasimi hesabi
-- `{ts}-hukuk-delil-{konu}.md` — delil stratejisi raporu
-- `{ts}-hukuk-ihtar-{tur}.md` — ihtar taslagi
+**SKILL_ADI:** degerlendirme, zamanasimi, delil, ihtar (skill'e gore degistir)
+**FIRMA_ADI:** Firmanin tam adi (slug otomatik olusur)
 
 **Onceki ciktilara referans:** Orchestrator Task prompt'unda dosya yolu verirse, Read ile oku ve degerlendirmeyi ona gore derinlestir.
 

@@ -476,6 +476,32 @@ class TestCiktiYonetimi:
                 f"{f.name} icinde '{beklenen}' referansi eksik"
             )
 
+    def test_subagentlar_ragip_output_kullaniyor(self):
+        """Tum sub-agent'lar ragip_output.kaydet() kullanimali (inline degil)"""
+        for f in ALL_SUBAGENT_FILES:
+            text = f.read_text(encoding="utf-8")
+            if "CIKTI KAYDETME" not in text:
+                continue  # veri gibi opsiyonel olanlar
+            assert "ragip_output" in text, (
+                f"{f.name} ragip_output modulu kullanmiyor — inline kaydetme kalkmali"
+            )
+            assert "from ragip_output import kaydet" in text, (
+                f"{f.name} 'from ragip_output import kaydet' eksik"
+            )
+
+    def test_orchestrator_sentez_kaydetme(self):
+        """ragip-aga sentez ciktisini kaydetme kurali icermeli"""
+        text = ORCHESTRATOR_FILE.read_text(encoding="utf-8")
+        assert "SENTEZ CIKTISINI KAYDET" in text, (
+            "ragip-aga'da SENTEZ CIKTISINI KAYDET kurali eksik"
+        )
+        assert "ragip_output" in text, (
+            "ragip-aga sentez kaydetmede ragip_output modulu kullanmiyor"
+        )
+        assert "kaydet('aga'" in text, (
+            "ragip-aga sentez kaydetmede agent='aga' parametresi eksik"
+        )
+
 
 # --- Test: Portability (repo-relative paths) ---
 

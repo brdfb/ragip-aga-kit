@@ -150,6 +150,7 @@ ragip_crud.py atomic write (tmp -> rename) yapiyor. Ama iki skill ayni anda ayni
 **Not (v2.8.9):** validate_fatura/validate_faturalar testleri eklendi (21 test). Toplam 290 test.
 **Not (v2.8.12):** Katman 3 integration testleri eklendi (27 test). Toplam 327 test.
 **Not (v2.8.13):** Nakit projeksiyon + odeme trend + ragip_output testleri eklendi (30 test). Toplam 357 test.
+**Not (v2.8.14):** ragip_output entegrasyon testleri eklendi (2 test). Toplam 364 test.
 
 **Degerlendirme zamani:** Katman 3 tamamlandi. Katman 4 muhtemelen hic yazilmaz (ADR-0008 gerekceye bakiniz).
 

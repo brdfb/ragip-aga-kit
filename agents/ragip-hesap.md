@@ -69,25 +69,22 @@ Her hesaplama sonucunu dosyaya KAYDET. Diger alt-ajanlar (strateji, ihtar) bu ra
 
 **SIRALAMA KURALI:** Once TUM hesaplamayi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
 
-**Dizin:** `data/RAGIP_AGA/ciktilar/` (repo koku altinda)
-
-Hesaplama tamamlandiktan sonra:
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
 ```bash
+ROOT=$(git rev-parse --show-toplevel)
 cat <<'RAGIP_EOF' | python3 -c "
-import subprocess as _sp, sys
-from pathlib import Path
-from datetime import datetime
-_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
-dizin = Path(_ROOT) / 'data/RAGIP_AGA/ciktilar'
-dizin.mkdir(parents=True, exist_ok=True)
-ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-dosya = dizin / f'{ts}-hesap-SKILL_ADI-KONU.md'
-dosya.write_text(sys.stdin.read(), encoding='utf-8')
-print(f'Cikti kaydedildi: {dosya.name}')
+import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
+from ragip_output import kaydet
+icerik = sys.stdin.read()
+yol = kaydet('hesap', 'SKILL_ADI', 'FIRMA_ADI', icerik)
+print(f'Cikti kaydedildi: {yol}')
 "
 HESAPLAMA_SONUCU
 RAGIP_EOF
 ```
+
+**SKILL_ADI:** vade-farki, arbitraj, rapor (skill'e gore degistir)
+**FIRMA_ADI:** Firmanin tam adi (slug otomatik olusur)
 
 ## SINIRLAR
 
