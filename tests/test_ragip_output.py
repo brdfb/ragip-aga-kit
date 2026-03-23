@@ -6,7 +6,10 @@ from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 
-from ragip_output import _slug, _frontmatter, kaydet, son_cikti, veri_tazeligi, tazelik_ozeti
+from ragip_output import (
+    _slug, _frontmatter, _parmak_izi, _ayni_cikti_var_mi,
+    kaydet, son_cikti, veri_tazeligi, tazelik_ozeti,
+)
 
 
 class TestSlug:
@@ -249,3 +252,136 @@ class TestVeriTazeligi:
         monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
         ozet = tazelik_ozeti(firma="Olmayan Firma")
         assert "ilk analiz" in ozet
+
+
+class TestParmakIzi:
+    """Fingerprint hesaplama."""
+
+    def test_deterministik(self):
+        h1 = _parmak_izi("hesap", "rapor", "icerik A")
+        h2 = _parmak_izi("hesap", "rapor", "icerik A")
+        assert h1 == h2
+
+    def test_farkli_icerik_farkli_hash(self):
+        h1 = _parmak_izi("hesap", "rapor", "icerik A")
+        h2 = _parmak_izi("hesap", "rapor", "icerik B")
+        assert h1 != h2
+
+    def test_farkli_agent_farkli_hash(self):
+        h1 = _parmak_izi("hesap", "rapor", "x")
+        h2 = _parmak_izi("hukuk", "rapor", "x")
+        assert h1 != h2
+
+    def test_farkli_skill_farkli_hash(self):
+        h1 = _parmak_izi("hesap", "rapor", "x")
+        h2 = _parmak_izi("hesap", "analiz", "x")
+        assert h1 != h2
+
+    def test_format(self):
+        h = _parmak_izi("a", "b", "c")
+        assert h.startswith("sha256:")
+        assert len(h) == 7 + 64  # "sha256:" + 64 hex
+
+
+class TestDedup:
+    """Idempotency — ayni ciktiyi tekrar yazmama."""
+
+    def test_ayni_cikti_dedup(self, tmp_path, monkeypatch):
+        """Ayni agent+skill+icerik ile 2 kez kaydet → 1 dosya."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        yol1 = kaydet("hesap", "rapor", "Firma A", "ayni icerik")
+        yol2 = kaydet("hesap", "rapor", "Firma A", "ayni icerik")
+        assert yol1 == yol2
+
+        # Manifest'te sadece 1 kayit olmali
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        satirlar = [l for l in manifest.read_text('utf-8').strip().split('\n') if l.strip()]
+        assert len(satirlar) == 1
+
+    def test_farkli_icerik_yeni_dosya(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        yol1 = kaydet("hesap", "rapor", "Firma A", "icerik 1")
+        yol2 = kaydet("hesap", "rapor", "Firma A", "icerik 2")
+        # Farkli icerik → dedup engellemez, dosya yazilir
+        # Ayni saniyede olursa dosya adi ayni olabilir, manifest'te 2 kayit olmali
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        satirlar = [l for l in manifest.read_text('utf-8').strip().split('\n') if l.strip()]
+        assert len(satirlar) == 2
+        k1 = json.loads(satirlar[0])
+        k2 = json.loads(satirlar[1])
+        assert k1['parmak_izi'] != k2['parmak_izi']
+
+    def test_dedup_devre_disi(self, tmp_path, monkeypatch):
+        """dedup=False ile her zaman yeni dosya yazilir."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        yol1 = kaydet("hesap", "rapor", "Firma", "icerik", dedup=False)
+        import time; time.sleep(1.1)  # timestamp farki icin
+        yol2 = kaydet("hesap", "rapor", "Firma", "icerik", dedup=False)
+        assert yol1 != yol2
+
+    def test_manifest_parmak_izi_alani(self, tmp_path, monkeypatch):
+        """Manifest entry'de parmak_izi alani bulunur."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        kaydet("hesap", "rapor", "Firma", "icerik")
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        kayit = json.loads(manifest.read_text('utf-8').strip().split('\n')[0])
+        assert "parmak_izi" in kayit
+        assert kayit["parmak_izi"].startswith("sha256:")
+
+    def test_eski_manifest_uyumlu(self, tmp_path, monkeypatch):
+        """Parmak_izi olmayan eski manifest kayitlari hata vermez."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        # Eski format manifest entry (parmak_izi yok)
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        eski = {"firma": "X", "agent": "hesap", "skill": "rapor",
+                "dosya": "eski.md", "tarih": datetime.now().isoformat(), "boyut": 10}
+        manifest.write_text(json.dumps(eski) + '\n', encoding='utf-8')
+
+        # Yeni kaydet calismali (eski kayitla eslesmez)
+        yol = kaydet("hesap", "rapor", "X", "yeni icerik")
+        assert yol  # dosya olusturuldu
+
+    def test_dedup_penceresi(self, tmp_path, monkeypatch):
+        """24 saat onceki kayit dedup'a takilmaz."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        # Once bir kayit olustur
+        kaydet("hesap", "rapor", "F", "icerik X")
+
+        # Manifest'teki tarihi 25 saat oncesine cek
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        from datetime import timedelta
+        eski_tarih = (datetime.now() - timedelta(hours=25)).isoformat()
+        satir = manifest.read_text('utf-8').strip()
+        kayit = json.loads(satir)
+        kayit['tarih'] = eski_tarih
+        manifest.write_text(json.dumps(kayit, ensure_ascii=False) + '\n', encoding='utf-8')
+
+        # Ayni icerik tekrar yazilmali (24h doldu)
+        yol = kaydet("hesap", "rapor", "F", "icerik X")
+        satirlar = [l for l in manifest.read_text('utf-8').strip().split('\n') if l.strip()]
+        assert len(satirlar) == 2  # 2 kayit (eski + yeni)
+
+    def test_pii_temizle(self, tmp_path, monkeypatch):
+        """pii_temizle=True ile manifest'te firma hash'lenir."""
+        monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
+
+        kaydet("hesap", "rapor", "Geneks Kimya", "icerik", pii_temizle=True)
+        from ragip_output import _manifest_path
+        manifest = _manifest_path()
+        kayit = json.loads(manifest.read_text('utf-8').strip().split('\n')[0])
+        # Firma alani hash'lenmis olmali
+        assert kayit["firma"].startswith("h:")
+        # Agent/skill temizlenmemis
+        assert kayit["agent"] == "hesap"

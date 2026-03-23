@@ -10,10 +10,11 @@ Kullanim (agent bash block'larinda):
     kaydet('arastirma', 'dis-veri', 'geneks_kimya', icerik)
     "
 """
+import hashlib
 import json
 import re
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 
@@ -86,7 +87,50 @@ def _frontmatter(agent, skill, firma, firma_id=None, ekstra=None):
     return '\n'.join(lines)
 
 
-def kaydet(agent, skill, firma, icerik, firma_id=None, ekstra_meta=None):
+def _parmak_izi(agent, skill, icerik):
+    """SHA-256(agent|skill|icerik) → "sha256:{hex}" fingerprint.
+
+    Ayni agent, skill ve icerik kombinasyonu her zaman ayni hash uretir.
+    Dedup kontrolu icin kullanilir.
+    """
+    ham = f"{agent}|{skill}|{icerik}"
+    return "sha256:" + hashlib.sha256(ham.encode('utf-8')).hexdigest()
+
+
+def _ayni_cikti_var_mi(parmak_izi, saat=24):
+    """Manifest'te son N saat icinde ayni fingerprint var mi?
+
+    Args:
+        parmak_izi: SHA-256 fingerprint string
+        saat: Dedup penceresi (varsayilan 24 saat)
+
+    Returns:
+        dict | None: Eslesen manifest kaydi veya None
+    """
+    manifest = _manifest_path()
+    if not manifest.exists():
+        return None
+    esik = datetime.now() - timedelta(hours=saat)
+    for line in manifest.read_text('utf-8').strip().split('\n'):
+        if not line.strip():
+            continue
+        try:
+            kayit = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if kayit.get('parmak_izi') != parmak_izi:
+            continue
+        tarih_str = kayit.get('tarih', '')
+        try:
+            if datetime.fromisoformat(tarih_str) > esik:
+                return kayit
+        except ValueError:
+            continue
+    return None
+
+
+def kaydet(agent, skill, firma, icerik, firma_id=None, ekstra_meta=None,
+           dedup=True, pii_temizle=False):
     """Cikti dosyasini standart formatta kaydeder.
 
     Args:
@@ -96,10 +140,21 @@ def kaydet(agent, skill, firma, icerik, firma_id=None, ekstra_meta=None):
         icerik: Markdown icerik (frontmatter otomatik eklenir)
         firma_id: Opsiyonel firma GUID/ID
         ekstra_meta: Opsiyonel ekstra frontmatter alanlari (dict)
+        dedup: True ise ayni icerik 24 saat icinde tekrar yazilmaz (varsayilan True)
+        pii_temizle: True ise manifest entry'de PII temizlenir (varsayilan False)
 
     Returns:
-        str: Kaydedilen dosyanin yolu (repo-relative)
+        str: Kaydedilen (veya mevcut) dosyanin yolu (repo-relative)
     """
+    # Dedup kontrolu
+    if dedup:
+        pz = _parmak_izi(agent, skill, icerik)
+        mevcut = _ayni_cikti_var_mi(pz)
+        if mevcut:
+            return mevcut.get('dosya', '')
+    else:
+        pz = None
+
     root = Path(get_root())
     firma_slug = _slug(firma)
     ay = _ay_dizini()
@@ -133,6 +188,17 @@ def kaydet(agent, skill, firma, icerik, firma_id=None, ekstra_meta=None):
         'tarih': datetime.now().isoformat(),
         'boyut': len(tam_icerik),
     }
+    if pz:
+        manifest_entry['parmak_izi'] = pz
+
+    # PII temizleme (opsiyonel)
+    if pii_temizle:
+        try:
+            from ragip_pii import kayit_temizle
+            manifest_entry = kayit_temizle(manifest_entry)
+        except ImportError:
+            pass  # ragip_pii mevcut degil — temizlemeden devam
+
     manifest = _manifest_path()
     manifest.parent.mkdir(parents=True, exist_ok=True)
     with open(manifest, 'a', encoding='utf-8') as f:

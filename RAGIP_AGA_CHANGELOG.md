@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.9.0] - 2026-03-23
+
+### Added — Savunma Katmanlari (ADR-0010)
+
+gibibyte-agent'ta (v0.9.0) kanitlanmis 4 muhendislik pattern'i kit'e tasinarak jenerik altyapi guclendirmesi yapildi.
+
+- **scripts/ragip_errors.py**: Yapilandirilmis hata siniflandirmasi — HataTuru (GECICI/KALICI/POLITIKA), RagipHata exception sinifi, siniflandir() ve tekrar_denenebilir() helper'lari
+- **scripts/ragip_pii.py**: PII temizleyici — email/telefon/TCKN/IBAN regex maskeleme + firma/musteri alan hash'leme (SHA-256). MSP multi-tenant senaryolari icin
+- **scripts/ragip_output.py**: Idempotency — _parmak_izi() SHA-256 fingerprint + 24h dedup penceresi. kaydet() fonksiyonuna dedup=True ve pii_temizle=False parametreleri eklendi
+- **scripts/ragip_rates.py**: TCMB Protocol pattern — OranSaglayici Protocol, StubSaglayici (test), EVDSSaglayici (production), saglayici_olustur() factory
+- **docs/adr/0010-savunma-katmanlari.md**: Mimari karar kaydi
+- **docs/FEATURE_IDEAS.md**: I9 — Prompt caching izleme maddesi eklendi
+- Toplam test: 386 → ~443, Script: 5 → 7
+
+---
+
 ## [2.8.16] - 2026-03-22
 
 ### Added — Kur Farki Hesaplama

@@ -35,6 +35,7 @@ __all__ = [
     "eur_usd_cross", "en_yuksek_mevduat",
     "format_pretty", "format_mevduat", "format_kredi",
     "load_cache", "save_cache",
+    "OranSaglayici", "EVDSSaglayici", "StubSaglayici", "saglayici_olustur",
 ]
 
 CACHE_DIR = Path(os.environ.get("RAGIP_CACHE_DIR", str(Path(__file__).parent / ".ragip_cache")))
@@ -340,6 +341,77 @@ def format_kredi(data: dict) -> str:
         lines.append(f"  {banka:<20} {faiz:>8}  {mn:>10}  {mx:>10}")
     lines.append("=" * 60)
     return "\n".join(lines)
+
+
+# ─── Protocol Pattern ────────────────────────────────────────────────────────
+# Swap edilebilir oran saglayici: test icin StubSaglayici, production icin EVDSSaglayici.
+# typing.Protocol stdlib 3.8+ (kit 3.12+ gerektiriyor).
+
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class OranSaglayici(Protocol):
+    """TCMB oran saglayici protokolu.
+
+    Herhangi bir sinif bu iki metodu uygularsa OranSaglayici olarak kullanilabilir.
+    """
+    def oran_cek(self, seri_kodu: str) -> float | None: ...
+    def tum_oranlar(self) -> dict: ...
+
+
+class EVDSSaglayici:
+    """Gercek TCMB EVDS3 saglayicisi.
+
+    fetch_series() ve fetch_tcmb() fonksiyonlarini sarar.
+    """
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+
+    def oran_cek(self, seri_kodu: str) -> float | None:
+        return fetch_series(seri_kodu, self.api_key)
+
+    def tum_oranlar(self) -> dict:
+        return fetch_tcmb(self.api_key)
+
+
+class StubSaglayici:
+    """Test icin sahte saglayici — API cagrisi yapmaz, sabit oranlar doner."""
+    def __init__(self, oranlar: dict | None = None):
+        self._oranlar = oranlar or dict(FALLBACK_RATES)
+
+    def oran_cek(self, seri_kodu: str) -> float | None:
+        for ad, kod in SERIES.items():
+            if kod == seri_kodu:
+                v = self._oranlar.get(ad)
+                return float(v) if v is not None else None
+        return None
+
+    def tum_oranlar(self) -> dict:
+        r = dict(self._oranlar)
+        r['kaynak'] = 'stub'
+        r['guncelleme'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        return r
+
+
+def saglayici_olustur(tur: str = 'evds', api_key: str | None = None,
+                       oranlar: dict | None = None) -> OranSaglayici | None:
+    """Factory: saglayici tipi secimi.
+
+    Args:
+        tur: 'stub' veya 'evds'
+        api_key: TCMB API anahtari (evds icin)
+        oranlar: Stub icin ozel oranlar (varsayilan: FALLBACK_RATES)
+
+    Returns:
+        OranSaglayici veya None (evds icin api_key yoksa)
+    """
+    if tur == 'stub':
+        return StubSaglayici(oranlar)
+    key = api_key or os.environ.get('TCMB_API_KEY', '').strip()
+    if not key:
+        return None
+    return EVDSSaglayici(key)
 
 
 # ─── CLI ─────────────────────────────────────────────────────────────────────

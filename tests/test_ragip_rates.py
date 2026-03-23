@@ -227,3 +227,72 @@ class TestAllExports:
     def test_no_get_env_key(self):
         """get_env_key kaldirilmis olmali"""
         assert not hasattr(ragip_rates, "get_env_key")
+
+
+class TestOranSaglayiciProtocol:
+    """Protocol pattern — swap edilebilir oran saglayici."""
+
+    def test_stub_isinstance(self):
+        """StubSaglayici OranSaglayici Protocol'unu uygulamali."""
+        stub = ragip_rates.StubSaglayici()
+        assert isinstance(stub, ragip_rates.OranSaglayici)
+
+    def test_evds_isinstance(self):
+        """EVDSSaglayici OranSaglayici Protocol'unu uygulamali."""
+        evds = ragip_rates.EVDSSaglayici(api_key="test")
+        assert isinstance(evds, ragip_rates.OranSaglayici)
+
+    def test_stub_tum_oranlar(self):
+        """StubSaglayici varsayilan FALLBACK_RATES doner."""
+        stub = ragip_rates.StubSaglayici()
+        oranlar = stub.tum_oranlar()
+        assert oranlar["kaynak"] == "stub"
+        assert "politika_faizi" in oranlar
+        assert "usd_kuru" in oranlar
+
+    def test_stub_ozel_oranlar(self):
+        """StubSaglayici ozel oranlarla yapilandirilabilir."""
+        ozel = {"politika_faizi": 50.0, "usd_kuru": 40.0}
+        stub = ragip_rates.StubSaglayici(oranlar=ozel)
+        oranlar = stub.tum_oranlar()
+        assert oranlar["politika_faizi"] == 50.0
+        assert oranlar["usd_kuru"] == 40.0
+
+    def test_stub_oran_cek(self):
+        """StubSaglayici seri koduyla oran cekilir."""
+        stub = ragip_rates.StubSaglayici()
+        # TP.DK.USD.A.YTL → usd_kuru
+        deger = stub.oran_cek("TP.DK.USD.A.YTL")
+        assert deger == ragip_rates.FALLBACK_RATES["usd_kuru"]
+
+    def test_stub_oran_cek_bilinmeyen_seri(self):
+        """Bilinmeyen seri kodu icin None doner."""
+        stub = ragip_rates.StubSaglayici()
+        assert stub.oran_cek("TP.BILINMEYEN") is None
+
+    def test_evds_instantiation(self):
+        """EVDSSaglayici api_key ile olusturulur."""
+        evds = ragip_rates.EVDSSaglayici(api_key="test123")
+        assert evds.api_key == "test123"
+
+    def test_factory_stub(self):
+        """saglayici_olustur('stub') StubSaglayici doner."""
+        s = ragip_rates.saglayici_olustur(tur='stub')
+        assert isinstance(s, ragip_rates.StubSaglayici)
+
+    def test_factory_evds_with_key(self):
+        """saglayici_olustur('evds', api_key=...) EVDSSaglayici doner."""
+        s = ragip_rates.saglayici_olustur(tur='evds', api_key='test')
+        assert isinstance(s, ragip_rates.EVDSSaglayici)
+
+    def test_factory_evds_no_key(self):
+        """API key yoksa None doner."""
+        with patch.dict(os.environ, {}, clear=True):
+            s = ragip_rates.saglayici_olustur(tur='evds')
+            assert s is None
+
+    def test_factory_stub_ozel_oranlar(self):
+        """Factory stub'a ozel oranlar gecebilir."""
+        ozel = {"usd_kuru": 99.0}
+        s = ragip_rates.saglayici_olustur(tur='stub', oranlar=ozel)
+        assert s.tum_oranlar()["usd_kuru"] == 99.0

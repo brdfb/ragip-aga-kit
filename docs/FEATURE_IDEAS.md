@@ -220,6 +220,10 @@ Senaryo A deneysel, auto-delegation sınırı nedeniyle üretim için önerilmez
 
 Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basladikca degerlendirilecek.
 
+### I9. Prompt Caching (cache_control: ephemeral)
+
+gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniyor — Anthropic API'de tekrar eden system prompt'lari onbellege alarak token tasarrufu sagliyor. Claude Code LLM cagrilarini kendisi yonetiyor — kit tarafindan kontrol edilemiyor. Claude Code bu ozelligi desteklerse agent YAML'lerine `cache_control` eklenebilir. Simdilik aksiyon yok.
+
 ---
 
 ## D. Tamamlanan (10/10)
