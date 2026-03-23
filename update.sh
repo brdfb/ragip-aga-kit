@@ -142,10 +142,13 @@ for f in sorted(kit_root.glob("skills/ragip-*/SKILL.md")):
     rel = kit_to_installed(str(f.relative_to(kit_root)))
     kit_files[rel] = {"kit_path": str(f), "new_hash": sha256_file(f)}
 
-for name in ["ragip_aga.py", "ragip_rates.py", "ragip_crud.py", "ragip_get_rates.sh"]:
-    f = kit_root / "scripts" / name
-    if f.exists():
-        kit_files[f"scripts/{name}"] = {"kit_path": str(f), "new_hash": sha256_file(f)}
+for f in sorted(kit_root.glob("scripts/ragip_*.py")):
+    rel = str(f.relative_to(kit_root))
+    kit_files[rel] = {"kit_path": str(f), "new_hash": sha256_file(f)}
+
+for f in sorted(kit_root.glob("scripts/ragip_*.sh")):
+    rel = str(f.relative_to(kit_root))
+    kit_files[rel] = {"kit_path": str(f), "new_hash": sha256_file(f)}
 
 f = kit_root / "config" / "ragip_aga.yaml"
 if f.exists():
