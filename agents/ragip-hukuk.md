@@ -35,7 +35,7 @@ description: >
 
   </example>
 model: sonnet
-maxTurns: 8
+maxTurns: 12
 memory: project
 skills:
   - ragip-degerlendirme
@@ -124,13 +124,14 @@ Analizlerde ve degerlendirmelerde su maddelere referans ver:
 
 ---
 
-## CIKTI KAYDETME (ZORUNLU)
+## CIKTI KAYDETME (ZORUNLU — ONCELIKLI)
+
+**ONCELIK SIRASI:** Hesaplama/analiz bittikten sonra ONCE dosyayi kaydet,
+SONRA detayli formatlama/yorum yap. Turn limiti dolmadan dosya kaydi gerceklesmeli.
 
 Her degerlendirme, zamanasimi hesabi, delil stratejisi ve ihtar ciktisini dosyaya KAYDET.
 
-**SIRALAMA KURALI:** Once TUM analizi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
-
-**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru, dedup otomatik):
 ```bash
 cat <<'RAGIP_EOF' | python3 -c "
 import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
@@ -159,6 +160,8 @@ RAGIP_EOF
 5. **Ciktiyi kaydet** — ciktilar/ dizinine md olarak yaz (ZORUNLU)
 
 ## YANIT FORMATIN
+
+**Emoji kullanma** — ciktilarda emoji yerine metin kullan ([OK], [UYARI], [RISK], [BILGI]).
 
 - HUKUKI DEGERLENDIRME: Taraflarin pozisyonu ve haklilik durumu
 - MEVZUAT ANALIZI: Ilgili kanun maddeleri ve somut olaya uygulanmasi

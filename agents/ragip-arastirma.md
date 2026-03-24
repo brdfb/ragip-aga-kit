@@ -34,7 +34,7 @@ description: >
 
   </example>
 model: sonnet
-maxTurns: 8
+maxTurns: 12
 memory: project
 skills:
   - ragip-analiz
@@ -99,13 +99,14 @@ Analizlerde ve tavsiyelerde su maddelere referans ver:
 
 ---
 
-## CIKTI KAYDETME (ZORUNLU)
+## CIKTI KAYDETME (ZORUNLU — ONCELIKLI)
+
+**ONCELIK SIRASI:** Hesaplama/analiz bittikten sonra ONCE dosyayi kaydet,
+SONRA detayli formatlama/yorum yap. Turn limiti dolmadan dosya kaydi gerceklesmeli.
 
 Her analiz, strateji ve ihtar ciktisini dosyaya KAYDET. Diger alt-ajanlar ve gelecek session'lar bu ciktilara ihtiyac duyar.
 
-**SIRALAMA KURALI:** Once TUM analizi tamamla, SONRA kaydet. Erken kaydetme — eksik icerikle dosya olusur. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
-
-**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru, dedup otomatik):
 ```bash
 cat <<'RAGIP_EOF' | python3 -c "
 import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
@@ -165,6 +166,8 @@ Birden fazla skill gerekiyorsa sirayla calistir (orn: once dis-veri → sonra st
 ### 4. Ciktiyi kaydet — ciktilar/ dizinine md olarak yaz (ZORUNLU)
 
 ## YANIT FORMATIN
+
+**Emoji kullanma** — ciktilarda emoji yerine metin kullan ([OK], [UYARI], [RISK], [BILGI]).
 
 - DURUM ANALIZI: Mevcut durumun gercekci degerlendirmesi
 - HESAPLAMALAR: Vade farki, TVM, gunluk maliyet — gercek rakamlarla

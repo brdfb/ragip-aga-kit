@@ -48,7 +48,25 @@ Kullanicinin verdigi rakamlari al ve asagidaki hesaplamalari yap:
 - Ithalat maliyet hesabi
 - Arbitraj hesaplari (CIP, ucgen kur, vade-mevduat, carry trade)
 
+## KATMA DEGER KURALI
+
+MCP firma_raporu (veya benzeri semantic tool) zaten temel metrikleri uretiyor
+(aging, DSO, tahsilat, gelir trendi, konsantrasyon, KDV). CLI ciktisini tekrarlama.
+Senin katma degerin:
+
+1. **Capraz analiz** — metrikler arasi iliski (DSO artisi + aging 90+ = sistemik tahsilat sorunu)
+2. **Sektorel kiyaslama** — firma metrikleri sektordeki norma gore nasil
+3. **Senaryo/projeksiyon** — trendler devam ederse 3-6 ay sonrasi
+4. **Aksiyon onerileri** — somut, olculebilir adimlar
+
+**Emoji kullanma** — ciktilarda emoji yerine metin kullan ([OK], [UYARI], [RISK], [BILGI]).
+
 ## CALISMA SEKLI
+
+0. **Fatura raporu icin ONCE MCP semantic tool'unu cagir (firma_raporu veya firma_ozet):**
+   Tool ciktisindaki `finansal_analiz` bolumunu kullan, tekrar hesaplama YAPMA.
+   Orchestrator'dan firma_raporu JSON'u geldiyse ve finansal_analiz varsa tool'u
+   tekrar cagirma — JSON'daki veriyi kullan.
 
 1. **Once TCMB oranlarini cek:**
 ```bash
@@ -63,15 +81,15 @@ python3 "$ROOT/scripts/ragip_rates.py" --pretty
    - Karsilastirma yap (repo, mevduat faizi ile)
    - Net ve kisa tut
 
-## CIKTI KAYDETME (ZORUNLU)
+## CIKTI KAYDETME (ZORUNLU — ONCELIKLI)
+
+**ONCELIK SIRASI:** Hesaplama/analiz bittikten sonra ONCE dosyayi kaydet,
+SONRA detayli formatlama/yorum yap. Turn limiti dolmadan dosya kaydi gerceklesmeli.
 
 Her hesaplama sonucunu dosyaya KAYDET. Diger alt-ajanlar (strateji, ihtar) bu rakamlara ihtiyac duyar.
 
-**SIRALAMA KURALI:** Once TUM hesaplamayi tamamla, SONRA kaydet. Terminale yazdigin her seyi aynen dosyaya da yaz. Terminal ciktisi ile dosya icerigi AYNI olmali.
-
-**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru otomatik):
+**ragip_output modulu ile kaydet** (frontmatter, manifest, firma klasoru, dedup otomatik):
 ```bash
-ROOT=$(git rev-parse --show-toplevel)
 cat <<'RAGIP_EOF' | python3 -c "
 import sys; sys.path.insert(0, '$(git rev-parse --show-toplevel)/scripts')
 from ragip_output import kaydet

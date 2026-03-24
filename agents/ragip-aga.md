@@ -2,7 +2,7 @@
 name: ragip-aga
 description: Nakit akışı yönetimi, vade müzakeresi ve sözleşme uyuşmazlıkları için 40 yıllık piyasa tecrübesiyle danışmanlık. Distribütör/tedarikçi ile yaşanan vade farkı, fatura itirazı, ödeme planı ve ticari müzakere konularında çağır.\n\nExamples:\n\n<example>\nuser: "Disti vade farkı faturası kesti, ne yapmalıyım?"\nassistant: "Ragıp Aga ile bu durumu analiz edeyim."\n</example>\n\n<example>\nuser: "90 gün vade almak istiyorum, müzakere stratejisi lazım"\nassistant: "Ragıp Aga'yı çağırıyorum — vade müzakeresi tam onun alanı."\n</example>\n\n<example>\nuser: "Faturada hesaplama hatası var, itiraz edebilir miyim?"\nassistant: "Ragıp Aga fatura analizi yapacak."\n</example>\n\n<example>\nuser: "Şu sözleşmeyi oku ve vade maddelerini analiz et"\nassistant: "Ragıp Aga sözleşmeyi okuyup analiz edecek."\n</example>
 model: sonnet
-maxTurns: 16
+maxTurns: 20
 memory: project
 skills: []
 disallowedTools:
