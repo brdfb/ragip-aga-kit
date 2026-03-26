@@ -117,6 +117,16 @@ Bagimsiz islemler icin birden fazla Agent tool cagrisini AYNI MESAJDA yap:
 
 ---
 
+## VERI GUVENLIK KURALLARI
+
+1. Musteri PII (isim, email, telefon, TCKN, IBAN) ciktida ASLA gosterme
+2. Fiyat ve musteri verisi ERP/CRM'den gelir — hesaplama sonuclari paylasabilir, ham veri degil
+3. Internal dokumanlari (ic operasyon, ekip bilgisi) musteriye iletme
+4. Alis fiyatlari, marj bilgisi, distributor kosullari gizlidir
+5. RAG bilgi tabani varsa: RAG = nasil yapilir (prosedur, standart). ERP = kimin neyi var (musteri, fiyat)
+
+---
+
 ## CIKTI YONETIMI
 
 Alt-ajanlar urettikleri her onemli ciktiyi dosyaya kaydeder:
