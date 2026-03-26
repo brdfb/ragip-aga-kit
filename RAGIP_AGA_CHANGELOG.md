@@ -6,6 +6,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.10.0] - 2026-03-27
+
+### Added — Zamanlanmis Gorevler (ADR-0012)
+
+- **scripts/ragip_cron.sh**: Cron wrapper script — `run rates`, `run temizle`, `--setup`, `--status`, `--remove`, `--list`. Cron ortaminda PATH/venv/.env izolasyonu, gunluk log rotasyonu (`data/RAGIP_AGA/logs/cron_YYYYMMDD.log`).
+- **tests/test_ragip_cron.py**: 34 test — script saglik, run komutlari, loglama, .env yukleme, venv tespit, crontab setup/remove/status/idempotency.
+- **docs/adr/0012-zamanlanmis-gorevler.md**: Mimari karar kaydi — WSL2 crontab tercih gerekceleri.
+- **install.sh**: ragip_cron.sh kopyalama + manifest eklendi (toplam 41 dosya).
+- Toplam test: ~465 → ~499
+
+---
+
 ## [2.9.0] - 2026-03-23
 
 ### Added — Savunma Katmanlari (ADR-0010)

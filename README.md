@@ -36,7 +36,7 @@ bash /path/to/ragip-aga-kit/update.sh
 - Onizleme icin: `bash update.sh --dry-run`
 - Ayni surumde zorla: `bash update.sh --force`
 
-Her kurulumda `config/.ragip_manifest.json` dosyasina 33 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
+Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 checksum'i kaydedilir. Guncelleme sirasinda uclu karsilastirma yapilir: manifest (kit hash) vs mevcut dosya vs yeni kit. Kullanici degisikligi tespit edilirse dosyaya dokunulmaz — ardisik update'lerde de korunur.
 
 ## Ne Kuruluyor
 
@@ -44,10 +44,10 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 33 core dosyanin SHA-256 c
 |-----|------|-------|
 | Agent | 5 | `.claude/agents/ragip-*.md` |
 | Skill | 15 | `.claude/skills/ragip-*/SKILL.md` |
-| Script | 5 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` |
+| Script | 8 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` + `ragip_cron.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 7 | `tests/test_ragip_*.py` |
+| Test | 12 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -118,11 +118,12 @@ ragip-aga (orchestrator, sonnet)
 
 - **`scripts/ragip_get_rates.sh`** — TCMB oranlarini cekmek icin tek kaynak. Fallback zinciri: canli API → cache → FALLBACK_RATES. Tum oran kullanan skill'ler (vade-farki, arbitraj, strateji) bu helper'i cagirir.
 - **`scripts/ragip_crud.py`** — CRUD skill'leri icin paylasimli yardimci modul. `load/save_jsonl`, `load/save_json`, `parse_kv`, `atomic_write`, `next_id` + ADR-0007 sema dogrulamasi (`validate_fatura`, `validate_faturalar`).
+- **`scripts/ragip_cron.sh`** — Zamanlanmis gorev wrapper. `run rates` (TCMB oran yenileme), `run temizle` (ciktilar temizleme), `--setup/--status/--remove` (crontab yonetimi). Cron ortaminda PATH/venv/.env izolasyonu + gunluk log rotasyonu.
 
 ## Test
 
 ```bash
-# Tam suite (465 test)
+# Tam suite (499 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -135,9 +136,12 @@ python -m pytest tests/test_ragip_install.py -v         # Install/update
 python -m pytest tests/test_ragip_temizle.py -v         # ragip_temizle.sh
 python -m pytest tests/test_ragip_integration.py -v    # Katman 3 integration (D365)
 python -m pytest tests/test_ragip_output.py -v         # Cikti yonetimi
+python -m pytest tests/test_ragip_errors.py -v         # Hata siniflandirmasi
+python -m pytest tests/test_ragip_pii.py -v            # PII temizleyici
+python -m pytest tests/test_ragip_cron.py -v           # Zamanlanmis gorevler
 ```
 
-Testler 9 katmani kapsar:
+Testler 12 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
@@ -147,6 +151,9 @@ Testler 9 katmani kapsar:
 7. **Temizle** — ragip_temizle.sh yas bazli + limit bazli silme, dry-run, dosya filtresi
 8. **Integration** — Gercek D365 veri yapisina dayali (GUID firma_id, USD/TRL karisik, kismi odeme, vade==fatura, CCC, nakit projeksiyon, odeme trend)
 9. **Cikti yonetimi** — Firma bazli klasor, manifest, YAML frontmatter, slug donusumu
+10. **Hata siniflandirmasi** — GECICI/KALICI/POLITIKA enum, tekrar_denenebilir()
+11. **PII** — Email/telefon/TCKN maskeleme, firma hash'leme
+12. **Cron** — Wrapper script saglik, run/setup/remove/status, loglama, .env yukleme, venv tespit
 
 ## Bagimlilklar
 

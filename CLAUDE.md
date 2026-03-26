@@ -28,6 +28,7 @@ python -m pytest tests/test_ragip_integration.py -v  # Katman 3 integration (D36
 python -m pytest tests/test_ragip_output.py -v       # Cikti yonetimi (firma klasor, manifest, dedup)
 python -m pytest tests/test_ragip_errors.py -v      # Hata siniflandirmasi (GECICI/KALICI/POLITIKA)
 python -m pytest tests/test_ragip_pii.py -v         # PII temizleyici (maskeleme + hash)
+python -m pytest tests/test_ragip_cron.py -v       # Zamanlanmis gorevler (cron wrapper)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v
@@ -36,6 +37,14 @@ python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -
 python3 scripts/ragip_rates.py              # JSON
 python3 scripts/ragip_rates.py --pretty     # Tablo
 python3 scripts/ragip_rates.py --refresh    # Cache yenile
+
+# Zamanlanmis gorevler (cron)
+bash scripts/ragip_cron.sh --list           # Gorevleri listele
+bash scripts/ragip_cron.sh run rates        # TCMB oranlarini yenile
+bash scripts/ragip_cron.sh run temizle      # Ciktilar temizle
+bash scripts/ragip_cron.sh --setup          # Crontab'a ekle
+bash scripts/ragip_cron.sh --status         # Durumu goster
+bash scripts/ragip_cron.sh --remove         # Crontab'dan kaldir
 
 # Kurulum / guncelleme
 bash install.sh                             # Hedef repoya kur

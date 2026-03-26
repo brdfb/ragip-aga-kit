@@ -1,6 +1,6 @@
 # Ekosistem Repo Haritasi
 
-> Son guncelleme: 2026-03-23
+> Son guncelleme: 2026-03-27
 
 ## Repolar
 

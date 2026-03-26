@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-20 (v2.8.12 — Faz 3 gercek veri sonrasi)
+Guncelleme: 2026-03-27 (v2.10.0 — zamanlanmis gorevler)
 
 ---
 
@@ -220,7 +220,28 @@ Senaryo A deneysel, auto-delegation sınırı nedeniyle üretim için önerilmez
 
 Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basladikca degerlendirilecek.
 
-### I9. Prompt Caching (cache_control: ephemeral)
+### I9. Zamanlanmis Gorevler (Cron / Heartbeat)
+
+**TAMAMLANDI (v2.10.0):** `scripts/ragip_cron.sh` — cron wrapper script. WSL2 crontab ile TCMB oran guncelleme (hafta ici 08:00) ve ciktilar temizleme (pazar 03:00). 34 test. ADR-0012.
+
+**Kalan (Faz 2+):**
+- install.sh'a opsiyonel interaktif cron setup adimi
+- `--health` alt komutu (son calisma zamani, cache yasi, servis durumu)
+- Haftalik ozet rapor: D365 verisi lazim → MCP gerekli → crontab + `claude -p "..."` ile
+
+**Yaklasim:**
+- WSL2 crontab ile basit gorevler (rates, temizleme)
+- Claude Code `/loop` session ici gecici isler icin (test izleme, deploy)
+- Cloud `/schedule` sadece git repo bazli isler icin (dependency audit)
+- Desktop Tasks WSL'den native Windows'a gecis olursa degerlendirilir
+
+**Effort:** Kucuk (crontab) / Orta (Claude Code entegrasyonu)
+**Risk:** Dusuk — crontab zaten kanıtlanmis teknoloji
+**Oncelik:** Dusuk — manuel calistirma su an yeterli. Gunluk kullanim arttikca degerlendirilir.
+
+---
+
+### I10. Prompt Caching (cache_control: ephemeral)
 
 gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniyor — Anthropic API'de tekrar eden system prompt'lari onbellege alarak token tasarrufu sagliyor. Claude Code LLM cagrilarini kendisi yonetiyor — kit tarafindan kontrol edilemiyor. Claude Code bu ozelligi desteklerse agent YAML'lerine `cache_control` eklenebilir. Simdilik aksiyon yok.
 
