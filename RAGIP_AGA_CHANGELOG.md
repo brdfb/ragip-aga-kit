@@ -6,6 +6,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.11.0] - 2026-03-27
+
+### Added — Sozlesme Yonetimi Altyapisi
+
+- **scripts/ragip_pii.py**: Geri donusturulabilir maskeleme — `maskele_geri_donusturulabilir(metin, firma_adlari, kisi_adlari)` ve `geri_cevir(metin, mapping)`. Sozlesme analizi oncesi PII korumasi: firma, kisi, email, telefon, TCKN, IBAN, tutar, tarih, adres placeholder'lari. Mapping dict ile orijinal degerlere geri donus.
+- **scripts/ragip_crud.py**: `validate_sozlesme()` — sozlesmeler.jsonl sema dogrulamasi. Turler: gizlilik/hizmet/tedarik/distributorluk/diger. Durumlar: taslak/inceleme/imzali/aktif/suresi_doldu/iptal.
+- **tests/test_ragip_pii.py**: 21 yeni test — geri donusturulabilir maskeleme (firma, kisi, email, tutar, tarih, karisik metin, tam dongu).
+- **tests/test_ragip_crud.py**: 13 yeni test — sozlesme validasyonu (zorunlu alanlar, tur/durum enum, tarih format, taraflar).
+- Toplam test: ~499 → ~533
+
+---
+
 ## [2.10.0] - 2026-03-27
 
 ### Added — Zamanlanmis Gorevler (ADR-0012)

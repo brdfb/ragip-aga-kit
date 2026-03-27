@@ -288,3 +288,92 @@ class TestValidateFaturalar:
         kayit = _gecerli_fatura(yon="HATALI")
         validate_faturalar([kayit])
         assert "_hatalar" not in kayit
+
+
+# ── Sozlesme validasyonu ─────────────────────────────────────────────────
+
+from ragip_crud import validate_sozlesme
+
+
+def _gecerli_sozlesme(**kw):
+    """Gecerli bir sozlesme kaydi olusturur."""
+    base = {
+        "id": 1,
+        "firma": "Guven Pres Dokum",
+        "tur": "gizlilik",
+        "durum": "inceleme",
+        "tarih": "2026-03-27",
+    }
+    base.update(kw)
+    return base
+
+
+class TestValidateSozlesme:
+    """validate_sozlesme() — sozlesme semasi dogrulamasi."""
+
+    def test_gecerli_minimum(self):
+        assert validate_sozlesme(_gecerli_sozlesme()) == []
+
+    def test_gecerli_tam(self):
+        s = _gecerli_sozlesme(
+            firma_id="abc-123",
+            dosya="sozlesmeler/guven_pres_dokum/nda.pdf",
+            masked_dosya="sozlesmeler/guven_pres_dokum/nda.masked.md",
+            bitis_tarihi="2027-03-27",
+            taraflar=["Gibibyte", "Guven Pres"],
+            kaynak="email",
+            aciklama="ISO 27001 NDA",
+        )
+        assert validate_sozlesme(s) == []
+
+    def test_zorunlu_alan_eksik_firma(self):
+        s = _gecerli_sozlesme()
+        del s["firma"]
+        hatalar = validate_sozlesme(s)
+        assert any("firma" in h for h in hatalar)
+
+    def test_zorunlu_alan_eksik_tur(self):
+        s = _gecerli_sozlesme()
+        del s["tur"]
+        hatalar = validate_sozlesme(s)
+        assert any("tur" in h for h in hatalar)
+
+    def test_zorunlu_alan_eksik_tarih(self):
+        s = _gecerli_sozlesme()
+        del s["tarih"]
+        hatalar = validate_sozlesme(s)
+        assert any("tarih" in h for h in hatalar)
+
+    def test_gecersiz_tur(self):
+        hatalar = validate_sozlesme(_gecerli_sozlesme(tur="yanlis"))
+        assert any("tur gecersiz" in h for h in hatalar)
+
+    def test_tum_gecerli_turler(self):
+        for tur in ('gizlilik', 'hizmet', 'tedarik', 'distributorluk', 'diger'):
+            assert validate_sozlesme(_gecerli_sozlesme(tur=tur)) == []
+
+    def test_gecersiz_durum(self):
+        hatalar = validate_sozlesme(_gecerli_sozlesme(durum="beklemede"))
+        assert any("durum gecersiz" in h for h in hatalar)
+
+    def test_tum_gecerli_durumlar(self):
+        for d in ('taslak', 'inceleme', 'imzali', 'aktif', 'suresi_doldu', 'iptal'):
+            assert validate_sozlesme(_gecerli_sozlesme(durum=d)) == []
+
+    def test_gecersiz_tarih_formati(self):
+        hatalar = validate_sozlesme(_gecerli_sozlesme(tarih="27-03-2026"))
+        assert any("ISO 8601" in h for h in hatalar)
+
+    def test_gecersiz_bitis_tarihi(self):
+        hatalar = validate_sozlesme(_gecerli_sozlesme(bitis_tarihi="abc"))
+        assert any("bitis_tarihi" in h for h in hatalar)
+
+    def test_bitis_tarihi_null_gecerli(self):
+        assert validate_sozlesme(_gecerli_sozlesme(bitis_tarihi=None)) == []
+
+    def test_taraflar_liste_olmali(self):
+        hatalar = validate_sozlesme(_gecerli_sozlesme(taraflar="Gibibyte"))
+        assert any("taraflar" in h and "liste" in h for h in hatalar)
+
+    def test_taraflar_liste_gecerli(self):
+        assert validate_sozlesme(_gecerli_sozlesme(taraflar=["A", "B"])) == []

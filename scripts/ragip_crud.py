@@ -182,6 +182,57 @@ def validate_fatura(record):
     return errors
 
 
+_SOZLESME_TURLERI = {'gizlilik', 'hizmet', 'tedarik', 'distributorluk', 'diger'}
+_SOZLESME_DURUMLARI = {'taslak', 'inceleme', 'imzali', 'aktif', 'suresi_doldu', 'iptal'}
+_SOZLESME_ZORUNLU = ('id', 'firma', 'tur', 'durum', 'tarih')
+
+
+def validate_sozlesme(record):
+    """Sozlesme kaydini dogrular (sozlesmeler.jsonl semasi).
+
+    Zorunlu: id, firma, tur, durum, tarih
+    Opsiyonel: firma_id, dosya, masked_dosya, bitis_tarihi, taraflar,
+               kaynak, aciklama, mapping
+
+    Returns:
+        list[str]: Hata mesajlari (bos = gecerli)
+    """
+    errors = []
+
+    for alan in _SOZLESME_ZORUNLU:
+        if alan not in record or record[alan] is None:
+            errors.append(f"Zorunlu alan eksik: {alan}")
+
+    if errors:
+        return errors
+
+    # tur kontrolu
+    if record['tur'] not in _SOZLESME_TURLERI:
+        errors.append(f"tur gecersiz: '{record['tur']}'. Gecerli: {sorted(_SOZLESME_TURLERI)}")
+
+    # durum kontrolu
+    if record['durum'] not in _SOZLESME_DURUMLARI:
+        errors.append(f"durum gecersiz: '{record['durum']}'. Gecerli: {sorted(_SOZLESME_DURUMLARI)}")
+
+    # tarih format
+    pat = _iso_date_pattern()
+    val = record['tarih']
+    if not isinstance(val, str) or not pat.match(val):
+        errors.append(f"tarih ISO 8601 formatta olmali (YYYY-MM-DD): '{val}'")
+
+    if 'bitis_tarihi' in record and record['bitis_tarihi'] is not None:
+        val = record['bitis_tarihi']
+        if not isinstance(val, str) or not pat.match(val):
+            errors.append(f"bitis_tarihi ISO 8601 formatta olmali: '{val}'")
+
+    # taraflar list kontrolu
+    if 'taraflar' in record and record['taraflar'] is not None:
+        if not isinstance(record['taraflar'], list):
+            errors.append("taraflar liste olmali")
+
+    return errors
+
+
 def validate_faturalar(records):
     """Birden fazla fatura kaydını doğrular.
 
