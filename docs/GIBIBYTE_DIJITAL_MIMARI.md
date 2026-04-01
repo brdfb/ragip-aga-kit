@@ -498,4 +498,40 @@ ragip-aga-kit (bu repo)
     +-- Dokumantasyon hub'i
     +-- Claude Code ust akil
     +-- Agent sistemi (KOBi finans — ayri concern)
+
+PRST (Parasut → D365 sync)
+    +-- Fatura/odeme senkronizasyonu
+    +-- D365 prst_* alanlari
+    +-- Lead Engine "satis sonrasi" ayagi
+
+mara (Tenra platformu)
+    +-- Tenant yonetim + tarama
+    +-- 178 test, 7 adapter, 28 route
+    +-- /tenra sayfasinin arkasindaki urun
+
+gibibyte-agent (sidecar RAG agent)
+    +-- 20 skill, Qdrant vektör DB
+    +-- FastMCP, v0.9.0
+    +-- Continuity Hub ile entegrasyonu YOK (bagimsiz)
+
+gibibyte-knowledge-source (RAG bilgi tabani)
+    +-- 65 dokuman, v0.7.0
+    +-- Teklif sablonu, NCE kurallar, brand guide
+    +-- gibibyte-agent tarafindan kullanilir
 ```
+
+### Tum Repolar Durum Tablosu
+
+| # | Repo | Durum | Son Aktivite | Not |
+|---|------|-------|-------------|-----|
+| 1 | ragip-aga-kit | Aktif | 2 Nisan 2026 | Ust akil, dokumantasyon |
+| 2 | ragip-workspace | Aktif | 28 Mart 2026 | Kit kurulumu + D365 MCP |
+| 3 | dyn365hunterv3 | Aktif | 1 Nisan 2026 | Lead intelligence, canli |
+| 4 | gibibyte-continuity-hub | Aktif | 2 Nisan 2026 | Website, Lead Engine |
+| 5 | PRST | Aktif | 2 Nisan 2026 | Parasut→D365 sync |
+| 6 | mara | Aktif | 2 Nisan 2026 | Tenra platformu |
+| 7 | gibibyte-agent | Aktif | 24 Mart 2026 | RAG agent |
+| 8 | gibibyte-knowledge-source | Aktif | 19 Mart 2026 | RAG bilgi tabani |
+| 9 | gb_ragipaga | Emekli | 19 Mart 2026 | Referans, kit'e tasindi |
+| 10 | gb_ragip_new | Emekli? | 23 Subat 2026 | Temizlik adayi |
+| 11 | gb_ragip | Olu | — | Git yok, temizlik adayi |
