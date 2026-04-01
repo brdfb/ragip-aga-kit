@@ -458,6 +458,71 @@ D365 COKERSE:
 | WhatsApp Business | 905522898311 | Telefon app | Business profil ayarli |
 | Cloudflare | — | Dashboard | DNS: gibibyte.com.tr |
 
+## Acik Sorular ve Riskler
+
+### 1. Lead → Musteri → Fatura gecisi dokumante degil
+
+Hunter lead olusturuyor (satis oncesi), PRST fatura sync yapiyor (satis sonrasi).
+Ortadaki satis sureci tamamen manuel:
+
+```
+Hunter Lead → ??? → D365 Opportunity → ??? → D365 Order → PRST Fatura Sync
+```
+
+Sorular:
+- Lead'den opportunity'ye kim/nasil geciriyor?
+- Teklif sureci D365'te mi, Excel'de mi?
+- Quote/Order entity'leri kullaniliyor mu?
+- PRST ne zaman devreye giriyor?
+
+### 2. MARA/Tenra — demo hazirlik durumu belirsiz
+
+`/tenra` sayfasi "Demo Talep Edin" diyor. Birisi demo isterse:
+- Demo ortami canli mi?
+- Demo sureci nasil isliyor?
+- Tenra'nin production durumu ne?
+- Form submit → D365 Lead (formType=demo) → sonra ne oluyor?
+
+### 3. RAG sistemi (agent + knowledge-source) pasif
+
+gibibyte-agent (20 skill, Qdrant) ve gibibyte-knowledge-source (65 dokuman) mevcut
+ama continuity-hub'la entegrasyonu yok. Su an:
+- Kim kullaniyor?
+- Hangi is akisinda devreye giriyor?
+- Website'den erisim var mi yoksa sadece dahili mi?
+- Aktif gelistirme var mi yoksa bekleme modunda mi?
+
+### 4. D365 satis pipeline belirsiz
+
+Lead entity kullaniliyor (Lead Engine'den). Ama:
+- Opportunity entity kullaniliyor mu?
+- Pipeline asamalari tanimli mi?
+- Win/loss takibi var mi?
+- Forecast/raporlama var mi?
+
+### 5. Monitoring sifir
+
+Hicbir sistemde uptime/health monitoring yok:
+
+| Sistem | Cokerse | Fark eden |
+|--------|---------|-----------|
+| gibibyte.com.tr (Vercel) | Site erisim disi | Kimse (Vercel statuspage var ama alert yok) |
+| hunter.gibibyte.com.tr | Lead skorlama durur | Kimse |
+| Brevo | Email gitmez | Kimse |
+| Power Automate | D365 lead olusturmaz | Kimse |
+| D365 | CRM erisim disi | Muhtemelen kullanici fark eder |
+
+Oneri: UptimeRobot (ucretsiz, 5 dk aralik) ile en az website ve Hunter izlenmeli.
+
+### 6. Uncommitted degisiklikler (2 Nisan 2026 snapshot)
+
+| Repo | Degisiklik | Durum |
+|------|-----------|-------|
+| dyn365hunterv3 | 4 dosya | Aktif gelistirme mi, unutulmus mu? |
+| gb_ragipaga | 2 dosya | Emekli repo'da neden degisiklik var? |
+| gibibyte-continuity-hub | 1 dosya | Dev branch'te calisan is? |
+| ragip-workspace | 1 dosya | Senaryo testi bekleyen degisiklik? |
+
 ## Bekleyen Isler
 
 ### Yakin Vadeli
