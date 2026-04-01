@@ -288,6 +288,176 @@ KATMAN 4 — CRM (D365)
             → 2,000 TL/ay kontrat = 72,000 TL LTV (3 yil)
 ```
 
+## Maliyet Tablosu
+
+| Platform | Plan | Aylik Maliyet | Limit | Upgrade Tetikleyici |
+|----------|------|--------------|-------|---------------------|
+| Vercel | Hobby (free) | $0 | 100GB bant, 12 serverless fn | Trafik > 100GB/ay |
+| Brevo | Free | $0 | 300 email/gun, 100K kisi, 2K automation | > 300 email/gun |
+| Hunter | Self-hosted | $0 (Azure VM maliyeti haric) | Rate limit: 60/dk | — |
+| D365 Sales | E5 dahil | $0 (E5 lisansinda) | — | — |
+| Power Automate | E5 dahil | $0 (E5 lisansinda) | 6K calistirma/ay | — |
+| GA4 + GTM | Free | $0 | — | — |
+| Clarity | Free | $0 | — | — |
+| Formspree | Free | $0 | 50 submit/ay | > 50 submit/ay → $10/ay |
+| WhatsApp Business | App (free) | $0 | — | API gerekirse ~$50/ay |
+| **TOPLAM** | | **$0/ay** | | |
+
+Ilk ucretli upgrade: Brevo Starter ($25/ay) — email hacmi artinca.
+
+## Deploy Workflow
+
+```
+KURAL: Dogrudan main'e push YASAK (acil hotfix harici)
+
+1. Degisiklik → dev branch'te yap
+2. bun run build → basarili mi?
+3. git push origin dev → Vercel preview deploy
+4. Preview URL'de kontrol et
+5. Onay → git checkout main && git merge dev && git push origin main
+6. Vercel production auto-deploy
+7. Canli sitede son kontrol
+```
+
+### Commit Kontrol Listesi
+- Build gecti mi
+- Blog: sitemap guncel, slug dogru
+- Form/CTA: analytics event eklendi
+- console.log temizlendi
+- Commit mesaji: imperative, Ingilizce
+
+## Claude Code Altyapisi (Continuity Hub)
+
+### Skills (4)
+| Skill | Tetikleyici | Ne yapar |
+|-------|------------|----------|
+| `/blog-yaz [konu]` | "blog yaz", "makale olustur" | Arastirma → BlogPost → sitemap → build dogrula |
+| `/seo-kontrol` | "SEO durumu", "sitemap guncel mi" | 7 adim SEO denetimi, KRITIK/UYARI/OK rapor |
+| `/deploy-kontrol` | "deploy oncesi kontrol" | Build + lint + icerik tutarliligi + redirect |
+| `/design-review` | "tasarim kontrol", "tutarlilik" | 8 kontrol: H1, label, badge, CTA, glass-card |
+
+### Agents (2)
+| Agent | Model | Rol | Skill'ler |
+|-------|-------|-----|-----------|
+| content-writer | Sonnet | Blog/FAQ/sayfa icerigi | blog-yaz, react-best-practices |
+| qa-reviewer | Haiku | Build/lint/SEO/deploy kontrol | seo-kontrol, deploy-kontrol |
+
+### MCP Server'lar (3)
+| Server | Tip | Ne yapar |
+|--------|-----|----------|
+| shadcn/ui | HTTP | Component registry erisimi |
+| Playwright | stdio | Browser otomasyon ve test |
+| Lighthouse | stdio | Performance, SEO, a11y audit |
+
+### Hooks (2)
+| Hook | Tetik | Ne yapar |
+|------|-------|----------|
+| PostToolUse (Edit/Write) | Dosya degisikligi | Prettier auto-format |
+| SessionStart (compact) | Context kaybi | Kritik kurallari yeniden enjekte |
+
+## Sorumluluk Matrisi
+
+### Roller
+
+```
+UST AKIL (ragip-aga-kit Claude Code)
+  → Strateji, arastirma, plan, prompt yazma
+  → Cross-repo koordinasyon
+  → Kalite kontrol, "bu dogru mu?" sorusu
+  → Memory ve dokumantasyon
+
+WEB DEV (continuity-hub Claude Code)
+  → React component gelistirme
+  → Vercel API endpoint'leri
+  → Blog icerigi (content-writer agent)
+  → SEO/QA (qa-reviewer agent)
+  → Build + deploy
+
+HUNTER DEV (dyn365hunterv3 Claude Code)
+  → Hunter API endpoint'leri
+  → Nginx config, guvenlik
+  → D365 push entegrasyonu
+  → Scorer/P-Model degisiklikleri
+```
+
+### Karar Matrisi
+
+| Karar | Kim karar verir | Kim uygular |
+|-------|----------------|-------------|
+| Yeni ozellik eklensin mi | Kullanici + Ust Akil | Web Dev / Hunter Dev |
+| Hangi blog yazilsin | Kullanici + Ust Akil | Web Dev (content-writer) |
+| API endpoint tasarimi | Ust Akil | Web Dev / Hunter Dev |
+| D365 field mapping | Hunter Dev | Hunter Dev |
+| Brevo automation | Ust Akil | Kullanici (dashboard) |
+| Power Automate flow | Ust Akil | Kullanici (dashboard) |
+| Deploy onay | Kullanici | Web Dev |
+| Mimari karar (ADR) | Ust Akil + Kullanici | Ilgili Dev |
+
+## Hata Durumlari ve Fail-Safe
+
+### Temel Kural: Hic bir dis servis hatasi lead kaybettirmez
+
+```
+HUNTER COKERSE:
+  → lead-capture.ts try/catch ile yakalar
+  → score=0, segment=unknown olarak devam eder
+  → Brevo'ya kisi yine eklenir
+  → D365'e gitmez (score < 70)
+  → SONUC: Lead kaybolmaz, sadece skorlanmaz
+
+BREVO COKERSE:
+  → lead-capture.ts try/catch ile yakalar
+  → 500 hatasi → kullaniciya "Tekrar deneyin" mesaji
+  → SONUC: Lead kaybolur (yeniden form doldurmalari lazim)
+  → ONLEM: Brevo status page izle
+
+POWER AUTOMATE COKERSE:
+  → lead-capture.ts try/catch ile yakalar
+  → Brevo'ya kisi yine eklenir
+  → D365'e gitmez
+  → SONUC: Hot lead D365'te gorulmez, Brevo'da var
+  → ONLEM: Brevo'dan manuel D365 aktarimi yapilabilir
+
+VERCEL COKERSE:
+  → Tum site erisim disi
+  → SONUC: Hicbir sey calismaz
+  → ONLEM: Vercel status page, uptime monitoring
+
+D365 COKERSE:
+  → Power Automate retry (3 deneme)
+  → SONUC: Lead gecikmeli olusur veya kaybolur
+  → ONLEM: Power Automate hata emaili gonderir
+```
+
+### Rate Limit'ler
+
+| Servis | Limit | Risk |
+|--------|-------|------|
+| Hunter API | 60 istek/dk | Dusuk (gunde 5-20 lead) |
+| Brevo API | 300 email/gun | Dusuk (DOI + nurture) |
+| Brevo automation | 2,000 kisi | Orta (buyuyunce upgrade) |
+| Power Automate | 6,000 calistirma/ay | Dusuk |
+| Vercel serverless | 100GB bant/ay | Dusuk |
+| Formspree | 50 submit/ay | Orta (iletisim yogunlugu) |
+
+## Erisim ve Hesap Sahiplikleri
+
+| Platform | Hesap Sahibi | Erisim Yontemi | Notlar |
+|----------|-------------|---------------|--------|
+| Vercel | brdfbai (GitHub org) | GitHub OAuth | Hobby plan |
+| Brevo | subs@gibibyte.com.tr | Email login | Free plan |
+| D365 Sales | Gibibyte M365 tenant | Azure AD | E5 lisans |
+| Power Automate | Gibibyte M365 tenant | Azure AD | E5 dahil |
+| Hunter (VM) | Azure subscription | SSH | Docker compose |
+| GA4 | Gmail hesabi | Google login | Property: G-Z9EYLHL1WP |
+| GTM | Gmail hesabi | Google login | Container: GTM-PML8LBG2 |
+| Clarity | Microsoft hesabi | MS login | Project: w1i6s9jd7 |
+| GitHub (brdfb) | Kisisel | SSH key | ragip-aga-kit, hunter |
+| GitHub (brdfbai) | Organizasyon | SSH key | continuity-hub, PRST, gibibyte-* |
+| Formspree | — | API | Form ID: xeerpkyy |
+| WhatsApp Business | 905522898311 | Telefon app | Business profil ayarli |
+| Cloudflare | — | Dashboard | DNS: gibibyte.com.tr |
+
 ## Bekleyen Isler
 
 ### Yakin Vadeli
