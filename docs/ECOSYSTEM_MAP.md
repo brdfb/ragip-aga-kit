@@ -13,6 +13,7 @@
 | 5 | PRST | ~/projects/PRST | Parasut→D365 sync, ayri ekip | brdfbai (github-brdfbai) |
 | 6 | gibibyte-knowledge-source | ~/projects/gibibyte-knowledge-source | RAG knowledge base, 65 dokuman, v0.7.0 | brdfbai |
 | 7 | gibibyte-agent | ~/projects/gibibyte-agent | RAG agent, 20 skill, Qdrant, v0.9.0 | brdfbai |
+| 8 | gibibyte-continuity-hub | ~/projects/gibibyte-continuity-hub | Website (gibibyte.com.tr), React+Vercel, Lead Engine | brdfbai |
 
 ## D365 Ortak Instance
 
