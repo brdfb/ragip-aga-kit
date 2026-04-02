@@ -523,6 +523,97 @@ Oneri: UptimeRobot (ucretsiz, 5 dk aralik) ile en az website ve Hunter izlenmeli
 | gibibyte-continuity-hub | 1 dosya | Dev branch'te calisan is? |
 | ragip-workspace | 1 dosya | Senaryo testi bekleyen degisiklik? |
 
+## Email → CRM Journey (Planlanmis)
+
+### Sorun
+
+Website formlari Lead Engine ile yakalaniyor. Ama dogrudan email, telefon,
+WhatsApp, referans — hicbir sistem yakalAmiyor. Lead kaybi riski.
+
+### Cozum: Iki Kanalli Yakalama
+
+```
+KANAL 1: SHARED MAILBOX (otomatik)
+==========================================
+sales@gibibyte.com.tr (Exchange Online shared mailbox)
+    |
+    v
+D365 Server-side Sync → D365 Queue
+    |
+    v
+ARC (Automatic Record Creation) Kurali
+    |
+    +-- FILTRELER (Lead OLUSTURMA):
+    |   - Gonderenin domaini @gibibyte.com.tr → ATLA (dahili)
+    |   - Gonderen mevcut D365 Contact → ATLA (zaten musteri)
+    |   - Gonderen mevcut D365 Lead → ATLA (zaten lead)
+    |   - Subject "out of office" / "delivery failure" → ATLA
+    |   - Vendor/partnership solicitation → ATLA
+    |
+    +-- FILTREDEN GECEN → D365 Lead olustur
+        - Sender email → emailaddress1
+        - Sender name → firstname + lastname
+        - Subject → topic
+        - Body → description
+        - Source → Email
+        |
+        v
+    Power Automate tetiklenir:
+        ├── Hunter'a domain gonder → skor + segment + provider
+        ├── Hunter sonucunu D365 Lead'e yaz (hnt_* fields)
+        ├── Teams'e bildirim gonder
+        └── Otomatik yanit emaili gonder
+
+
+KANAL 2: BIREYSEL EMAIL (manuel secim)
+==========================================
+bered@gibibyte.com.tr → email geldi
+    |
+    +-- Bu satis talebi mi? (sen karar verirsin)
+    |
+    +-- EVET → Outlook'ta "Track in CRM" (1 tik)
+    |          veya Copilot for Sales "Save to D365"
+    |          → Lead olusur, ASIL gonderen bilgileriyle
+    |          → Power Automate ayni sekilde tetiklenir
+    |
+    +-- HAYIR → normal email, CRM'e girmez
+
+NEDEN FORWARD DEGIL:
+  - sales@ forward edersen ARC seni gorur, asil gonereni degil
+  - "Track in CRM" gercek gondereni korur
+  - Her emaili lead yapmak copu yaratir, secici olmak lazim
+```
+
+### Uygulama Fazlari
+
+```
+FAZ 1 — Simdi (1 saat, sifir maliyet):
+  1. Shared mailbox olustur (sales@gibibyte.com.tr)
+  2. D365 server-side sync aktif et
+  3. D365 Queue olustur
+  4. ARC kurali: bilinmeyen gonderici → Lead olustur (filtreli)
+  5. Gunluk aliskanlik: D365 queue kontrol et
+
+FAZ 2 — Bu hafta (Power Automate):
+  1. Yeni Lead → Teams bildirimi
+  2. Yeni Lead → otomatik yanit emaili
+  3. Yeni Lead → Hunter'a domain gonder → sonucu Lead'e yaz
+
+FAZ 3 — Lead hacmi artinca (30+/ay):
+  1. AI Builder ile email parsing (ad, sirket, telefon, niyet)
+  2. Lead routing (birden fazla satis kisisi varsa)
+  3. Copilot for Sales (email ozetleme, aksiyon onerisi)
+```
+
+### Hacim / Otomasyon Esigi
+
+| Aylik talep | Yaklasim |
+|-------------|---------|
+| < 10 | Manuel "Track in CRM" yeterli |
+| 10-30 | ARC + basit filtre + Teams bildirimi |
+| 30-100 | ARC + Hunter otomasyon + AI parsing |
+| 100+ | Full otomasyon + routing + skorlama |
+
 ## Bekleyen Isler
 
 ### Yakin Vadeli
