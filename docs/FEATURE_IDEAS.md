@@ -3,11 +3,77 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-03-27 (v2.10.0 — zamanlanmis gorevler)
+Guncelleme: 2026-04-04 (v2.11.0 — rekabet istihbarati)
 
 ---
 
 ## A. Aktif Fikirler
+
+---
+
+### 18. Rekabet Istihbarati + Musteri Segmentasyonu (YUKSEK DEGER — TASARIM BAGIMLI)
+
+**Sorun:** Lisans yenileme tekliflerinde rakip fiyatlarini bilmeden tahmin ediyoruz. Satiscilar CRM'e rekabet verisini YAZMAZ — bu evrensel bir sorun. D365'te Competitor entity + Opportunity win/loss altyapisi var ama bos.
+
+**Baglam (Zeren UAT, Nisan 2026):**
+- Telco vs MSP fiyat farki %3-5 disti marji degil, %15-20 yapisal (term/billing/cross-subsidy)
+- Microsoft pricing architecture: monthly term +%20, annual monthly billing +%5, incentive reinvest +%5-10
+- Telco (Vodafone, Turkcell) portfolio economics ile calisir — lisans loss leader, hat/fiber profit center
+- MSP SKU economics ile calisir — ayni oyunda rekabet edemez
+- Dogru strateji: fiyat degil, musteri segmentasyonu — "hangi musteriyi birak, hangisini kazan"
+
+**Kritik tasarim sorusu: LLM mi yapsin, satisci mi, hibrit mi?**
+
+Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → kayiplar. Klasik kisir dongu.
+
+3 yaklasim:
+
+| Yaklasim | Avantaj | Dezavantaj |
+|----------|---------|------------|
+| **Satisci girer** | Birinci el bilgi | Kimse yazmaz, CRM bos kalir |
+| **LLM otomatik cikarir** | Pasif veri toplama, sifir friction | Hallucination riski, dogrulama lazim |
+| **Hibrit (LLM cikar → insan onaylar)** | En iyi denge | Onay adimi atlanabilir |
+
+**Onerilen hibrit model:**
+1. Satisci normal konusmasini yapar (Ragip Aga ile veya direkt)
+2. LLM konusmadan rekabet sinyallerini cikarir: "Vodafone teklif vermis, ~$130K civari"
+3. LLM ozet sunar: "Bu veriyi rekabet kayitlarina ekleyeyim mi?"
+4. Satisci tek tikla onaylar veya duzeltir
+5. Veri yapilandirilmis olarak kaydedilir
+
+**Veri nerede durur?**
+- **Faz 1 (lokal):** `data/RAGIP_AGA/rekabet/` — kit icinde, olgunlasma donemi
+- **Faz 2 (D365):** Competitor entity + Opportunity win/loss → raporlama + Power BI
+- Hassas veri (gercek rakip fiyatlari, marj tahminleri) her zaman lokalde kalabilir
+
+**Ne TAKIP edilmeli (dogrular):**
+- Win/loss sebebi (fiyat mi, ilisik mi, hizmet mi, bundle mi)
+- Musteri segmenti (lisans-only vs managed services ihtiyaci)
+- Musteri stickiness faktorleri (ne tutuyor, ne koparir)
+- Rakip TIPI (Direct Bill telco vs Indirect MSP — fiyatlama davranisi farkli)
+
+**Ne TAKIP edilmemeli (yanlis metrik):**
+- Rakibin kesin fiyati (bilemezsin, bundle icinde gizli)
+- SKU bazli fiyat karsilastirmasi (telco SKU satmiyor, bundle satiyor)
+- Rakibin marji (senin kontrolunde degil)
+
+**D365 altyapisi (zaten var, bos):**
+- Competitor kayitlari: ad, profil, guclu/zayif yanlar, SWOT
+- Opportunity → Competitor link: her firsata 1+ rakip baglanir
+- Win/Loss kapatma: "kim kazandi, neden kaybettik" alani
+- Raporlama: rakip bazli win rate, kayip nedenleri, Power BI
+
+**Effort:** Buyuk — tasarim + lokal prototip + D365 entegrasyonu + LLM extraction logic
+**Risk:** Orta — en buyuk risk "kimse kullanmaz" (satisci atlar, LLM hallucinate eder)
+**Oncelik:** Yuksek deger ama OLGUNLASMA gerekli. Lokal prototip → gercek kullanim verisi → D365 migrasyonu.
+
+**Bagli konular:**
+- piyasa_verileri.json'daki rekabet_maliyet_tahminleri (statik rakip tip bilgisi — tier 1)
+- ragip-teklif Adim 3.5 (rakip maliyet tahmini — tier 2, hesaplama)
+- ragip-dis-veri (WebSearch ile rakip arastirma — tier 3, canli)
+- D365 Competitor entity + Opportunity (hedef — tier 4, CRM entegrasyonu)
+
+**Kaynak dokuman:** Telco vs CSP deep research (Nisan 2026) — McKinsey, BCG, Forrester, Microsoft partner docs analizi
 
 ---
 

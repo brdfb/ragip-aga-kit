@@ -38,6 +38,29 @@ __all__ = [
     "OranSaglayici", "EVDSSaglayici", "StubSaglayici", "saglayici_olustur",
 ]
 
+# ─── .env desteği (stdlib-only, dotenv bağımlılığı yok) ─────────────────────
+# Workspace .env'deki TCMB_API_KEY ve COLLECTAPI_KEY'i yükle
+def _load_env_keys():
+    """Git root veya script dizinindeki .env'den anahtar değişkenleri yükle."""
+    for base in (Path(__file__).parent.parent, Path(__file__).parent):
+        env_file = base / ".env"
+        if env_file.exists():
+            try:
+                for line in env_file.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, _, val = line.partition("=")
+                    key = key.strip()
+                    val = val.strip().strip("'\"")
+                    if key in ("TCMB_API_KEY", "COLLECTAPI_KEY", "RAGIP_CACHE_DIR") and key not in os.environ:
+                        os.environ[key] = val
+            except Exception:
+                pass
+            break
+
+_load_env_keys()
+
 CACHE_DIR = Path(os.environ.get("RAGIP_CACHE_DIR", str(Path(__file__).parent / ".ragip_cache")))
 CACHE_FILE       = CACHE_DIR / "rates_cache.json"
 MEVDUAT_CACHE    = CACHE_DIR / "mevduat_cache.json"

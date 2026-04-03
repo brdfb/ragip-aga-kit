@@ -25,11 +25,14 @@ description: >
 
   </example>
 model: haiku
-maxTurns: 5
+maxTurns: 12
 skills:
   - ragip-vade-farki
   - ragip-arbitraj
   - ragip-rapor
+  - ragip-teklif
+  - ragip-maliyet
+  - ragip-yenileme
 disallowedTools:
   - WebSearch
   - WebFetch

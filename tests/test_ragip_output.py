@@ -320,7 +320,7 @@ class TestDedup:
         monkeypatch.setattr("ragip_output.get_root", lambda: str(tmp_path))
 
         yol1 = kaydet("hesap", "rapor", "Firma", "icerik", dedup=False)
-        import time; time.sleep(1.1)  # timestamp farki icin
+        import time; time.sleep(2)  # timestamp farki icin (saniye cozunurlugu)
         yol2 = kaydet("hesap", "rapor", "Firma", "icerik", dedup=False)
         assert yol1 != yol2
 

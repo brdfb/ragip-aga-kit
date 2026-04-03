@@ -156,7 +156,8 @@ def kaydet(agent, skill, firma, icerik, firma_id=None, ekstra_meta=None,
         pz = None
 
     root = Path(get_root())
-    firma_slug = _slug(firma)
+    # firma_id varsa klasor adi icin onu kullan (tutarli slug garantisi)
+    firma_slug = firma_id if firma_id else _slug(firma)
     ay = _ay_dizini()
     ts = _timestamp()
 

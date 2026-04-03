@@ -112,6 +112,10 @@ EXPECTED_ALL_SKILLS = {
     "ragip-degerlendirme",
     "ragip-zamanasimi",
     "ragip-delil",
+    "ragip-teklif",
+    "ragip-maliyet",
+    "ragip-esles",
+    "ragip-yenileme",
 }
 
 
@@ -194,10 +198,12 @@ class TestSubAgentHesap:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        assert self.fm["skills"] == ["ragip-vade-farki", "ragip-arbitraj", "ragip-rapor"]
+        expected = {"ragip-vade-farki", "ragip-arbitraj", "ragip-rapor",
+                    "ragip-teklif", "ragip-maliyet", "ragip-yenileme"}
+        assert set(self.fm["skills"]) == expected
 
     def test_max_turns_kisa(self):
-        assert self.fm["maxTurns"] <= 5, "Hesap motoru 3-5 turn yeterli"
+        assert self.fm["maxTurns"] <= 12, "Hesap motoru 5-12 turn"
 
     def test_no_websearch(self):
         """Hesap motoru WebSearch kullanmamali (mimari seviyede kisitli)"""
@@ -313,11 +319,11 @@ class TestSubAgentVeri:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet", "ragip-profil"}
+        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet", "ragip-profil", "ragip-esles"}
         assert set(self.fm["skills"]) == expected
 
     def test_max_turns_kisa(self):
-        assert self.fm["maxTurns"] <= 5, "CRUD islemleri 3-5 turn yeterli"
+        assert self.fm["maxTurns"] <= 12, "CRUD/eslestirme islemleri 5-12 turn"
 
     def test_no_websearch(self):
         """CRUD agent WebSearch kullanmamali (mimari seviyede kisitli)"""
@@ -378,9 +384,9 @@ class TestSkillDagilimi:
         assert orch["skills"] == [], "Orchestrator'de skill olmamali"
 
     def test_toplam_skill_sayisi(self):
-        """Tam 15 skill olmali"""
+        """Tam 19 skill olmali"""
         total = sum(len(a["skills"]) for a in self.all_subagents)
-        assert total == 15, f"Beklenen 15 skill, bulunan {total}"
+        assert total == 19, f"Beklenen 19 skill, bulunan {total}"
 
 
 # --- Test: Skill disable-model-invocation tutarliligi ---
@@ -589,9 +595,9 @@ class TestPortability:
             blocks = self._extract_python_blocks(text)
             for i, block in enumerate(blocks):
                 if "data/RAGIP_AGA/" in block:
-                    assert "_ROOT" in block, (
+                    assert "_ROOT" in block or "$ROOT" in block, (
                         f"{f.name} Python blok #{i+1}: "
-                        f"data/RAGIP_AGA/ referansi var ama _ROOT tanimli degil"
+                        f"data/RAGIP_AGA/ referansi var ama _ROOT/$ROOT tanimli degil"
                     )
 
     def test_git_rev_parse_works_in_repo(self):
