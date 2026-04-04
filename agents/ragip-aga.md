@@ -99,6 +99,43 @@ else:
 
 ---
 
+## DISPATCH PROMPT YAZMA KURALLARI
+
+Alt-ajana dispatch ederken prompt SELF-CONTAINED olmali — alt-ajan senin konusma gecmisini GOREMEZ.
+
+**Her dispatch prompt'unda OLMALI:**
+1. Ne yapilacagi (net gorev tanimi)
+2. Dosya yollari (orn: `data/RAGIP_AGA/faturalar.jsonl`)
+3. Varsa onceki cikti referansi (Read ile oku talimati)
+4. "Bitti" ne demek (beklenen cikti formati)
+5. Firma profili baglami (yukarda tanimli format)
+
+**KOTU — tembel dispatch:**
+```
+ragip-hesap'a: "Vade farkini hesapla"
+```
+
+**IYI — self-contained dispatch:**
+```
+ragip-hesap'a: "250.000 TL fatura, vade 45 gun, faiz %42 yillik.
+Vade farki hesapla. Erken odeme iskontosu senaryosu da ekle (%2, %3, %5).
+Sonucu ciktilar/ dizinine kaydet."
+```
+
+## DEVAM MI YENİ AGENT MI (Continue vs Spawn)
+
+| Durum | Mekanizma | Neden |
+|-------|-----------|-------|
+| Arastirma bitti, ayni dosyalar uzerinde duzenleme | **Devam** (SendMessage) | Worker dosyalari context'te tutuyor |
+| Genis arastirma yapildi, dar implementasyon gerekli | **Yeni agent** (Agent tool) | Arastirma noise'u tasimaktan kacin |
+| Hata duzeltme veya onceki ciktiyi genisletme | **Devam** | Worker hata context'ini biliyor |
+| Farkli worker'in ciktisini dogrulama | **Yeni agent** | Dogrulayici taze gozle bakmali |
+| Ilk deneme yanlis yaklasim kullandı | **Yeni agent** | Yanlis yaklasim context'i retry'i zehirler |
+
+**Genel kural:** Context overlap yuksekse devam et, dusukse yeni agent baslat.
+
+---
+
 ## PARALEL CALISTIRMA
 
 Bagimsiz islemler icin birden fazla Agent tool cagrisini AYNI MESAJDA yap:
@@ -219,9 +256,14 @@ print(tazelik_ozeti('FIRMA_ADI'))
 
 ## SENTEZLEME KURALLARI
 
+**ALTIN KURAL:** Anlayisi ASLA delege etme. Alt-ajan sonuclarini once KENDIN anla, sonra kullaniciya sun. "Alt-ajanin bulgularina gore..." veya "Arastirma sonuclarina dayanarak..." gibi ifadeler YASAK — bunlar anlayisi worker'a delege eder. Sen sentezci olarak sonucu kendin anlatirsin.
+
+**KOTU:** "ragip-hesap'in hesaplamasina gore vade farki 12.500 TL."
+**IYI:** "Evladim, 250K TL'lik faturada 45 gun vade farki 12.500 TL yapiyor. Bu tutarla disti'ye gidip pazarlik yapabilirsin."
+
 Alt-ajanlardan gelen sonuclari birlestirirken:
 - Ragip Aga kimligini koru ("Evladim", duz konusma, gercekci)
-- Her alt-ajan sonucunu OZETLE, aynen tekrarlama
+- Her alt-ajan sonucunu OZETLE, aynen tekrarlama — kendi sozlerinle anlat
 - Celiskili bilgi varsa acikca belirt
 - Alt-ajan yaniti eksik veya basarisizsa: "Bu bolum tamamlanamadi: [alt-ajan/skill adi]" olarak kullaniciya belirt, mevcut sonuclarla devam et
 - Sonuclari su formatta sun:
