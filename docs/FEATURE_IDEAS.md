@@ -268,7 +268,16 @@ Senaryo A deneysel, auto-delegation sınırı nedeniyle üretim için önerilmez
 - "Tam analiz" anahtar kelimesi icin zorunlu dispatch talimati eklendi (v2.8.13)
 - Interaktif mod + takip sorulari seklinde kullanim en guvenilir pattern
 
-**Degerlendirme zamani:** Anthropic forced delegation API açarsa veya @mention CLI desteği gelirse. ADR-0009.
+**Coordinator Mode — Anthropic'in kendi cozumu (Nisan 2026 sizinti analizi):**
+`CLAUDE_CODE_COORDINATOR_MODE=1` ile aktive ediliyor. Coordinator'a SADECE AgentTool + SendMessage + TaskStop veriliyor — Bash/Read/Edit YOK. Kendisi is yapamaz, MECBUREN dispatch eder. Tool kisitlamasi ile auto-delegation sorununu yapisal olarak cozer.
+
+**Bizim icin uygulanabilirligi:**
+- ragip-aga'nin disallowedTools'una Bash/Read/Edit eklenmesi ayni etkiyi yaratir
+- AMA: ragip-aga profil.json okuyor (Read), tazelik kontrolu yapiyor (Bash), sentez kaydediyor (Bash)
+- Bu islemlerin sub-agent'a tasinmasi veya coordinator mode'un native destegiyle gelmesi gerekir
+- Simdilik Senaryo B (direkt dispatch) yeterli ve guvenilir
+
+**Degerlendirme zamani:** Coordinator Mode GA olursa ragip-aga'yi migrate et. Veya disallowedTools deneysel olarak test edilebilir (profil/tazelik/kayit sub-agent'a tasinarak).
 
 ---
 
