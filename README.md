@@ -43,7 +43,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 | Tip | Sayi | Konum |
 |-----|------|-------|
 | Agent | 5 | `.claude/agents/ragip-*.md` |
-| Skill | 15 | `.claude/skills/ragip-*/SKILL.md` |
+| Skill | 19 | `.claude/skills/ragip-*/SKILL.md` |
 | Script | 8 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` + `ragip_cron.sh` |
 | Config | 1 | `config/ragip_aga.yaml` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
@@ -68,6 +68,10 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 /ragip-profil ABC Dagitim               — Sektor-aware firma profili
 /ragip-ozet                             — Gunluk brifing
 /ragip-import dosya.csv                 — CSV/Excel import
+/ragip-teklif                           — Lisans yenileme teklifi (3 senaryo, MCI, float, rakip)
+/ragip-maliyet                          — Disti maliyet analizi (YA vs YM, NCE primi)
+/ragip-yenileme                         — Kit list degisim analizi + yenileme takvimi
+/ragip-esles                            — Satis vs alis fatura eslestirme, kacak kontrolu
 ```
 
 ### Dogal Dil (Agent)
@@ -88,9 +92,12 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 ```
 ragip-aga (orchestrator, sonnet)
   |
-  +-- ragip-hesap (haiku) -------- ragip-vade-farki
+  +-- ragip-hesap (haiku, 12 turn)  ragip-vade-farki
   |                                ragip-arbitraj
   |                                ragip-rapor
+  |                                ragip-teklif
+  |                                ragip-maliyet
+  |                                ragip-yenileme
   |
   +-- ragip-arastirma (sonnet) --- ragip-analiz
   |                                ragip-dis-veri
@@ -101,11 +108,12 @@ ragip-aga (orchestrator, sonnet)
   |                                ragip-delil
   |                                ragip-ihtar
   |
-  +-- ragip-veri (haiku) --------- ragip-firma
+  +-- ragip-veri (haiku, 12 turn)  ragip-firma
                                    ragip-gorev
                                    ragip-import
                                    ragip-ozet
                                    ragip-profil
+                                   ragip-esles
 ```
 
 **Orchestrator** (ragip-aga) kullanicinin istegini anlar ve uygun sub-agent'a yonlendirir. Kendisi hesaplama/analiz yapmaz.

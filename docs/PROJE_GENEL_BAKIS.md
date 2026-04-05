@@ -1,6 +1,8 @@
 # Ragip Aga Kit — Proje Genel Bakis
 
-**Versiyon:** 2.8.16 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+**Versiyon:** 2.11.0 | **Lisans:** MIT | **Platform:** Claude Code (Anthropic)
+
+> **Not:** Bu dokuman README.md ve CHANGELOG ile buyuk olcude ortusuyor. Guncel detaylar icin README.md'ye bakin. 533 test, 19 skill, 5 agent.
 
 ---
 
