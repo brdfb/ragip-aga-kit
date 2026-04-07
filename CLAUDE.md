@@ -95,3 +95,7 @@ Detaylar `.claude/rules/commit-checklist.md` altinda.
 ## Genel Kurallar
 
 Detaylar `.claude/rules/conventions.md` altinda.
+
+## Cross-Repo Koordinasyon
+
+`gibibyte-coordinator` reposuna SADECE coordinator session'i yazabilir. Bu session o repoda dosya olusturmaz, duzenlemez veya silmez. Coordinator raporlari ve cross-repo bulgulari coordinator reposunda yasir.
