@@ -74,6 +74,9 @@ print(f'  TOPLAM: {toplam_hukuki + firsat_maliyeti:,.0f} TL')
 "
 ```
 
+**2. Barnum filtresi (ZORUNLU — ciktiyi yazmadan once):**
+Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (firma verisi, tutar, vade, sektor detayi ekle) ya da cikar. Generic strateji onerisi ("nakit akisinizi iyilestirin", "vade farklarini takip edin") YASAK — somut senaryo verisine dayanan oneriler yaz.
+
 ## Çıktı Formatı
 
 ---

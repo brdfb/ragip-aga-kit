@@ -102,7 +102,10 @@ print(f'(AI tahmini — hukuki degerlendirme degildir)')
 "
 ```
 
-**6. Analiz raporu yaz:**
+**6. Barnum filtresi (ZORUNLU — raporu yazmadan once):**
+Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (sozlesme maddesi, tutar, vade, somut hesaplama ekle) ya da cikar. Generic tespitler ("sozlesmeyi dikkatli okuyun", "vade farki onemlidir") YASAK — belgenin kendisine dayanan spesifik bulgular yaz.
+
+**7. Analiz raporu yaz:**
 
 ## Çıktı Formatı
 

@@ -96,6 +96,9 @@ print(f'Cikti kaydedildi: {dosya.name}')
 "
 ```
 
+**6. Barnum filtresi (ZORUNLU — raporu yazmadan once):**
+Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (somut madde referansi, tutar, zamanasimi suresi, ispat detayi ekle) ya da cikar. Generic hukuki tespitler ("avukata danisin", "haklarinizi koruyun") YASAK — mevzuat maddesi ve somut olaya dayanan spesifik degerlendirmeler yaz.
+
 ## Cikti Formati
 
 ### HUKUKI DEGERLENDIRME
