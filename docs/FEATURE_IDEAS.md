@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-05-12 (v2.12.0 — citation dogrulama + CoVe)
+Guncelleme: 2026-05-13 (v2.13.0 — prompt caching)
 
 ---
 
@@ -316,13 +316,9 @@ Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basl
 
 ---
 
-### I10. Prompt Caching (cache_control: ephemeral)
-
-gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniyor — Anthropic API'de tekrar eden system prompt'lari onbellege alarak token tasarrufu sagliyor. Claude Code LLM cagrilarini kendisi yonetiyor — kit tarafindan kontrol edilemiyor. Claude Code bu ozelligi desteklerse agent YAML'lerine `cache_control` eklenebilir. Simdilik aksiyon yok.
-
 ---
 
-## D. Tamamlanan (12)
+## D. Tamamlanan (13)
 
 | # | Madde | Versiyon | Ozet |
 |---|-------|----------|------|
@@ -339,6 +335,7 @@ gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniy
 | 11 | Agent Tool Kisitlama (MCP) | v2.8.10 | Semantic tool zorunlu + ham tool'lar tum agent'larda disallowedTools ile bloke (MCP rehberi + ADR-0004) |
 | 16 | Sub-Agent Graceful Degradation | v2.8.6 | 4 sub-agent'a kismi sonuc talimatı + orchestrator partial failure bildirimi |
 | 19 | Citation Dogrulama + CoVe | v2.12.0 | Tier 2A: `ragip_madde_dogrula.py` (regex + JSON kanun veri) deterministik dogrulama; Tier 2B: CoVe 4-adim akisi ragip-degerlendirme'de; ADR-0013 |
+| I10 | Prompt Caching | v2.13.0 | CLI `call_llm()` Anthropic provider icin `cache_control: ephemeral` eklendi (`_build_messages()` helper). Claude Code orchestration zaten otomatik. ADR-0014 |
 
 ---
 

@@ -6,6 +6,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.13.0] - 2026-05-13
+
+### Added — Prompt Caching (FEATURE_IDEAS I10, ADR-0014)
+
+CLI mode'da (`scripts/ragip_aga.py call_llm()`) Anthropic provider icin `cache_control: {"type": "ephemeral"}` eklendi. Tekrar eden CLI cagrilarinda system prompt 5dk cache'lenir, input token maliyeti ~%90 duser.
+
+- **scripts/ragip_aga.py**: `_build_messages()` saf yardimci fonksiyon. Model prefix'ine (`anthropic/...` veya `claude-...`) gore Anthropic ise structured content + cache_control, degilse standart string content (geriye uyumlu).
+- **tests/test_ragip_prompt_caching.py**: 9 yeni test — Anthropic prefix'leri, OpenAI/Gemini/Ollama (cache yok), multiline/empty system prompt, user prompt korunmasi.
+- **docs/adr/0014-prompt-caching-policy.md**: Iki katmanli politika dokumante edildi:
+  - Claude Code orchestration: otomatik (kit dokunmaz)
+  - CLI mode litellm: explicit cache_control (kit kontrol eder)
+
+### Why
+
+Kit v2.7.x'ten beri `call_llm()` litellm uzerinden Anthropic'e direkt cagri yapiyor ama cache_control eksikti. Agent system prompt'lari ~5k token (`agents/ragip-aga.md` 357 satir) — repeat CLI calistirmalarinda yeniden tokenize ediliyordu. Bu kayip kapatildi.
+
+### Test toplam
+
+576 test (onceki 567 + 9 prompt caching).
+
+### install.sh
+
+`test_manifest_file_count`: 49 → 50 (+1 test dosyasi).
+
+---
+
 ## [2.12.1] - 2026-05-12
 
 ### Added — ragip-analiz PII Backport (workspace → kit)

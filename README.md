@@ -47,7 +47,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 | Script | 10 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` + `ragip_cron.sh` + `ragip_madde_dogrula.sh` |
 | Config | 2 | `config/ragip_aga.yaml` + `config/kanun_maddeleri.json` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 13 | `tests/test_ragip_*.py` |
+| Test | 14 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -131,7 +131,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (567 test)
+# Tam suite (576 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -149,7 +149,7 @@ python -m pytest tests/test_ragip_pii.py -v            # PII temizleyici
 python -m pytest tests/test_ragip_cron.py -v           # Zamanlanmis gorevler
 ```
 
-Testler 13 katmani kapsar:
+Testler 14 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
@@ -163,6 +163,7 @@ Testler 13 katmani kapsar:
 11. **PII** — Email/telefon/TCKN maskeleme, firma hash'leme
 12. **Cron** — Wrapper script saglik, run/setup/remove/status, loglama, .env yukleme, venv tespit
 13. **Madde dogrulama** — Yasal madde citation halusinasyon tespiti (Tier 2A, CoVe ADR-0013) — regex extractor, JSON kanun veri, CLI/Bash wrapper, range, fikra/bent, Turkce karakter
+14. **Prompt caching** — `call_llm()` Anthropic provider icin `cache_control: ephemeral` (ADR-0014), provider tespiti (Anthropic vs OpenAI/Gemini/Ollama), structured content yapisi
 
 ## Bagimlilklar
 

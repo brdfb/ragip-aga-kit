@@ -1648,6 +1648,34 @@ def save_to_history(log_dir, prompt, response, model, duration_ms, tokens):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def _build_messages(model: str, system_prompt: str, user_prompt: str) -> list:
+    """Build messages with Anthropic prompt caching when available.
+
+    Anthropic API: system prompt'a cache_control: ephemeral eklenir,
+    aynı system prompt'la art arda çağrıda 5dk cache hit olur (token tasarrufu).
+    Diğer provider'larda standart string content kullanılır (cache yok).
+    """
+    is_anthropic = model.startswith("anthropic/") or model.startswith("claude-")
+    if is_anthropic:
+        return [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": {"type": "ephemeral"},
+                    }
+                ],
+            },
+            {"role": "user", "content": user_prompt},
+        ]
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+
+
 def call_llm(config, prompt):
     try:
         import litellm
@@ -1663,17 +1691,13 @@ def call_llm(config, prompt):
     max_tokens = agent_cfg.get("max_tokens", 4000)
     fallbacks = agent_cfg.get("fallback_order", [])
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": prompt},
-    ]
-
     models_to_try = [model] + fallbacks
     last_error = None
 
     for attempt_model in models_to_try:
         try:
             t0 = time.time()
+            messages = _build_messages(attempt_model, system_prompt, prompt)
             response = litellm.completion(
                 model=attempt_model,
                 messages=messages,
