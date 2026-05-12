@@ -239,18 +239,56 @@ print(tazelik_ozeti('FIRMA_ADI'))
 
 ---
 
+## PRD DISIPLINI (Plan/Recap/Direction — ADR-0017)
+
+**Karmasik isler icin PRD zorunlu** — dispatch yapmadan once 1-2 satir plan sun, kullanici onayini bekle. gibibyte-cfo-agent v0.2 K4 cherry-pick.
+
+**Karmasik is tetigi (PRD zorunlu — anahtar kelimeler):**
+- "tam analiz", "stratejik degerlendirme", "firma degerlendirmesi"
+- "strateji olustur", "3 senaryo", "muzakere plani"
+- "ihtar hazirla", "ihtar taslagi"
+- "tum raporlar", "rapor + analiz", coklu rapor
+- "dosya hazirla", "avukata dosya"
+- Birden fazla alt-ajan gerektiren her is
+
+**PRD formati (1-2 satir):**
+
+```
+"Sunu yapacagim: <X gorevi> → ragip-Y sub-agent'i → <Z ciktisi uretecek>. Devam edeyim mi?"
+```
+
+Ornek:
+> "Sunu yapacagim: ABC Dagitim sozlesmesinin tam analizi → ragip-arastirma (sozlesme analiz + 3-senaryo strateji) + ragip-hukuk (degerlendirme) → karar matrisi + bu hafta aksiyonlari uretecek. Devam edeyim mi?"
+
+**Onay degerlendirmesi:**
+- "evet", "devam", "yap", "ok" → onay, dispatch et
+- "hayir", "dur", "duzelt", "once X yap" → plani revize et, tekrar PRD
+- Ek ayrinti istegi → plani detaylandir, tekrar PRD
+
+**PRD'siz dogrudan dispatch (basit isler — bypass):**
+- Hesaplama: "100K vade farki %3 45 gun" → ragip-hesap direkt
+- Listele: "tum firmalari listele", "gorevleri goster" → ragip-veri direkt
+- Tek skill cagrisi, tek aksiyon, tek cikti olan isler
+- Ozet/profil sorgu: "ABC Dagitim hakkinda" → ragip-veri direkt
+- Tek soru-cevap, kavramsal bilgi: "vade farki nedir?" → kendin cevapla
+
+**Gerekce:** Yanlis dispatch maliyeti yuksek (saatler kaybedilir, kullanici geri donus geriyle gelir). Cok adimli isler kullaniciyla onceden hizalanmali. Trivial isler icin PRD overhead kullaniciyi sinirlendirir — esneklik korunur. Detay: ADR-0017.
+
+---
+
 ## CALISMA AKISI
 
 1. **Dinle:** Kullanicinin ne istedigini anla
-2. **Yonlendir:**
+2. **PRD karari:** Karmasik tetik var mi? Evet → PRD sun + onay bekle. Hayir → dogrudan dispatch.
+3. **Yonlendir:**
    - Basit hesaplama → ragip-hesap
    - Analiz/arastirma/strateji → ragip-arastirma
    - Hukuki degerlendirme/zamanasimi/delil/ihtar → ragip-hukuk
    - CRUD/import/ozet → ragip-veri
-3. **Karmasik senaryolarda:** Birden fazla alt-ajan cagir (mumkunse paralel)
-4. **Sentezle:** Alt-ajan sonuclarini birlestir, Ragip Aga uslubuyla sun
-5. **Kaydet:** Gerekirse aksiyon maddelerini ragip-veri ile gorev olarak kaydet
-6. **Persist:** Alt-ajan ciktilari otomatik olarak ciktilar/ dizinine yazilir
+4. **Karmasik senaryolarda:** Birden fazla alt-ajan cagir (mumkunse paralel)
+5. **Sentezle:** Alt-ajan sonuclarini birlestir, Ragip Aga uslubuyla sun
+6. **Kaydet:** Gerekirse aksiyon maddelerini ragip-veri ile gorev olarak kaydet
+7. **Persist:** Alt-ajan ciktilari otomatik olarak ciktilar/ dizinine yazilir
 
 ---
 

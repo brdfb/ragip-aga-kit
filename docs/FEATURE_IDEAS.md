@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-05-13 (v2.15.0 — #20 Tier 3 cikti disiplini tamamlandi)
+Guncelleme: 2026-05-13 (v2.16.0 — #22 Orchestrator PRD disiplini tamamlandi; 3 cherry-pick tamam)
 
 ---
 
@@ -128,36 +128,6 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 **Effort:** Orta
 **Risk:** Orta — UBL-TR spec karmasik
 **Oncelik:** e-fatura entegrasyonu gundemdeyse
-
----
-
-### 22. Orchestrator PRD Disiplini: Dispatch oncesi 1-cumle plan (ORTA)
-
-**Sorun:** ragip-aga orchestrator dispatch yaparken kullaniciya hangi sub-agent'a hangi gorev gondereceğini soylemiyor, dogrudan Agent tool cagiriyor. Kullanici yanlis yonlendirildigini ancak ciktiyı gorunce anlıyor — geri donus pahalı.
-
-**Kaynak:** gibibyte-cfo-agent v0.2 K4 — "Her gorevde PRD önce. Onaysiz ana iş yok."
-
-**Fikir:** ragip-aga system prompt'una PRD adimi:
-```
-Once: "Sunu yapacagim: <X gorevi> → ragip-Y sub-agent'i → <ne uretecek>. Devam edeyim mi?"
-Kullanici onayi (acik soylendi / "evet" / sessizlik 1 turn) → dispatch
-Itiraz → plani revize et, tekrar PRD
-```
-
-**Esneklik:**
-- Trivial isler (ozet, listele, hesapla 100K %3 45 gun) PRD'siz dispatch (efor maliyetini asar)
-- Karmasik isler (analiz + strateji + ihtar) PRD zorunlu
-- Tetik: "tam analiz", "strateji", "rapor", "ihtar", "dosya hazirla" anahtar kelimeleri varsa PRD
-
-**Cakisma kontrolu:**
-- ADR-0009 ragip-aga Level 0 dispatch'i guvenilir, sub-agent olunca yapamiyor — PRD bu sınırı degistirmez, ama Level 0 dispatch'i daha şeffaf yapar.
-- I8 Senaryo A — interaktif modda ilk mesajda dispatch yapmiyordu, PRD bu davranışi YAPISAL hale getirir (zaten yapilmiyordu, simdi neden yapilmadığı dürüstlük katmaniyla kullaniciya görünür).
-
-**Effort:** Dusuk — ragip-aga.md sistem prompt revizyonu + test
-**Risk:** Orta — kullanici "her seferinde onay sorma" diye sikayet edebilir. Anahtar kelime tetigi bu riski azaltir.
-**Oncelik:** Orta — yanlis dispatch maliyetini dusurur, ama kit zaten Senaryo B (ana session direkt dispatch) onaylanmis durumda. Senaryo A iyilestirir.
-
-**Bagli:** I8 (Senaryo A guvenilirligi), ADR-0009.
 
 ---
 
@@ -348,7 +318,7 @@ Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basl
 
 ---
 
-## D. Tamamlanan (15)
+## D. Tamamlanan (16)
 
 | # | Madde | Versiyon | Ozet |
 |---|-------|----------|------|
@@ -368,6 +338,7 @@ Kalan: Skill kullanim metrikleri + LLM routing testi. Bunlar canli kullanim basl
 | I10 | Prompt Caching | v2.13.0 | CLI `call_llm()` Anthropic provider icin `cache_control: ephemeral` eklendi (`_build_messages()` helper). Claude Code orchestration zaten otomatik. ADR-0014 |
 | 21 | Citation Source Whitelist (Tier 2C) | v2.14.0 | ragip-hukuk + ragip-degerlendirme'ye 8 resmi domain whitelist (mevzuat.gov.tr, yargitay.gov.tr, ...). Whitelist disi sonuc reddedilir. ADR-0013 ustune ucuncu citation defense katmani. ADR-0015 |
 | 20 | Cikti Disiplini (Tier 3): 3-satir + VARSAYIM | v2.15.0 | ragip-analiz/strateji/degerlendirme'ye TESPIT/POZISYON/GEREKCE 3-satir blok formati + sayisal iddialarda VARSAYIM damgasi (aralik zorunlu, tek nokta yasak). Anlatim paragraflari serbest. gibibyte-cfo-agent K2 cherry-pick. ADR-0016 |
+| 22 | Orchestrator PRD Disiplini | v2.16.0 | ragip-aga karmasik isler icin dispatch oncesi 1-2 satir plan + onay (Plan/Recap/Direction). Anahtar kelime tetigi (tam analiz, strateji, ihtar, ...), trivial bypass (hesaplama, listele). gibibyte-cfo-agent K4 cherry-pick. ADR-0017 |
 
 ---
 

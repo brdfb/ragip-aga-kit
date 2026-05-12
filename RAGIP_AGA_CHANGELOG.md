@@ -6,6 +6,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.16.0] - 2026-05-13
+
+### Added — Orchestrator PRD Disiplini (FEATURE_IDEAS #22, ADR-0017)
+
+ragip-aga orchestrator karmasik isler icin **PRD (Plan/Recap/Direction) zorunlu**: dispatch oncesi 1-2 satir plan + kullanici onayi. Trivial isler bypass (hesaplama, listele, ozet — dogrudan dispatch). gibibyte-cfo-agent v0.2 K4 cherry-pick.
+
+- **agents/ragip-aga.md**: "PRD DISIPLINI" bolumu eklendi. Karmasik is tetigi anahtar kelimeleri (tam analiz, strateji, ihtar, dosya hazirla, firma degerlendirmesi), PRD formati ornegi, onay/red akisi, trivial bypass kategorileri. CALISMA AKISI Adim 2'ye "PRD karari" eklendi.
+- **tests/test_ragip_prd_disiplini.py**: 20 test — PRD section header, ADR referansi, cherry-pick kaynagi, tetik anahtar kelimeleri (5 kategori), PRD format ornegi, onay/red kelimeleri, trivial bypass ornekleri, CALISMA AKISI entegrasyonu.
+- **docs/adr/0017-orchestrator-prd-disiplini.md**: K4 K4 disiplinin kit'e uyarlanmasi, alternatif yaklasimlar (her dispatch'te PRD reddedildi cunku trivial overhead), I8 Senaryo A sinirlarini disipline cevirme.
+
+### Why
+
+ragip-aga karmasik dispatch'ler icin (sozlesme analizi + strateji + ihtar dosyasi) Agent tool ile dogrudan dispatch yapiyordu. Yanlis dispatch maliyeti yuksek (saatler kaybedilir, kullanici geri donus geriyle gelir). PRD disiplini yanlis dispatch oranını azaltir, karmasik isler kullaniciyla onceden hizalanir. Trivial bypass kullanici frustrationunu engeller.
+
+I8 Senaryo A: ragip-aga interaktif modda ilk mesajda dispatch yapmama davranisini gozlemlemis ama yapisal degildi. PRD disiplini bu davranisi DISIPLINE cevirir — "dispatch yapma" yerine "PRD ver" yapisal alternatif.
+
+### Test toplam
+
+632 test (onceki 612 + 20 PRD disiplini).
+
+### install.sh
+
+`test_manifest_file_count`: 52 → 53 (+1 test dosyasi).
+
+---
+
 ## [2.15.0] - 2026-05-13
 
 ### Added — Tier 3 Cikti Disiplini: 3-satir blok + VARSAYIM damgasi (FEATURE_IDEAS #20, ADR-0016)
