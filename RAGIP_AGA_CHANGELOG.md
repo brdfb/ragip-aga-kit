@@ -6,6 +6,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.14.0] - 2026-05-13
+
+### Added — Citation Source Whitelist Tier 2C (FEATURE_IDEAS #21, ADR-0015)
+
+Hukuki citation icin **resmi kaynak domain whitelist** zorunlulugu. ADR-0013 (Tier 1 Barnum + Tier 2A madde_dogrula + Tier 2B CoVe) uzerine dorduncu savunma katmani.
+
+- **agents/ragip-hukuk.md**: "TIER 2C — KAYNAK DOMAIN WHITELIST" bolumu eklendi. 8 resmi domain (mevzuat.gov.tr, resmigazete.gov.tr, yargitay.gov.tr, karararama.yargitay.gov.tr, danistay.gov.tr, anayasa.gov.tr, adalet.gov.tr, hsk.gov.tr) listelendi.
+- **skills/ragip-degerlendirme/SKILL.md**:
+  - `allowed-tools` icine `WebFetch` eklendi (whitelist domaininde teyit icin).
+  - Adim 3 guncellendi: `site:mevzuat.gov.tr` filtreli arama, whitelist disi sonuclar reddedilir, "Resmi kaynaktan teyit edilemedi" notu zorunlu.
+- **tests/test_ragip_kaynak_whitelist.py**: 13 test — whitelist tutarliligi (agent vs skill), WebFetch eklenmis, ADR-0015 referansi, diger hukuk skill'lerinde WebSearch yok kontrolu.
+- **docs/adr/0015-citation-source-whitelist.md**: Kaynak otoritesi zorunlulugu, alternatif yaklasimlar (settings.json kit-level reddedildi cunku ragip-dis-veri'yi etkiler), prompt-level enforcement sinirlari.
+
+### Why
+
+ADR-0013 sonrasi acik kalan bosluk: madde_dogrula sadece kanun maddesi pattern'ini yakalar, "Yargıtay 11. HD 2024/X karar" gibi mahkeme karari ve doktrin alintilarini kapsamiyordu. Model gerçek-gibi-gözüken-uydurma-karar üretebilir. Tier 2C kaynak otoritesini prompt-level zorunluluga baglar.
+
+gibibyte-cfo-agent v0.2 (Nisan 2026) settings.json WebFetch whitelist pattern'inden ilham — vergi domain'inde uygulanan disiplin hukuki citation'a tasındı.
+
+### Test toplam
+
+589 test (onceki 576 + 13 whitelist).
+
+### install.sh
+
+`test_manifest_file_count`: 50 → 51 (+1 test dosyasi).
+
+---
+
 ## [2.13.0] - 2026-05-13
 
 ### Added — Prompt Caching (FEATURE_IDEAS I10, ADR-0014)

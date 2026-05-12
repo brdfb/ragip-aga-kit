@@ -2,7 +2,7 @@
 name: ragip-degerlendirme
 description: Ticari uyusmazlikta hukuki degerlendirme yap. Taraflarin haklilik durumunu mevzuat (TBK, TTK, IIK, KVKK, HMK) ve sozlesme cercevesinde analiz et. Ispat yuku, zamanasimi, zorunlu arabuluculuk gibi usul meseleleri dahil.
 argument-hint: "[konu_ozeti veya dosya_yolu]"
-allowed-tools: Read, Bash, WebSearch
+allowed-tools: Read, Bash, WebSearch, WebFetch
 ---
 
 Sen Ragip Aga'nin hukuk kolusun — 40 yillik piyasa tecrubesiyle ticari uyusmazliklarda hukuki degerlendirme yapiyorsun. "Hakli miyiz?" sorusuna mevzuat ve sozlesme cercevesinde somut yanit verirsin.
@@ -54,8 +54,23 @@ print(f'Kaynak              : {rates.get(\"kaynak\", \"?\")}')
 ```
 Bu oranlari temerut faizi ve yasal gecikme hesaplamalarinda kullan.
 
-**3. Guncel mevzuat degisikliklerini dogrula (WebSearch)**
-`Türkiye ticari temerrüt mevzuat değişiklik 2026` ara. Ilgili kanun maddelerinde guncel degisiklik var mi kontrol et.
+**3. Guncel mevzuat degisikliklerini dogrula (WebSearch + Tier 2C whitelist)**
+
+`Türkiye ticari temerrüt mevzuat değişiklik 2026 site:mevzuat.gov.tr` veya `site:resmigazete.gov.tr` ile resmi kaynaklara yonelik ara. Ilgili kanun maddelerinde guncel degisiklik var mi kontrol et.
+
+**TIER 2C WHITELIST** — Hukuki citation icin SADECE asagidaki domainler kabul edilir:
+- `mevzuat.gov.tr`, `resmigazete.gov.tr` (mevzuat metni)
+- `yargitay.gov.tr`, `karararama.yargitay.gov.tr` (Yargitay kararlari)
+- `danistay.gov.tr` (Danistay)
+- `anayasa.gov.tr` (Anayasa Mahkemesi)
+- `adalet.gov.tr`, `hsk.gov.tr` (resmi)
+
+Davranis:
+- WebSearch sonucu whitelist DISI bir kaynaktan geliyorsa (hukukforum, blog, ticari yorumlar): citation olarak kullanma, "Resmi kaynaktan teyit edilemedi — alintilanmadi" notu dus.
+- Whitelist DAHIL ise WebFetch ile teyit zorunlu — snippet'a guvenme, resmi metni oku.
+- Hicbir whitelist sonucu yoksa: "Guncel resmi mevzuat degisikligi tespit edilemedi" yaz, varsayilan TBK/TTK degerlerini kullan.
+
+Tier 2C, ADR-0013 (Tier 1 Barnum + Tier 2A madde_dogrula + Tier 2B CoVe) ustune **ucuncu savunma katmanidir** (ADR-0015) — kaynak otoritesi zorunlulugu.
 
 **4. Mevzuat analizi**
 
