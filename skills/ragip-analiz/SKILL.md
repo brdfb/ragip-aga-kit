@@ -17,6 +17,93 @@ Dosya yolu verilmemişse sor. Birden fazla dosya verilebilir (sözleşme + fatur
 **1. Dosyaları oku**
 Her dosyayı Read ile oku. Okuyamazsan kullanıcıya hata mesajını ver.
 
+**1b. Sözleşme ise PII maskeleme uygula (ZORUNLU):**
+Dosya bir sözleşme (NDA, hizmet sözleşmesi, tedarik sözleşmesi vb.) ise analiz ÖNCESINDE metin maskelenmeli:
+```bash
+ROOT=$(git rev-parse --show-toplevel)
+python3 -c "
+import sys, json, subprocess as _sp
+_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
+sys.path.insert(0, f'{_ROOT}/scripts')
+from ragip_pii import maskele_geri_donusturulabilir
+
+# Read ile okunan sozlesme metnini buraya gir
+metin = '''SOZLESME_METNI'''
+
+# Bilinen taraf adlarini gir
+masked, mapping = maskele_geri_donusturulabilir(
+    metin,
+    firma_adlari=['FIRMA_ADI_1', 'FIRMA_ADI_2'],
+    kisi_adlari=['KISI_ADI_1', 'KISI_ADI_2']
+)
+
+# Mapping dosyasini kaydet
+import pathlib
+firma_slug = 'FIRMA_SLUG'
+sozlesme_dir = pathlib.Path(f'{_ROOT}/data/RAGIP_AGA/sozlesmeler') / firma_slug
+sozlesme_dir.mkdir(parents=True, exist_ok=True)
+mapping_dosya = sozlesme_dir / '.mapping.json'
+mapping_dosya.write_text(json.dumps(mapping, ensure_ascii=False, indent=2))
+
+# Maskelenmis metni kaydet
+masked_dosya = sozlesme_dir / 'DOSYA_ADI.masked.md'
+masked_dosya.write_text(masked)
+
+print('Maskeleme tamamlandi.')
+print(f'Mapping: {mapping_dosya}')
+print(f'Masked: {masked_dosya}')
+print(f'Maskelenen alan sayisi: {len(mapping)}')
+print()
+print(masked[:500])
+"
+```
+**SONRA maskelenmis metni analiz et, orijinali KULLANMA.**
+
+Analiz bitince ciktidaki placeholder'lari geri cevir:
+```bash
+python3 -c "
+import sys, json, subprocess as _sp
+_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
+sys.path.insert(0, f'{_ROOT}/scripts')
+from ragip_pii import geri_cevir
+
+mapping = json.loads(open(f'{_ROOT}/data/RAGIP_AGA/sozlesmeler/FIRMA_SLUG/.mapping.json').read())
+analiz_metni = '''ANALIZ_CIKTISI'''
+print(geri_cevir(analiz_metni, mapping))
+"
+```
+
+**1c. Sözleşme metadata kaydı:**
+Analiz bittikten sonra sözleşme bilgisini `sozlesmeler.jsonl`'e kaydet:
+```bash
+python3 -c "
+import sys, json, subprocess as _sp
+_ROOT = _sp.check_output(['git', 'rev-parse', '--show-toplevel'], text=True, stderr=_sp.DEVNULL).strip()
+sys.path.insert(0, f'{_ROOT}/scripts')
+from ragip_crud import load_jsonl, save_jsonl, data_path, next_id
+
+dosya = data_path('sozlesmeler.jsonl')
+kayitlar = load_jsonl(dosya)
+yeni = {
+    'id': next_id(kayitlar),
+    'firma': 'FIRMA_ADI',
+    'firma_id': 'FIRMA_ID_VARSA',
+    'tur': 'gizlilik',       # gizlilik|hizmet|tedarik|distributorluk|diger
+    'durum': 'inceleme',     # taslak|inceleme|imzali|aktif|suresi_doldu|iptal
+    'tarih': 'IMZA_TARIHI',  # ISO 8601
+    'dosya': 'sozlesmeler/FIRMA_SLUG/DOSYA.pdf',
+    'masked_dosya': 'sozlesmeler/FIRMA_SLUG/DOSYA.masked.md',
+    'mapping': 'sozlesmeler/FIRMA_SLUG/.mapping.json',
+    'taraflar': ['TARAF_1', 'TARAF_2'],
+    'kaynak': 'email',
+    'aciklama': 'KISA_ACIKLAMA'
+}
+kayitlar.append(yeni)
+save_jsonl(dosya, kayitlar)
+print(f'Sozlesme kaydedildi: id={yeni[\"id\"]}')
+"
+```
+
 **2. Güncel yasal oranları al:**
 ```bash
 ROOT=$(git rev-parse --show-toplevel)

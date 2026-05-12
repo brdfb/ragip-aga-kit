@@ -6,6 +6,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.12.1] - 2026-05-12
+
+### Added — ragip-analiz PII Backport (workspace → kit)
+
+Workspace'te 1 Nisan 2026'da eklenen `ragip-analiz` PII maskeleme entegrasyonu kit'e geri tasindi. v2.11.0'da eklenen altyapi (`ragip_pii.py`, `validate_sozlesme`) ilk kez SKILL.md seviyesinde gercek kullaniliyor.
+
+- **skills/ragip-analiz/SKILL.md**: Iki yeni adim eklendi:
+  - **1b. Sozlesme ise PII maskeleme**: Analiz oncesi `ragip_pii.maskele_geri_donusturulabilir()` ile firma/kisi/email/telefon/TCKN/IBAN/tutar/tarih/adres maskele; mapping `.mapping.json`'a; maskelenmis metin `.masked.md`'ye. Analiz bitince `geri_cevir()` ile placeholder'lari original'a cevir.
+  - **1c. Sozlesme metadata**: `sozlesmeler.jsonl`'e kayit ekle (`validate_sozlesme()` semasi: tur/durum/tarih/taraflar/dosya/masked_dosya/mapping).
+
+### Why
+
+Kit v2.11.0'de eklenen sozlesme altyapisi (ragip_pii + validate_sozlesme) **hicbir skill tarafindan kullanilmiyordu** — workspace altyapiyi gercek kullaniyordu. Backport ile pattern kit'in resmi parcasi oldu. Bundan sonra `bash install.sh` ile kurulan her workspace bu pattern'i alir.
+
+---
+
 ## [2.12.0] - 2026-05-12
 
 ### Added — Citation Validation + CoVe (FEATURE_IDEAS #19, ADR-0013)
