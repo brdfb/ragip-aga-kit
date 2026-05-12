@@ -47,7 +47,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 | Script | 10 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` + `ragip_cron.sh` + `ragip_madde_dogrula.sh` |
 | Config | 2 | `config/ragip_aga.yaml` + `config/kanun_maddeleri.json` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 15 | `tests/test_ragip_*.py` |
+| Test | 16 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -131,7 +131,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (589 test)
+# Tam suite (612 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -148,9 +148,10 @@ python -m pytest tests/test_ragip_errors.py -v         # Hata siniflandirmasi
 python -m pytest tests/test_ragip_pii.py -v            # PII temizleyici
 python -m pytest tests/test_ragip_cron.py -v           # Zamanlanmis gorevler
 python -m pytest tests/test_ragip_kaynak_whitelist.py -v # Tier 2C kaynak whitelist
+python -m pytest tests/test_ragip_cikti_disiplini.py -v # Tier 3 cikti disiplini (3-satir + VARSAYIM)
 ```
 
-Testler 15 katmani kapsar:
+Testler 16 katmani kapsar:
 1. **Yapisal** — Agent frontmatter, skill dagilimi, model atamalari, portability
 2. **Bash block** — Python sozdizimi, bare placeholder, env var eslestirme, helper kullanimi
 3. **Finansal** — Vade farki, TVM, arbitraj, carry trade hesaplamalari
@@ -166,6 +167,7 @@ Testler 15 katmani kapsar:
 13. **Madde dogrulama** — Yasal madde citation halusinasyon tespiti (Tier 2A, CoVe ADR-0013) — regex extractor, JSON kanun veri, CLI/Bash wrapper, range, fikra/bent, Turkce karakter
 14. **Prompt caching** — `call_llm()` Anthropic provider icin `cache_control: ephemeral` (ADR-0014), provider tespiti (Anthropic vs OpenAI/Gemini/Ollama), structured content yapisi
 15. **Kaynak whitelist (Tier 2C)** — Hukuki citation icin resmi kaynak zorunlulugu (ADR-0015), 8 domain (mevzuat.gov.tr, yargitay.gov.tr, ...), agent + skill tutarlilik, whitelist disi reddedilir
+16. **Cikti disiplini (Tier 3)** — 3-satir TESPIT/POZISYON/GEREKCE blok formati + VARSAYIM damgasi (ADR-0016), ragip-analiz/strateji/degerlendirme, anlatim sesi serbest, deterministik skill'ler kapsam disi
 
 ## Bagimlilklar
 

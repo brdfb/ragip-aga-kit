@@ -32,6 +32,7 @@ python -m pytest tests/test_ragip_cron.py -v       # Zamanlanmis gorevler (cron 
 python -m pytest tests/test_ragip_madde_dogrula.py -v # Yasal madde citation dogrulama (Tier 2A, ADR-0013)
 python -m pytest tests/test_ragip_prompt_caching.py -v # CLI prompt caching (Anthropic cache_control, ADR-0014)
 python -m pytest tests/test_ragip_kaynak_whitelist.py -v # Tier 2C kaynak domain whitelist (ADR-0015)
+python -m pytest tests/test_ragip_cikti_disiplini.py -v # Tier 3 cikti disiplini 3-satir + VARSAYIM (ADR-0016)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

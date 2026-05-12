@@ -6,6 +6,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.15.0] - 2026-05-13
+
+### Added — Tier 3 Cikti Disiplini: 3-satir blok + VARSAYIM damgasi (FEATURE_IDEAS #20, ADR-0016)
+
+ragip-analiz, ragip-strateji, ragip-degerlendirme LLM-driven skill'lere **3-satir TESPIT/POZISYON/GEREKCE** kritik-bulgu formati ve **VARSAYIM damgasi** zorunluluk olarak eklendi. Tier 1 (Barnum) + Tier 2A/B/C (citation defense) ustune **besinci savunma katmani** — cikti formati ve belirsizlik tanima.
+
+- **skills/ragip-analiz/SKILL.md**: Step 7 "Cikti disiplini" eklendi (Madde dogrulama 8→9). Output Format: KRITIK MADDELER, ELINDEKI KOZLAR, RISKLER her biri 3-satir blok.
+- **skills/ragip-strateji/SKILL.md**: Step 3 "Cikti disiplini" eklendi (Madde dogrulama 3→4). RAGIP AGA'NIN TAVSIYESI + BU HAFTA YAPILACAKLAR 3-satir formatinda.
+- **skills/ragip-degerlendirme/SKILL.md**: Step 8 Barnum + Cikti disiplini birlestirildi. SONUC VE ONERI 3-satir formatinda. Anlatim paragraflari (HUKUKI DEGERLENDIRME, MADDE BAZLI ANALIZ) serbest.
+- **tests/test_ragip_cikti_disiplini.py**: 23 test — uc skill icin TESPIT/POZISYON/GEREKCE, VARSAYIM damgasi, aralik kurali, ses korundu kontrolu, deterministik skill'lerin kapsam disi.
+- **docs/adr/0016-cikti-disiplini-tier-3.md**: X5 reddi (full template) ile distinction: kritik bulgu blok formati, full template degil. K2 + 3-satir disiplini gibibyte-cfo-agent v0.2 cherry-pick.
+
+### Why
+
+Mevcut bulgu listeleri serbest-format, yumusatici dil ("dikkatli incelenmeli", "olabilir") icerebiliyor, kritik bulgular paragraflar arasinda kayboluyor. Sayisal iddialarda LLM tek-noktali tahmin verirken overconfidence bias (arXiv 2512.16030, 2025) — kullaniciyi yanlis kesinlik hissine sokuyor. Tier 3 disiplini yapisal sunumla okuma surati arttirir, VARSAYIM damgasi aralik kullanmayi modelin "bilmiyorum" demesinin yapisal araci yapar.
+
+### Test toplam
+
+612 test (onceki 589 + 23 cikti disiplini).
+
+### install.sh
+
+`test_manifest_file_count`: 51 → 52 (+1 test dosyasi).
+
+---
+
 ## [2.14.0] - 2026-05-13
 
 ### Added — Citation Source Whitelist Tier 2C (FEATURE_IDEAS #21, ADR-0015)

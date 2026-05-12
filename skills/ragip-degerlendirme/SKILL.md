@@ -135,9 +135,22 @@ Cevaplari yaz. Eger draft'in iddiasi cevapla celisiyorsa **draft yanlis** — ce
 
 ### SENTEZ FAZI (8-9)
 
-**8. Final raporu yaz + Barnum filtresi (ZORUNLU):**
+**8. Final raporu yaz + Barnum filtresi + Cikti disiplini (Tier 3, ADR-0016):**
 
 Draft + verification cevaplari + Barnum filtresi (her cumle: "firma adini degistirsem hala gecerli mi?" → evet ise spesifiklestir veya cikar).
+
+**Cikti disiplini** — SONUC VE ONERI bolumunde **3-satir blok formati** zorunlu:
+```
+TESPIT: <somut bulgu — madde + tarih + tutar>
+POZISYON: <fiil ile baslar — ne yapilacak, hangi senaryo>
+GEREKCE: <opsiyonel — neden bu pozisyon>
+```
+Anlatim paragraflari (HUKUKI DEGERLENDIRME, MADDE BAZLI ANALIZ) serbest format.
+
+**VARSAYIM damgasi** — sonuc/etki tahmininde:
+- Veri (sozlesme, fatura, oran) eksikse "VARSAYIM:" + aralik (X-Y TRY veya X-Y ay) yaz
+- Tek nokta tahmini yasak — "Bu varsayimdir, kesinlesmek icin [belge] gerekli" cumlesi zorunlu
+- Mevzuatta gercek bir sure (TBK m.146 → 10 yil) varsa varsayim degil — kesin yaz.
 
 ```bash
 python3 -c "
@@ -194,10 +207,19 @@ Bu adim **deterministik Tier 2A savunma** — Tier 1 (Barnum) ve CoVe (Tier 2B y
 - **Yetkili mahkeme:** [sozlesmede belirtilmisse, yoksa genel kurallar]
 
 ### SONUC VE ONERI
-[Net degerlendirme + onerilen sonraki adimlar]
+**3-satir blok formatinda** (TESPIT/POZISYON/GEREKCE):
+```
+TESPIT: <somut bulgu — madde + tutar + sure>
+POZISYON: <fiil ile baslar — onerilen ilk adim>
+GEREKCE: <neden bu adim, hangi senaryoyu disliyor>
+```
+
+Sonraki adimlar:
 - Delil stratejisi icin: `/ragip-delil`
 - Ihtar taslagi icin: `/ragip-ihtar`
 - Hesaplama icin: `/ragip-vade-farki`
+
+> Sonuc/etki tahmininde veri yoksa "VARSAYIM:" damgasi + aralik (tek nokta yasak).
 
 ---
 **UYARI:** Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin.

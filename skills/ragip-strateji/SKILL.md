@@ -77,7 +77,22 @@ print(f'  TOPLAM: {toplam_hukuki + firsat_maliyeti:,.0f} TL')
 **2. Barnum filtresi (ZORUNLU — ciktiyi yazmadan once):**
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (firma verisi, tutar, vade, sektor detayi ekle) ya da cikar. Generic strateji onerisi ("nakit akisinizi iyilestirin", "vade farklarini takip edin") YASAK — somut senaryo verisine dayanan oneriler yaz.
 
-**3. Madde dogrulama (strateji yasal yola/maddelere atifsa):**
+**3. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
+
+**3-satir blok formati** — RAGIP AGA'NIN TAVSIYESI ve BU HAFTA YAPILACAKLAR icin:
+```
+TESPIT: <1 cumle, somut durum + tutar/vade>
+POZISYON: <1 cumle, fiil ile baslar — hangi senaryo, hangi adim>
+GEREKCE: <opsiyonel; sorulursa veya kararı zora sokan boyut>
+```
+Senaryo aciklamalari (Koşul, Hedef, Hafta planı) serbest kalir — 3-satir SADECE final tavsiye + bu hafta adimlari icin.
+
+**VARSAYIM damgasi** — senaryo maliyetinde firma/rakip/sektor verisi yoksa:
+- "VARSAYIM:" + aralik (X-Y TRY) — tek nokta yasak
+- "Bu varsayimdir, kesinlesmek icin [belge/D365/firma kaydi] gerekli" cumlesi zorunlu
+- Hesaplama (Adim 1) somut tutara dayaniyorsa VARSAYIM gereksiz; spekulatif tahminde zorunlu
+
+**4. Madde dogrulama (strateji yasal yola/maddelere atifsa):**
 Strateji raporunda TBK m.117, IIK m.58 gibi yasal yol referansi gectiyse, dosyayi yazdiktan sonra:
 ```bash
 bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
@@ -133,12 +148,17 @@ Referans maddeleri: TBK m.117-120 (temerut), TTK m.1530 (ticari faiz), IIK m.58/
 ---
 
 ### 📌 RAGIP AGA'NIN TAVSİYESİ
-Hangi senaryoyu öneriyorum ve neden:
-[Net tavsiye — "Senaryo 2'den başla, 3 hafta içinde yanıt gelmezse Senaryo 3'e geç"]
+**3-satir blok formatinda** — tek tavsiye:
+```
+TESPIT: <durum ozeti, somut tutar + vade>
+POZISYON: <hangi senaryo, hangi tetikleyici ile diger senaryoya gec>
+GEREKCE: <neden bu secim, hangi riske karsi>
+```
 
 ### 📋 BU HAFTA YAPILACAKLAR
-1. [En kritik ilk adım]
-2. [İkinci adım]
-3. [Üçüncü adım]
+Her adim **3-satir blok** veya tek satir somut aksiyon:
+1. TESPIT: ... / POZISYON: ... / GEREKCE: ...
+2. [Ikinci adim — tek satir kabul edilebilir]
+3. [Ucuncu adim]
 
 *Bu aksiyonları `/ragip-gorev ekle [açıklama]` ile kaydet.*

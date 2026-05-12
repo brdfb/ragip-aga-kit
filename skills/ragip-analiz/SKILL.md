@@ -192,9 +192,24 @@ print(f'(AI tahmini — hukuki degerlendirme degildir)')
 **6. Barnum filtresi (ZORUNLU — raporu yazmadan once):**
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (sozlesme maddesi, tutar, vade, somut hesaplama ekle) ya da cikar. Generic tespitler ("sozlesmeyi dikkatli okuyun", "vade farki onemlidir") YASAK — belgenin kendisine dayanan spesifik bulgular yaz.
 
-**7. Analiz raporu yaz:**
+**7. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
 
-**8. Madde dogrulama (raporda yasal madde referansi varsa):**
+**3-satir blok formati** — KRITIK MADDELER, ELINDEKI KOZLAR, RISKLER bolumlerinde her bulgu icin:
+```
+TESPIT: <1 cumle, somut alıntı + madde numarasi + tutar — generic yasak>
+POZISYON: <1 cumle, fiil ile baslar — ne yapilacak>
+GEREKCE: <opsiyonel; sorulursa veya etki esik ustunde ise>
+```
+Anlatim paragraflari (DOSYA OZETI, HUKUK NOTU) serbest kalabilir — 3-satir SADECE kritik bulgu listeleri icin.
+
+**VARSAYIM damgasi** — sayisal etki/tutar/vade tahminlerinde:
+- Veri yoksa cikti basina buyuk harfle "VARSAYIM:" + aralik (X-Y TRY) yaz, tek nokta yasak
+- "Bu varsayimdir, kesinlesmek icin [belge/veri] gerekli" cumlesi zorunlu
+- Belge gelince varsayim damgasi kaldirilir
+
+**8. Analiz raporu yaz:**
+
+**9. Madde dogrulama (raporda yasal madde referansi varsa):**
 Eger analiz raporunda TBK/TTK/IIK/KVKK/HMK madde referansi gectiyse, ciktiyi yazdiktan sonra:
 ```bash
 bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
@@ -207,13 +222,20 @@ Exit 2 = uydurma sanigi → raporu duzelt. Detay: ragip-degerlendirme skill'inde
 [Belge türü, taraflar, tarih, kapsam]
 
 ### ⚡ KRİTİK MADDELER
-[Doğrudan alıntıyla, madde numarasıyla]
+Her madde icin **3-satir blok** (TESPIT/POZISYON/GEREKCE):
+```
+TESPIT: Madde 7.2 — vade farki %3/ay "tarafların mutabakatıyla" sartina bagli, otomatik degil
+POZISYON: Itiraz yazisi gonder, mutabakat olmadiginı kanıtla
+GEREKCE: TTK m.21/2 itiraz suresi (8 gun) baslangic noktasi
+```
 
 ### 💪 ELİNDEKİ KOZLAR
-[İtiraz gerekçesi olabilecek maddeler — gerçek sözleşme ifadesiyle]
+Her koz **3-satir blok**. Alintilanan sozlesme ifadesi + somut etki + onerilen aksiyon.
 
 ### ⚠️ RİSKLER
-[Karşı tarafın lehine olan maddeler]
+Her risk **3-satir blok**. Karsı tarafın lehine olan madde + olasi etki + savunma.
+
+> Sayisal etki/tutar tahmininde veri yoksa "VARSAYIM:" damgasi + aralik (tek nokta yasak).
 
 ### 📐 HESAPLAMA KONTROLÜ
 [Fatura tutarları doğru mu? Bash çıktısı]
