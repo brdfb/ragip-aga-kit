@@ -6,6 +6,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.12.0] - 2026-05-12
+
+### Added — Citation Validation + CoVe (FEATURE_IDEAS #19, ADR-0013)
+
+Tier 2 savunma katmani: ragip-degerlendirme, ragip-analiz, ragip-strateji ciktilarinda sahte yasal madde citation halusinasyonunu yakalar. Tier 1 (Barnum filtresi prompt-tabanli) ustune deterministik kontrol.
+
+- **config/kanun_maddeleri.json**: 5 mevzuat (TBK, TTK, IIK, KVKK, HMK) + 25 madde manuel curated. SKILL.md'lerden cikartilan tum referanslari kapsar. Genisletilebilir (kullanici manuel ekler).
+- **scripts/ragip_madde_dogrula.py**: Regex extractor + validator. Yakaladiklari: tek madde (`TBK m.117`), fikra (`TTK m.21/2`), fikra+bent (`TTK m.23/1-c`), range (`TBK m.117-120` → 4 madde), Turkce karakter (`İİK` → `IIK` normalize). LLM-bagimsiz, ragip_get_rates.sh tarzi standalone.
+- **scripts/ragip_madde_dogrula.sh**: Bash wrapper — skill'lerden kolay cagri.
+- **tests/test_ragip_madde_dogrula.py**: 34 yeni test — kanun veri butunlugu, normalize, referans cikarma, dogrulama, CLI (exit kodu, stdin, JSON format), bash wrapper, portability.
+- **docs/adr/0013-chain-of-verification.md**: CoVe pattern + Tier 2 mimari karar. Defense-in-depth: Tier 1 Barnum + Tier 2A madde_dogrula deterministik + Tier 2B CoVe yapisal.
+- **skills/ragip-degerlendirme/SKILL.md**: 4-fazli CoVe akisi (DRAFT → VERIFICATION SORULARI → FRESH-LOOK CEVAP → SENTEZ + dogrulama). Adim 9 zorunlu madde dogrulama.
+- **skills/ragip-analiz/SKILL.md**: Adim 8 — madde referansi varsa zorunlu dogrulama.
+- **skills/ragip-strateji/SKILL.md**: Adim 3 — yasal yola atifsa zorunlu dogrulama.
+
+### Changed
+
+- **install.sh**: Script count 8 → 10 (+ragip_madde_dogrula.py, +ragip_madde_dogrula.sh). Config count 1 → 2 (+kanun_maddeleri.json). Manifest builder genisletildi.
+- **tests/test_ragip_install.py**: `test_manifest_file_count` 45 → 49 (+1 test + 2 script + 1 config).
+- **README.md**: Script 8→10, Config 1→2, Test 12→13. Yeni test katmani (13. Madde dogrulama) eklendi.
+- **CLAUDE.md**: Test komut listesine `test_ragip_madde_dogrula.py` eklendi.
+- **docs/FEATURE_IDEAS.md**: #19 "Aktif" → "Tamamlanan (12)".
+
+### Test toplam
+
+567 test (onceki 533 + 34 madde_dogrula).
+
+---
+
 ## [2.11.0] - 2026-03-27
 
 ### Added — Sozlesme Yonetimi Altyapisi

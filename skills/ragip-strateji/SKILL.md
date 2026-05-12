@@ -77,6 +77,13 @@ print(f'  TOPLAM: {toplam_hukuki + firsat_maliyeti:,.0f} TL')
 **2. Barnum filtresi (ZORUNLU — ciktiyi yazmadan once):**
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (firma verisi, tutar, vade, sektor detayi ekle) ya da cikar. Generic strateji onerisi ("nakit akisinizi iyilestirin", "vade farklarini takip edin") YASAK — somut senaryo verisine dayanan oneriler yaz.
 
+**3. Madde dogrulama (strateji yasal yola/maddelere atifsa):**
+Strateji raporunda TBK m.117, IIK m.58 gibi yasal yol referansi gectiyse, dosyayi yazdiktan sonra:
+```bash
+bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
+```
+Exit 2 = uydurma sanigi → raporu duzelt. Detay: ragip-degerlendirme skill'inde.
+
 ## Çıktı Formatı
 
 ---

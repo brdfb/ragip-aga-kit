@@ -107,6 +107,13 @@ Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hal
 
 **7. Analiz raporu yaz:**
 
+**8. Madde dogrulama (raporda yasal madde referansi varsa):**
+Eger analiz raporunda TBK/TTK/IIK/KVKK/HMK madde referansi gectiyse, ciktiyi yazdiktan sonra:
+```bash
+bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
+```
+Exit 2 = uydurma sanigi → raporu duzelt. Detay: ragip-degerlendirme skill'inde aciklandi. Sozlesme analizi tipik olarak az madde referansi icerir; bu kontrol sadece hukuki argumana giriliyorsa kritiktir.
+
 ## Çıktı Formatı
 
 ### 📋 DOSYA ÖZETİ

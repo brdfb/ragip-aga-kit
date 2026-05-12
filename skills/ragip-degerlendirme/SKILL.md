@@ -16,7 +16,20 @@ Konu veya dosya yolu verilmemisse sor: "Hangi uyusmazlik? Sozlesme/fatura varsa 
 
 Sozlesme/fatura dosyasi verilmisse once oku ve ilgili maddeleri tespit et.
 
+## Akis — Chain-of-Verification (CoVe)
+
+Hukuki degerlendirme yuksek-stake bir cikti — sahte madde veya hatali zamanasimi hesabi kullaniciyi yaniltir. Sycophantic reflection riskini azaltmak icin **4-adim CoVe akisi** zorunludur (ADR-0013):
+
+1. **DRAFT** — ilk degerlendirme yazilir (Adim 1-5 asagida).
+2. **VERIFICATION SORULARI** — draft'i okumadan, kritik iddialari sorulara dönüştür (Adim 6).
+3. **FRESH-LOOK CEVAP** — her soruyu **kaynak veriden** (fatura, sozlesme, ragip_rates, kanun_maddeleri.json) tekrar dogrula. Draft'i referans alma (Adim 7).
+4. **SENTEZ + DOGRULAMA** — Draft + cevaplar birlestirilir, madde_dogrula calisir, final cikti yazilir (Adim 8-9).
+
+> NOT: Saf CoVe icin sub-agent yeniden spawn etmek gerekir (true fresh context). Skill-icindeki bu yapisal akis, **fresh primary-data engagement** ile yari-fresh yaklasimdir. Tier 2A (madde_dogrula deterministik) bu eksikligi kapatir.
+
 ## Yapilacaklar
+
+### DRAFT FAZI (1-5)
 
 **1. Durumu anla**
 - Taraflar kimler, uyusmazlik konusu ne?
@@ -79,7 +92,37 @@ Uyusmazlik turune gore ilgili kanun maddelerini belirle ve somut olaya uygula:
 - IIK m.68: Odeme emrine itiraz ve itirazin kaldirilmasi
 - IIK m.167: Kambiyo senetlerine ozgu haciz yolu
 
-**5. Hukuki degerlendirme raporu yaz (Bash):**
+**5. DRAFT degerlendirme uret (internal — dosyaya henuz yazma):**
+- Bizim/karsi tarafin pozisyonu, ilgili maddeler, zamanasimi durumu, ispat yuku, sonuc.
+- Bu adimda dosya yazilmaz — draft akli not olarak tutulur.
+
+### VERIFICATION FAZI (6-7) — CoVe
+
+**6. VERIFICATION SORULARI uret:**
+
+Draft'a bakmadan, su tipte sorular uret (ornek):
+- "Bu uyusmazlikta zamanasimi suresi kac yil? Hangi kanun maddesine dayaniyor?"
+- "Temerruda dusurme icin ihtar zorunlu mu? Hangi madde?"
+- "Yasal gecikme faizi orani guncel hangi seviye?"
+- "Bu olaya hangi mevzuat hukmu uygulanir?"
+
+Sorulari liste olarak dokumante et — sonraki adimda kaynak veriden cevaplayacaksin.
+
+**7. FRESH-LOOK CEVAP (kaynak veriden, draft'a bakmadan):**
+
+Her soru icin kaynak veriden tekrar bul:
+- **Madde sorulari** → `config/kanun_maddeleri.json` veya `kanun_maddeleri.json` icindeki gercek madde adi/aciklamasi
+- **Zamanasimi sorulari** → `/ragip-zamanasimi` skill veya ilgili madde (TBK m.146/147)
+- **Faiz orani** → `bash scripts/ragip_get_rates.sh` (deterministik)
+- **Sozlesme hukmu** → orijinal sozlesme dosyasini tekrar oku (Read)
+
+Cevaplari yaz. Eger draft'in iddiasi cevapla celisiyorsa **draft yanlis** — cevabi tut.
+
+### SENTEZ FAZI (8-9)
+
+**8. Final raporu yaz + Barnum filtresi (ZORUNLU):**
+
+Draft + verification cevaplari + Barnum filtresi (her cumle: "firma adini degistirsem hala gecerli mi?" → evet ise spesifiklestir veya cikar).
 
 ```bash
 python3 -c "
@@ -96,8 +139,20 @@ print(f'Cikti kaydedildi: {dosya.name}')
 "
 ```
 
-**6. Barnum filtresi (ZORUNLU — raporu yazmadan once):**
-Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (somut madde referansi, tutar, zamanasimi suresi, ispat detayi ekle) ya da cikar. Generic hukuki tespitler ("avukata danisin", "haklarinizi koruyun") YASAK — mevzuat maddesi ve somut olaya dayanan spesifik degerlendirmeler yaz.
+**9. MADDE DOGRULAMA (ZORUNLU — rapor dosyaya yazildiktan sonra, Tier 2A deterministik):**
+
+```bash
+bash $RAGIP_KIT_ROOT/scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
+# veya kit kurulu repoda:
+bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
+```
+
+Davranis:
+- Exit 0 → tum referanslar dogrulandi, rapor temiz.
+- Exit 2 → uydurma madde sanigi: raporu **DUZELT**. Bilinmeyen maddeyi `config/kanun_maddeleri.json` icinde kontrol et. Gercek bir madde ama JSON'da eksikse kullaniciya bildir ("Bu madde gercek, JSON'a eklenmeli"). Uydurma ise referansi kaldir veya gecerli madde ile degistir.
+- "Bilinmeyen kanun" (TCK, vb.) → kit scope'u disinda (ticari/borclar/icra/KVKK), referansi kaldir veya scope'a al.
+
+Bu adim **deterministik Tier 2A savunma** — Tier 1 (Barnum) ve CoVe (Tier 2B yapisal) ustune model halusinasyonunu yakalar.
 
 ## Cikti Formati
 

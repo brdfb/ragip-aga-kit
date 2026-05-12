@@ -3,62 +3,11 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-04-04 (v2.11.0 — rekabet istihbarati)
+Guncelleme: 2026-05-12 (v2.12.0 — citation dogrulama + CoVe)
 
 ---
 
 ## A. Aktif Fikirler
-
----
-
-### 19. Cikti Kalite Kontrolu — Citation Dogrulama + CoVe (YUKSEK DEGER — SAHTE MADDE RISKI)
-
-**Sorun:** ragip-degerlendirme, ragip-analiz, ragip-strateji ciktilarinda iki risk var:
-1. **Generic bulgu** — "vade farkini takip edin", "sozlesmeyi dikkatli okuyun" gibi firma adi degistirilse hala gecerli ifadeler (Barnum etkisi)
-2. **Hallucinated citation** — LLM'in "TBK m.117" gibi yasal madde numarasini UYDURMA riski. Adversarial testing'de citation fabrication orani %94'e cikabiliyor (arXiv 2510.24476, 2025).
-
-**Su an yapilan (Tier 1, v2.11+):** Barnum filtresi prompt'a eklendi — ragip-strateji, ragip-analiz, ragip-degerlendirme. Bu production'da "specificity rubric in-prompt" olarak bilinen pattern, Tier 1 cozum.
-
-**Tier 1 Sinirlamasi:** Prompt-based self-check **sycophantic reflection** tuzagina dusebilir — model kendi ciktisini kendi onaylar. "Do LLMs Know What They Don't Know" (arXiv 2512.16030, 2025) TUM frontier modellerde sistematik overconfidence tespit etmis. Yani prompt'a "emin misin?" yazmak yetmez.
-
-**Tier 2 Oneri (bir sonraki adim):**
-
-**a) ragip_madde_dogrula helper'i** (ragip-degerlendirme icin):
-- Cikti icindeki yasal madde referanslarini regex ile cikar (TBK m.X, TTK m.X, IIK m.X, KVKK m.X)
-- Offline JSON kanun madde listesi (manual olarak derlenmis gercek madde numaralari)
-- Uydurma madde referansi varsa hata dondur
-- ragip_get_rates.sh gibi deterministik, LLM dahil edilmez
-
-**b) Chain-of-Verification (CoVe) pattern** (ragip-degerlendirme/ragip-analiz icin):
-- Meta ACL 2024, 2025'te production'da yaygin kullanim
-- Adim akisi:
-  1. Draft yaz
-  2. Verification sorulari uret ("zamanasimi suresi dogru mu?", "madde gercek mi?", "hesap tutarli mi?")
-  3. Sorulari FRESH CONTEXT'te cevapla (orchestrator'dan yeni sub-call)
-  4. Final'i sentezle
-- Key insight: sorularin ayri context'te cevaplanmasi self-sycophancy'yi azaltir
-
-**Production referanslari:**
-- Anthropic "Three-Explorer-Plus-One-Critic" (Claude Code Ultra): PR review %16→%54 iyilesme
-- FinCon (finansal agent): multi-agent agent-as-a-judge pattern
-- UQLM (cvs-health/uqlm, JMLR 2025): production-ready confidence scorer Python paketi — bizim domain icin overkill ama referans
-
-**Reddedilenler (degerlendirildi):**
-- UQLM entegrasyonu — domain kucuk, compute maliyeti deger yok
-- MAR (Multi-Agent Reflexion, arXiv 2512.20845) — persona debate, karmasik
-- Process Reward Models — akademik, compute pahali
-- LATS — yuksek stakes'te, bizim domain degil
-
-**Yapilacak sira:**
-1. (Oncelik) ragip_madde_dogrula helper + ragip-degerlendirme'ye entegrasyon — gercek citation hallucination savunmasi
-2. ADR-XXXX: CoVe pattern ragip-kit'te — mimari karar
-3. Implementation: ragip-degerlendirme CoVe 4-adim akisi
-
-**Kaynaklar:**
-- HaluGate (vLLM blog, Dec 2025) — NLI-based grounding
-- CoVe paper (ACL 2024) — Chain-of-Verification
-- "Do LLMs Know What They Don't Know" (arXiv 2512.16030, 2025)
-- Anthropic Building Effective Agents — writer/reviewer pattern
 
 ---
 
@@ -373,7 +322,7 @@ gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniy
 
 ---
 
-## D. Tamamlanan (10/10)
+## D. Tamamlanan (12)
 
 | # | Madde | Versiyon | Ozet |
 |---|-------|----------|------|
@@ -389,6 +338,7 @@ gibibyte-agent'ta system prompt'a `cache_control: {"type": "ephemeral"}` ekleniy
 | 10 | Nakit Cevrim Dongusu Dashboard | v2.8.1 | `ccc_dashboard()` — DSO + DPO + tahsilat + aging tek cagri |
 | 11 | Agent Tool Kisitlama (MCP) | v2.8.10 | Semantic tool zorunlu + ham tool'lar tum agent'larda disallowedTools ile bloke (MCP rehberi + ADR-0004) |
 | 16 | Sub-Agent Graceful Degradation | v2.8.6 | 4 sub-agent'a kismi sonuc talimatı + orchestrator partial failure bildirimi |
+| 19 | Citation Dogrulama + CoVe | v2.12.0 | Tier 2A: `ragip_madde_dogrula.py` (regex + JSON kanun veri) deterministik dogrulama; Tier 2B: CoVe 4-adim akisi ragip-degerlendirme'de; ADR-0013 |
 
 ---
 

@@ -29,6 +29,7 @@ python -m pytest tests/test_ragip_output.py -v       # Cikti yonetimi (firma kla
 python -m pytest tests/test_ragip_errors.py -v      # Hata siniflandirmasi (GECICI/KALICI/POLITIKA)
 python -m pytest tests/test_ragip_pii.py -v         # PII temizleyici (maskeleme + hash)
 python -m pytest tests/test_ragip_cron.py -v       # Zamanlanmis gorevler (cron wrapper)
+python -m pytest tests/test_ragip_madde_dogrula.py -v # Yasal madde citation dogrulama (Tier 2A, ADR-0013)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

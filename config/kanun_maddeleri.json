@@ -1,0 +1,72 @@
+{
+  "_meta": {
+    "aciklama": "Ragip Aga citation validation veri tabani — gercek Turk mevzuat maddeleri. ragip_madde_dogrula.py LLM ciktilarinda referans halusinasyonu tespiti icin kullanir.",
+    "kapsam": "Sadece kit skill'lerinde (ragip-degerlendirme, ragip-zamanasimi, ragip-ihtar, ragip-strateji) referans verilen ve dogrulanabilir maddeler. Otesi: kullanici manuel olarak ekler.",
+    "guncelleme": "2026-05-12",
+    "kaynak": "ragip-degerlendirme/SKILL.md, ragip-zamanasimi/SKILL.md, ragip-ihtar/SKILL.md ekosistem referanslari",
+    "konvansiyon": "madde numaralari string olarak yazilir (slash, tire, bent karakterleri korunur). Eslesme base madde uzerinden yapilir, fikra/bent detayi degil."
+  },
+  "kanunlar": {
+    "TBK": {
+      "tam_ad": "Turk Borclar Kanunu",
+      "kanun_no": "6098",
+      "maddeler": {
+        "49": {"baslik": "Haksiz fiil", "ozet": "Haksiz fiilden dogan sorumluluk"},
+        "112": {"baslik": "Borca aykirilik", "ozet": "Borca aykiri davranis (ifa engeli) ve tazminat"},
+        "117": {"baslik": "Temerrut", "ozet": "Borclu mutemerridin sorumlulugu, ihtar gereksinimi"},
+        "118": {"baslik": "Temerrut faizi", "ozet": "Para borclarinda temerrut faizi"},
+        "119": {"baslik": "Kanuni faiz", "ozet": "Kanuni faiz hukumleri"},
+        "120": {"baslik": "Kapital (anapara) faizi", "ozet": "Anapara faizinin hesabi"},
+        "146": {"baslik": "Genel zamanasimi", "ozet": "10 yillik genel zamanasimi suresi"},
+        "147": {"baslik": "Kisa zamanasimi", "ozet": "5 yillik zamanasimi: kira, hizmet, eser, vekalet, vade farki vb."},
+        "207": {"baslik": "Satis sozlesmesinde ayip bildirimi", "ozet": "Alici ayibi gec bildirirse hak duser"},
+        "475": {"baslik": "Eser sozlesmesinde ayip hukumleri", "ozet": "Eser ayibinin tespiti, secimlik haklar"}
+      }
+    },
+    "TTK": {
+      "tam_ad": "Turk Ticaret Kanunu",
+      "kanun_no": "6102",
+      "maddeler": {
+        "21": {"baslik": "Ticari is karinesi ve fatura itiraz suresi", "ozet": "Fatura alan 8 gun icinde itiraz etmezse icerik kabul sayilir (m.21/2)"},
+        "23": {"baslik": "Ticari satista itiraz", "ozet": "Ticari satista 8 gunluk itiraz suresi (m.23/1-c)"},
+        "1530": {"baslik": "Ticari islerde temerrut faizi", "ozet": "Mal/hizmet bedelinde temerrut faizi orani"}
+      }
+    },
+    "IIK": {
+      "tam_ad": "Icra ve Iflas Kanunu",
+      "kanun_no": "2004",
+      "maddeler": {
+        "58": {"baslik": "Takip talebi", "ozet": "Icra takibinin baslamasi, 1 yillik zamanasimi"},
+        "68": {"baslik": "Odeme emrine itiraz", "ozet": "Itirazin kaldirilmasi prosedurleri"},
+        "167": {"baslik": "Kambiyo senetlerine ozgu haciz yolu", "ozet": "Cek, senet, police icin ozel takip yolu"}
+      }
+    },
+    "KVKK": {
+      "tam_ad": "Kisisel Verilerin Korunmasi Kanunu",
+      "kanun_no": "6698",
+      "maddeler": {
+        "5": {"baslik": "Kisisel veri isleme sartlari", "ozet": "Genel ilkeler ve isleme sartlari"},
+        "11": {"baslik": "Ilgili kisinin haklari", "ozet": "Veri sahibinin haklari (silme, erisim, vb.)"},
+        "13": {"baslik": "Veri sorumlusuna basvuru", "ozet": "30 gun icinde cevap zorunlulugu"},
+        "14": {"baslik": "Kurula sikayet", "ozet": "Basvurudan sonra 30 gun icinde Kurul'a sikayet"}
+      }
+    },
+    "HMK": {
+      "tam_ad": "Hukuk Muhakemeleri Kanunu",
+      "kanun_no": "6100",
+      "maddeler": {
+        "199": {"baslik": "Belge ve senet", "ozet": "Delil turleri"},
+        "200": {"baslik": "Senetle ispat zorunlulugu", "ozet": "Belirli tutar ustu islemlerde senet sarti"}
+      }
+    }
+  },
+  "kanun_referanslari": {
+    "_aciklama": "Madde numarasi olmadan sadece kanun adi/numarasi geciyorsa dogrulama icin",
+    "6098": "Turk Borclar Kanunu (TBK)",
+    "6102": "Turk Ticaret Kanunu (TTK)",
+    "2004": "Icra ve Iflas Kanunu (IIK)",
+    "6698": "Kisisel Verilerin Korunmasi Kanunu (KVKK)",
+    "6100": "Hukuk Muhakemeleri Kanunu (HMK)",
+    "6325": "Hukuk Uyusmazliklarinda Arabuluculuk Kanunu (zorunlu arabuluculuk)"
+  }
+}
