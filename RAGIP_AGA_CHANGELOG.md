@@ -6,6 +6,57 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.18.1] - 2026-05-14
+
+### Tier 3/4 propagation fix — Skill ↔ Agent koordinasyon (audit-driven)
+
+**Bulgu:** 14 Mayis Yontem 2B regresyon testleri (3 ardisik versiyon: v2.16.0/v2.17.0/v2.18.0) gosterdi ki Tier 3/4 prompt-level disiplin **modele davranis olarak yansimadi** — 3 farkli run, hepsinde 0/13 yapisal eslesme (TESPIT/POZISYON/GEREKCE blok, Etki:, Sahip/Zaman/Beklenen, anapara nominal/kalan etiketi, Tutarlilik denetimi notu, VARSAYIM damgasi). Niyet eslesmesi 6/9 — model disiplinin **ruhunu** yakaladi, **harfini** atlatdi.
+
+**Yapisal kok sebep (audit, /tmp/ragip_audit_v218_structural.md):** Skill SKILL.md'lere Tier 3/4 spec'i eklendi ama **agent system prompt'lari guncellenmedi**. `ragip-hukuk.md:182-192` ve `ragip-arastirma.md:168-178` "YANIT FORMATIN" bolumleri Tier 3/4 ile celisen narrative format dayatiyor. Model agent prompt'unu **birincil otorite** olarak okuyor, skill format'i ikincil rehber.
+
+### Changed — Agent system prompt'lari
+
+- `agents/ragip-hukuk.md:182-218` — "YANIT FORMATIN" bolumu Tier 3/4 spec ozeti ile birlestirildi. 6-bolum narrative koruma + SONUC VE ONERILER icinde **Tier 3 ZORUNLU 3-satir blok** + RISK NOTU sonrasi **TUTARLILIK DENETIMI ZORUNLU** kapanis bolumu. Persona vs format ayrimi acikca yazildi ("Evladim" narrative, TESPIT: format — celismez).
+- `agents/ragip-arastirma.md:168-198` — Ayni patern: 6-bolum koruma + SOMUT ADIMLAR icinde **Tier 3 ZORUNLU** + TUTARLILIK DENETIMI kapanis.
+
+### Changed — Skill basina Tier 3/4 ozet (Lost-in-the-Middle fix)
+
+3 skill'in **2. satirinda** (description'dan hemen sonra) `## CIKTI FORMATI (Tier 3/4 ZORUNLU — ILK OKU)` bolumu eklendi. Modelin ilk dikkat hattinda Tier 3/4 zorunlulugu hatirlatilir. Detay (CORRECT/WRONG ornek) skill ortasinda kalir:
+
+- `skills/ragip-degerlendirme/SKILL.md:12-30` — eklendi
+- `skills/ragip-analiz/SKILL.md:10-26` — eklendi
+- `skills/ragip-strateji/SKILL.md:10-26` — eklendi
+
+### Changed — WRONG/CORRECT ornek firma adlari notrlestirildi
+
+Model few-shot ornegi "**bu firma icin yazildi**" gibi okuyordu (audit H3 hipotezi). Notr ad ile "format ornegi" oldugu daha net algilanir:
+
+- `skills/ragip-degerlendirme/SKILL.md:200` — "Guven Pres" → "Demo Sanayi A.S."
+- `skills/ragip-strateji/SKILL.md:129, 138` — "Zeren" → "Demo IT Hizmetleri"
+- `skills/ragip-analiz/SKILL.md` — "ABC Dagitim" zaten notr, degisiklik yok
+
+### Changed — Tier 4 cikti template'e gomuldu (3 skill cikti format bolumu)
+
+Tier 4 talimat skill'in arkasinda kalmis, model "bitti" diyince denetim adimini atlamis (audit H5). Cikti template'ine **`### TUTARLILIK DENETIMI`** bolumu zorunlu kapanis olarak gomuldu:
+
+- `skills/ragip-degerlendirme/SKILL.md:279-310` — SONUC VE ONERI Tier 3 zenginlestirme + TUTARLILIK DENETIMI bolumu
+- `skills/ragip-analiz/SKILL.md:314-336` — ONERILEN ADIMLAR Tier 3 zenginlestirme + TUTARLILIK DENETIMI bolumu
+- `skills/ragip-strateji/SKILL.md:218-258` — RAGIP AGA'NIN TAVSIYESI + BU HAFTA YAPILACAKLAR Tier 3 + TUTARLILIK DENETIMI bolumu
+
+### Documentation
+
+- `docs/adr/0019-skill-agent-koordinasyon.md` — yeni ADR. Skill'e yeni cikti disiplin eklendiginde **ilgili agent system prompt'unun da guncellenmesi zorunlu** kurali. Yoksa agent prompt skill spec'ini override eder. Audit raporu line-no kanitlari ile.
+
+### Behavioral test (manuel)
+
+v2.18.1 sonrası 3 kosum tekrari (Guven Pres Yontem 2B + Senaryo A + ucuncu firma) gerekli. Yapisal eslesme oranı **8+/13** beklenir (audit B1 (a) yaklasimi). 0/13 hala duruyorsa v2.19.0'da (c) structured output veya (b) post-process Python.
+
+### Tests
+
+Tum 697 test gecti (yapisal Tier 4 dahil). Davranissal test dahil edilmedi — manuel kosum ile gozlemlenir.
+
+---
+
 ## [2.18.0] - 2026-05-14
 
 ### Tier 3 yeniden tasarim — Lead With Insight + Quantify Impact + Action 5-bilesen + Etiket

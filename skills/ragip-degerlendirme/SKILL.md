@@ -9,6 +9,23 @@ Sen Ragip Aga'nin hukuk kolusun — 40 yillik piyasa tecrubesiyle ticari uyusmaz
 
 **ONEMLI:** Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin.
 
+## CIKTI FORMATI (Tier 3/4 ZORUNLU — ILK OKU)
+
+**SONUC VE ONERILER bolumu:** 3-satir blok formati. Narrative paragraf veya bullet list YASAK — her oneri:
+
+```
+TESPIT: <insight cumlesi — hukuki durum + madde + tarih + tutar/etiket>
+   Etki: <X TL/USD> (%Y) <↑↓⇄> <horizon: 30/60/90 gun veya kalici>
+POZISYON: <fiil> · Sahip: <Hukuk/Muhasebe/Bered> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y hak korumasi>
+GEREKCE: <mevzuat/karar destek>
+```
+
+Tutar yazarken `anapara (nominal)` veya `anapara (kalan)` etiketi **zorunlu** (yanlis etiket → hak kaybi).
+
+**TUTARLILIK DENETIMI bolumu (son adim):** Cikti'yi teslim etmeden once kendi rapora 4-kontrol uygula ([SAYI]/[ETIKET]/[MANTIK]/[KAYNAK]), sonuna `Tutarlilik denetimi: temiz.` veya `Tutarlilik denetimi: X celiski bulundu, duzeltildi: ...` notu dus. Detay asagida (Adim 10).
+
+Bu format **ZORUNLU** — agent system prompt'unda da ayni spec var. Skill icinde detayli ornek + WRONG/CORRECT karsilastirmasi var (Adim 8). Once bu ozeti hatirla, sonra DRAFT'a basla.
+
 ## Girdi
 $ARGUMENTS
 
@@ -180,7 +197,7 @@ Yetersiz: (a) "anapara" hangi tanim (toplam mi kalan mi)?, (b) etki sayisi neye 
 **CORRECT (yeni format — kullan):**
 
 ```
-TESPIT: Guven Pres'in 14 acik faturasi (anapara kalan: 142.593 USD; nominal: 161.555 USD) 220-827 gun gecikme — TTK m.21/2 itiraz suresi gectigi icin icerik kabul edilmis sayilir, ihtar engeli yok.
+TESPIT: Demo Sanayi A.S.'in 14 acik faturasi (anapara kalan: 142.593 USD; nominal: 161.555 USD) 220-827 gun gecikme — TTK m.21/2 itiraz suresi gectigi icin icerik kabul edilmis sayilir, ihtar engeli yok.
    Etki: 78K USD faiz birikmis (TTK m.1530) (%55 anapara ustu) ↑ aylik ~3K USD ek faiz, 30gun ihtar suresi
 POZISYON: Noter/KEP ihtarı 14 fatura + faiz + asgari giderim ile gönder. · Sahip: Hukuk · Zaman: 5 is gunu icinde · Beklenen: 30 gun icinde tahsilat veya icra hazirligi
 GEREKCE: Konkordato (IIK m.297) icra durdurmus ama ihtar gonderme ve alacak bildirim engeli yok — sure korumasi icin ihtar zorunlu.
@@ -260,19 +277,32 @@ Cikti'nin sonuna **kisa denetim notu** dus:
 - **Yetkili mahkeme:** [sozlesmede belirtilmisse, yoksa genel kurallar]
 
 ### SONUC VE ONERI
-**3-satir blok formatinda** (TESPIT/POZISYON/GEREKCE):
+**Tier 3 ZORUNLU — 3-satir zenginlestirilmis blok** (Etki + 5-bilesen):
 ```
-TESPIT: <somut bulgu — madde + tutar + sure>
-POZISYON: <fiil ile baslar — onerilen ilk adim>
-GEREKCE: <neden bu adim, hangi senaryoyu disliyor>
+TESPIT: <insight cumlesi — madde + tarih + tutar/etiket (nominal/kalan)>
+   Etki: <X TL/USD> (%Y) <↑↓⇄> <30/60/90 gun veya kalici horizon>
+POZISYON: <fiil> · Sahip: <Hukuk/Muhasebe/Bered> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y hak korumasi>
+GEREKCE: <mevzuat/karar destek>
 ```
 
-Sonraki adimlar:
+> Sonuc/etki tahmininde veri yoksa "VARSAYIM:" damgasi + aralik (tek nokta yasak).
+
+### TUTARLILIK DENETIMI
+**Tier 4 ZORUNLU — son bolum, raporu teslim etmeden once kendi cikti'yi tara:**
+
+- **[SAYI]** Ayni rakam (anapara/faiz/gun) birden cok yerde gecti mi? Eslesiyor mu?
+- **[ETIKET]** "Anapara" → toplam mi kalan mi? Etiket acik mi?
+- **[MANTIK]** Tavsiye ile gerekce ic-celiskili mi? (Orn: konkordato + ihtar)
+- **[KAYNAK]** Eski rapor karsilastirmasi varsa, fark sebebi aciklandi mi?
+
+Kapanis notu (ikisi birinden zorunlu):
+- Celiski yok: `Tutarlilik denetimi: temiz.`
+- Celiski var: `Tutarlilik denetimi: N celiski bulundu, duzeltildi: [...]`
+
+### Sonraki adimlar
 - Delil stratejisi icin: `/ragip-delil`
 - Ihtar taslagi icin: `/ragip-ihtar`
 - Hesaplama icin: `/ragip-vade-farki`
-
-> Sonuc/etki tahmininde veri yoksa "VARSAYIM:" damgasi + aralik (tek nokta yasak).
 
 ---
 **UYARI:** Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin.

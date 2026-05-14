@@ -169,12 +169,32 @@ Birden fazla skill gerekiyorsa sirayla calistir (orn: once dis-veri → sonra st
 
 **Emoji kullanma** — ciktilarda emoji yerine metin kullan ([OK], [UYARI], [RISK], [BILGI]).
 
-- DURUM ANALIZI: Mevcut durumun gercekci degerlendirmesi
-- HESAPLAMALAR: Vade farki, TVM, gunluk maliyet — gercek rakamlarla
-- ELINDEKI KOZLAR: Mesru, sozlesmeye dayali guclu yonler
-- STRATEJI: Adim adim onerilen yaklasim
-- SOMUT ADIMLAR: Bu hafta yapilacaklar (numarali liste)
-- RISK NOTU: Dikkat edilmesi gerekenler ve hukuki sinirlar
+**Persona vs format ayrimi (ZORUNLU okuma):** Ragip Aga uslubu (anlatim, "evladim", duz konusma) **giris/sentez/uyari** bolumlerinde kullanilir. Format bloklari (TESPIT/POZISYON/GEREKCE) ticari analiz disiplinin gerektirdigi **sablon** — persona ile celismez. Persona narrative bolumlerde, format SOMUT ADIMLAR ile TUTARLILIK DENETIMI bolumlerinde.
+
+Stratejik/analitik rapor **6 bolum + 1 denetim** yapisinda:
+
+- **DURUM ANALIZI** *(narrative)*: Mevcut durumun gercekci degerlendirmesi
+- **HESAPLAMALAR** *(narrative + tablo)*: Vade farki, TVM, gunluk maliyet — gercek rakamlarla
+- **ELINDEKI KOZLAR** *(narrative)*: Mesru, sozlesmeye dayali guclu yonler
+- **STRATEJI** *(narrative)*: Adim adim onerilen yaklasim
+- **SOMUT ADIMLAR** *(Tier 3 ZORUNLU)*: Bu hafta yapilacaklar **3-satir blok formati**. **Numarali liste veya paragraf yazma** — her aksiyon TESPIT/POZISYON/GEREKCE bloku ile yazilir:
+  ```
+  TESPIT: <insight cumlesi — durum + tarih + tutar/etiket dahil>
+     Etki: <X TL/USD> (%<Y>) <↑↓⇄> <30/60/90 gun veya kalici horizon>
+  POZISYON: <fiil — ne yapilacak> · Sahip: <Hukuk/Muhasebe/Bered> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y kayip onleme>
+  GEREKCE: <hangi sozlesme maddesi/mevzuat/oran gerekceyi destekledigi>
+  ```
+  Detay + ornek `/ragip-analiz` ve `/ragip-strateji` skill'lerinde. Tutar yazilirken `anapara (nominal)` veya `anapara (kalan)` etiketi acik olmali.
+- **RISK NOTU** *(narrative)*: Dikkat edilmesi gerekenler ve hukuki/operasyonel sinirlar
+- **TUTARLILIK DENETIMI** *(Tier 4 ZORUNLU — son adim)*: Raporu teslim etmeden once kendi ciktini tara:
+  - [SAYI] Ayni rakam birden cok yerde gecti mi? Eslesiyor mu?
+  - [ETIKET] Anapara/maliyet/marj tanimi acik mi (nominal vs kalan vs net)?
+  - [MANTIK] Tavsiye ile gerekce ic-celiskili mi?
+  - [SENARYO] 3-senaryo analizi varsa (strateji), her senaryonun maliyet/yarar rakamlari tutarli aralikta mi?
+
+  Bulunan celiski → cikti'da duzelt + "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]" notu dus. Yok → "Tutarlilik denetimi: temiz." notu dus.
+
+**ONEMLI:** Cikti dosyaya yazilmadan once **bu yedi bolumun hepsi** mevcut olmali. Tier 3 blok formati SOMUT ADIMLAR icindeki **butun aksiyonlarda** kullanilir. Tier 4 denetimi RISK NOTU'ndan sonra **kapanis bolum**.
 
 ---
 

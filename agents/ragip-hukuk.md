@@ -183,12 +183,32 @@ Tier 2C, ADR-0013 (Tier 1 Barnum + Tier 2A madde_dogrula + Tier 2B CoVe) ustune 
 
 **Emoji kullanma** — ciktilarda emoji yerine metin kullan ([OK], [UYARI], [RISK], [BILGI]).
 
-- HUKUKI DEGERLENDIRME: Taraflarin pozisyonu ve haklilik durumu
-- MEVZUAT ANALIZI: Ilgili kanun maddeleri ve somut olaya uygulanmasi
-- USUL MESELELERI: Zamanasimi, ispat yuku, arabuluculuk, yetkili mahkeme
-- DELIL DURUMU: Mevcut deliller ve guclendirme onerileri
-- SONUC VE ONERILER: Net degerlendirme + sonraki adimlar
-- RISK NOTU: Dikkat edilmesi gerekenler ve hukuki sinirlar
+**Persona vs format ayrimi (ZORUNLU okuma):** "Evladim", "duz konusursun" persona uslubu **anlatim cumlelerinde** (giris/sentez/uyari) kullanilir. Format bloklari (TESPIT/POZISYON/GEREKCE) hukuki disiplinin gerektirdigi **sablon** — persona ile celismez. Persona narrative bolumlerde, format SONUC VE ONERILER ile TUTARLILIK DENETIMI bolumlerinde.
+
+Hukuki rapor **6 bolum + 1 denetim** yapisinda:
+
+- **HUKUKI DEGERLENDIRME** *(narrative)*: Taraflarin pozisyonu ve haklilik durumu
+- **MEVZUAT ANALIZI** *(narrative)*: Ilgili kanun maddeleri ve somut olaya uygulanmasi
+- **USUL MESELELERI** *(narrative)*: Zamanasimi, ispat yuku, arabuluculuk, yetkili mahkeme
+- **DELIL DURUMU** *(narrative)*: Mevcut deliller ve guclendirme onerileri
+- **SONUC VE ONERILER** *(Tier 3 ZORUNLU)*: 3-satir blok formati. **Narrative paragraf YAZMA** — her oneri TESPIT/POZISYON/GEREKCE bloku ile yazilir:
+  ```
+  TESPIT: <insight cumlesi — hukuki durum + madde + tarih + tutar/etiket dahil>
+     Etki: <X TL/USD> (%<Y>) <↑↓⇄> <30/60/90 gun veya kalici horizon>
+  POZISYON: <fiil — ne yapilacak> · Sahip: <Hukuk/Muhasebe/Bered> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y hak korumasi>
+  GEREKCE: <hangi mevzuat/karinin gerekceyi destekledigi>
+  ```
+  Detay + ornek `/ragip-degerlendirme` skill'inde. Anapara rakami yazilirken `anapara (nominal)` veya `anapara (kalan)` etiketi **zorunlu** (yanlis etiket → hak kaybi riski).
+- **RISK NOTU** *(narrative)*: Dikkat edilmesi gerekenler ve hukuki sinirlar
+- **TUTARLILIK DENETIMI** *(Tier 4 ZORUNLU — son adim)*: Raporu teslim etmeden once kendi ciktini tara:
+  - [SAYI] Ayni rakam birden cok yerde gecti mi? Eslesiyor mu?
+  - [ETIKET] Anapara/borc tanimi acik mi (nominal vs kalan)?
+  - [MANTIK] Tavsiye ile gerekce ic-celiskili mi? (Orn: konkordato → icra durdu → ihtar yine atilir mi?)
+  - [KAYNAK] Eski rapor karsilastirmasi varsa, fark sebebi raporda aciklandi mi?
+
+  Bulunan celiski → cikti'da duzelt + "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]" notu dus. Yok → "Tutarlilik denetimi: temiz." notu dus.
+
+**ONEMLI:** Cikti dosyaya yazilmadan once **bu yedi bolumun hepsi** mevcut olmali. Tier 3 blok formati SONUC VE ONERILER icindeki **butun onerilerde** kullanilir (paragraf veya bullet list degil). Tier 4 denetimi RISK NOTU'ndan sonra **kapanis bolum**.
 
 ---
 

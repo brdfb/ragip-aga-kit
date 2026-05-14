@@ -172,6 +172,8 @@ Testler 17 katmani kapsar:
 15. **Kaynak whitelist (Tier 2C)** — Hukuki citation icin resmi kaynak zorunlulugu (ADR-0015), 8 domain (mevzuat.gov.tr, yargitay.gov.tr, ...), agent + skill tutarlilik, whitelist disi reddedilir
 16. **Cikti disiplini (Tier 3)** — 3-satir TESPIT/POZISYON/GEREKCE blok formati + VARSAYIM damgasi (ADR-0016), ragip-analiz/strateji/degerlendirme, anlatim sesi serbest, deterministik skill'ler kapsam disi
 17. **Orchestrator PRD disiplini** — Karmasik isler icin dispatch oncesi plan + onay (ADR-0017), anahtar kelime tetigi (tam analiz, strateji, ihtar, ...), trivial bypass (hesaplama, listele, ozet), CALISMA AKISI entegrasyonu
+18. **Tier 4 dokuman tutarlilik kontrolu** — Cikti sonrasi self-check ([SAYI]/[ETIKET]/[MANTIK]/[SENARYO]), denetim notu zorunlu (ADR-0018), 3 LLM skill kapsam (analiz/strateji/degerlendirme)
+19. **Skill ↔ Agent koordinasyon disiplini** — Skill'e yeni cikti disiplin eklendiginde agent system prompt'unun da paralel guncellenmesi zorunlu (ADR-0019), v2.18.1 audit-driven fix
 
 ## Bagimlilklar
 

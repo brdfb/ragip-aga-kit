@@ -155,6 +155,41 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 
 ---
 
+### 19. Davranissal QA Altyapisi (LLM-judge + Tier 3 v3) (KRITIK — v2.19.0 ADAYI)
+
+**Sorun:** v2.15.0/v2.17.0/v2.18.0 — uc ardisik Tier 3 / Tier 4 prompt-level disiplin enjeksiyonu **modele davranis olarak yansimadi.** 14 Mayis 2026 Yontem 2B regresyonunda v2.16.0 / v2.17.0 / v2.18.0 ciktilarinin tumu 0/13 yapisal eslesme verdi (TESPIT/POZISYON/GEREKCE blok, Etki satiri, Sahip/Zaman/Beklenen, anapara nominal/kalan etiketi, Tutarlilik denetimi notu, VARSAYIM damgasi). Yapisal pytest yesil ama gercek davranis kotu. Patch listesi `/tmp/ragip_v2.17.0_patch_listesi.md` ve bulgu raporu `/tmp/ragip_v2.18.0_yontem2b_bulgu.md`.
+
+**Bunun "sirek" hali:** "Yapisal test gectim → guvendiim → prompt yeterli → davranisi olcmedim" donguusu. Her yeni Tier+1 disiplin eklendiginde ayni dongu.
+
+**Iki bilesenli cozum:**
+
+**B1. Tier 3 v3 mekanizma redesign** — prompt-level yetersiz oldugu gozlemlendi. Secenekler:
+- Skill cikti'nin **basinda** mandatory 3-satir blok template insert (post-process)
+- Few-shot ornek SKILL.md'nin EN BASINDA (mevcut "orta-arkada" konum yerine)
+- Skill output'unu Python ile parse + dogrula, eksikse regenerate cycle
+- Output schema (JSON-style) zorlama — model kendi format sezgisini iptal eder
+
+**B2. LLM-judge altyapisi (diagnostic mode)** — `scripts/ragip_judge.py`:
+- **Model:** Sonnet 4.6 (Haiku self-enhancement bias, $0.13/hafta tasarruf ile haklilanmiyor)
+- **Cikti:** Structured JSON, per-rubric Boolean + reasoning (Pydantic)
+- **Rubric:** 6 dimension (T3-1 TESPIT, T3-2 POZISYON, T3-3 Etki, T3-4 5-bilesen, T3-5 etiket netligi, T4 tutarlilik notu)
+- **Spirit vs Letter ikili olcum** — 14 May Yontem 2B asimetri gozlemi: cikti yapisal 0/13 ama "disiplinin ruhu" 4+ niyetli gosterildi. Judge sadece harf degil ruhu olcer
+- **Cadence:** Manuel haftalik (1x/hafta, ~10 senaryo), CI auto degil
+- **Cost limit:** `--max-budget-usd 5` default (haftalik ~$0.20 actual, 25x buffer)
+- **ADR-0019** yer tutucu, kapsam Tier 3 v3 mantigi netleştikten sonra finalize
+
+**B3. Davranissal test fixture:** Yontem 2B Guven Pres prompt'u kit'in test/e2e fixture'i olarak kayda gec (reproducible regression baseline).
+
+**Cherry-pick referans:** Yok — bu **kit-ozel** sorun (CFO agent farkli senaryolarda). Anthropic 2026 eval guidance, DeepEval (Python+pytest), Promptfoo arasi karsilastirma yapildi (research output mevcut).
+
+**Effort:** Orta — Tier 3 v3 mekanizma karari (1-2 saat tasarim) + ragip_judge.py (3-4 saat impl) + ADR-0019 + test fixture
+**Risk:** Orta — judge prompt sensitivity (JudgeSense 2604.23478) bilinen problem, paraphrase-pair zorunlu. Tier 3 v3 yanlis tasarimda model davranisi bozulabilir
+**Oncelik:** YUKSEK — yapisal-vs-davranissal asimetri ortadan kalkmadıkca her yeni disiplin ayni dongu
+
+**v2.19.0 hedef:** B1 (Tier 3 v3 prototip + olcum) + B2 (judge ilk versiyon, diagnostic mode). B3 yan urun. ADR-0019 final B1 sonrası.
+
+---
+
 ## B. Reddedilen Fikirler (Critique Sonucu)
 
 ### X1. ragip-veri Skill Tool Davranisi (haiku)
