@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-05-14 (v2.17.0 — Tier 4 dokuman tutarlilik (B1) + Kesinlik kalibi (A5) + 5 patch [PRD non-interactive, update.sh new-file, anapara netligi, ADR-0015 reactive notu])
+Guncelleme: 2026-05-14 (v2.17.1 — self-review duzeltmeleri: A5 pozitif yonlendirme + PRD prompt sadelestirme + ADR-0018 metadata + yedek temizleme yardimcisi)
 
 ---
 

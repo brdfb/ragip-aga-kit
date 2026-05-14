@@ -6,6 +6,63 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.17.1] - 2026-05-14
+
+### Self-review duzeltmeleri
+
+v2.17.0 sonrasi `/review` self-review bulgularinin (5 suggestion + 1 yardimci) hizli kazan paketi. Davranissal etki yok ama prompt netligi, terminoloji ve yedek temizlik araclari.
+
+### Changed — A5 pozitif yonlendirme
+
+"Kesinlik kalibi" kurali sadelestirildi: iki acik kural (1) veri yoksa olasilik dili kullan ("olası/muhtemel/tahmin/belirsiz"), (2) mutlak ifadeler SADECE veri-yok durumunda yasak. Onceki mutlak yasagi Turkce'de legitimate kullanimlari (orn: "hukum kesinlesti", "kesin alacak") yakaliyordu.
+
+- **skills/ragip-analiz/SKILL.md**, **skills/ragip-strateji/SKILL.md**, **skills/ragip-degerlendirme/SKILL.md**: 6b/2b/Adim-8 kurallari yeniden yazildi.
+- **tests/test_ragip_cikti_disiplini.py**: 6 yeni test (TestKesinlikKalibi sinifina pozitif_olasilik_dili + veri_yok_kosullu_yasak, 3 skill x 2 test).
+
+### Changed — Patch #1 PRD prompt sadelestirme
+
+Onceki fallback metni model environment'i goremezken "ortam degiskeni" tetikleyici onerdi — yanlislik kabul edildi. Yeni semantik:
+
+- Fallback ANCAK kullanici acik sinyal verirse tetiklenir (orn: "non-interactive moddayim", `[CRON]` etiketi)
+- Belirsiz sessizlik fallback YOK (yanlis dispatch riski)
+- Asil cozumun kit-disi (CLI/wrapper) oldugu acikca belirtildi → v2.19.0+
+
+Dosyalar:
+- **agents/ragip-aga.md**: Non-interactive fallback bolumu yeniden yazildi.
+- **tests/test_ragip_prd_disiplini.py**: TestNonInteractiveFallback.test_v2_17_1_acik_sinyal_semantigi yeni test.
+
+### Docs — ADR-0018 metadata netlestirme
+
+Cherry-pick referansinin sabit URL/yol icermesi gibibyte-cfo-agent'in yer karari beklemesi nedeniyle riskli. ADR-0018'e kaynak yeri belirsizligi notu eklendi (disiplin pattern'i alindi, kod dosyasi degil; kaynak yeri degisirse ADR icerigi etkilenmez).
+
+- **docs/adr/0018-tier-4-dokuman-tutarlilik.md**: Cherry-pick kaynagi alt-bolumu genisletildi.
+
+### Added — Yedek temizleme yardimcisi (scripts/ragip_yedek_temizle.sh)
+
+update.sh manifest tutarsizligi sonucu olusan SAHTE yedekleri (`.kullanici-yedek-YYYYMMDD` formatli, icerigi kit history'sindeki herhangi bir versiyonla ayni) ayikla. Gercek kullanici ozellestirmesi olan yedekler KORUNUR. Dry-run varsayilan.
+
+- **scripts/ragip_yedek_temizle.sh**: Yeni script. Git history araştırmasi ile kit versiyonu eslemesi.
+- **tests/test_ragip_yedek_temizle.py**: 6 test (script var, --help, sahte sil, gercek koru, bos repo, manifest yok).
+- **install.sh**: Yeni script kopyalanir ve manifest'e eklenir (10 → 11 script).
+
+### Test toplam
+
+667 → **680** (+13 yeni: A5 6 + Patch #1 1 + yedek_temizle 6 — install manifest count 54 → 56).
+
+### Migration
+
+- Workspace tarafinda eski yedek dosyalarini (v2.17.0 update'inden olusan 19 sahte) temizlemek icin:
+  ```bash
+  cd <workspace>
+  bash <kit>/scripts/ragip_yedek_temizle.sh           # Dry-run rapor
+  bash <kit>/scripts/ragip_yedek_temizle.sh --apply   # Gercekten sil
+  ```
+- Yeni v2.17.1 dosyalari `bash <kit>/update.sh` ile gelir (kucuk degisiklikler, regresyon yok).
+
+### Why
+
+v2.17.0 commit'inden hemen sonra yapilan self-review 5 prompt netligi sorunu + 1 yardimci araç ihtiyaci tespit etti. Hizli kazanlar paketi (v2.17.1 patch release) bunlari yapisal degisiklik olmadan duzeltir. Davranissal etki sinirli ama **prompt netligi ve terminoloji** ileride v2.18.0/v2.19.0 calismasi icin temiz zemin saglar.
+
 ## [2.17.0] - 2026-05-14
 
 ### Test bulgulari + disiplin guclendirme

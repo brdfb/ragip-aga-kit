@@ -272,15 +272,22 @@ Ornek:
 - Ozet/profil sorgu: "ABC Dagitim hakkinda" → ragip-veri direkt
 - Tek soru-cevap, kavramsal bilgi: "vade farki nedir?" → kendin cevapla
 
-**Non-interactive fallback (v2.17.0 — Patch #1):**
+**Non-interactive fallback (v2.17.0 — Patch #1, v2.17.1 sadelestirme):**
 
-PRD onay akisi interaktif kullanici varsayar. `claude -p` (--print) veya stdin TTY olmadigi (pipe/script/cron) senaryolarda kullanici yok → onay bekleme stuck olur. Bu durumlarda:
+PRD onay akisi interaktif kullanici varsayar. `claude -p` (--print), pipe, script veya cron senaryosunda kullanici yok → onay bekleme stuck olur.
 
-1. PRD ozetini ciktinin **basinda** yaz (audit/log icin korunur)
-2. "Non-interactive mod tespit edildi — onay beklenmeden dispatch yapiliyor" notu dus
+**Tetik kosulu (sadelestirilmis):** Kullanici prompt'unda **acik bir non-interactive sinyali** varsa fallback'e gec. Sinyaller:
+- "non-interactive moddayim" / "onay bekleme" / "otomatik dispatch et" gibi acik talimatlar
+- Prompt'ta `[NON-INTERACTIVE]` / `[CRON]` / `[CI]` etiketleri (kullanici wrapper'i koyar)
+
+Fallback davranisi:
+1. PRD ozetini ciktinin **basinda** yaz (audit/log icin korunur — kullanici cron loglarini okuyup ne yapilacagini gorur)
+2. "Non-interactive mod (sinyal: ...) — onay beklenmeden dispatch yapiliyor" notu dus
 3. Dogrudan dispatch et, sonuc cikti olarak don
 
-Tespit yontemi: Calistirma kapsami `CLAUDE_CODE_NON_INTERACTIVE`, `CI`, veya stdin non-TTY ise non-interactive say. (Bu kontrolu sen yapamiyorsan — ortam degiskenlerini gormuyorsan — kullanicidan tek kelimelik onay isteyip 3 saniye icinde cevap gelmezse fallback'e gec varsayimi YASAKTIR. Sadece kullanici acikca "non-interactive moddayim, onay bekleme" derse fallback'e gec.)
+**Acik sinyal yoksa onay BEKLE.** Belirsiz sessizlik fallback'i tetiklemez — model environment'i goremez, dolayisiyla "kullanici cevap vermedi" zaman asimi gibi heuristikler yasaktir (yanlis dispatch riski yuksek).
+
+**Asil cozum kit-disi** (v2.19.0+ candidate): claude-code CLI'in `--no-prd` veya `CLAUDE_CODE_NON_INTERACTIVE=1` env desteklemesi. Bu agent prompt'undan degil, harness/wrapper seviyesinden gelir. Mevcut prompt-level fallback **acik kullanici sinyali** ile sinirlidir.
 
 **Gerekce:** Yanlis dispatch maliyeti yuksek (saatler kaybedilir, kullanici geri donus geriyle gelir). Cok adimli isler kullaniciyla onceden hizalanmali. Trivial isler icin PRD overhead kullaniciyi sinirlendirir — esneklik korunur. Non-interactive fallback olmadan PRD `-p` mod kullanilamaz hale gelir. Detay: ADR-0017.
 

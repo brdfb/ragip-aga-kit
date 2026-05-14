@@ -82,10 +82,12 @@ cp "$SCRIPT_DIR"/scripts/ragip_get_rates.sh "$HEDEF/scripts/"
 cp "$SCRIPT_DIR"/scripts/ragip_temizle.sh "$HEDEF/scripts/"
 cp "$SCRIPT_DIR"/scripts/ragip_cron.sh "$HEDEF/scripts/"
 cp "$SCRIPT_DIR"/scripts/ragip_madde_dogrula.sh "$HEDEF/scripts/"
+cp "$SCRIPT_DIR"/scripts/ragip_yedek_temizle.sh "$HEDEF/scripts/"
 chmod +x "$HEDEF/scripts/ragip_get_rates.sh"
 chmod +x "$HEDEF/scripts/ragip_temizle.sh"
 chmod +x "$HEDEF/scripts/ragip_cron.sh"
 chmod +x "$HEDEF/scripts/ragip_madde_dogrula.sh"
+chmod +x "$HEDEF/scripts/ragip_yedek_temizle.sh"
 
 # 4. Config
 info "Konfigurasyon kopyalaniyor..."
@@ -135,7 +137,7 @@ for f in sorted(Path(hedef, ".claude/skills").glob("ragip-*/SKILL.md")):
     files[rel] = "sha256:" + sha
 
 # Scripts
-for name in ["ragip_aga.py", "ragip_rates.py", "ragip_crud.py", "ragip_errors.py", "ragip_pii.py", "ragip_madde_dogrula.py", "ragip_get_rates.sh", "ragip_temizle.sh", "ragip_cron.sh", "ragip_madde_dogrula.sh"]:
+for name in ["ragip_aga.py", "ragip_rates.py", "ragip_crud.py", "ragip_errors.py", "ragip_pii.py", "ragip_madde_dogrula.py", "ragip_get_rates.sh", "ragip_temizle.sh", "ragip_cron.sh", "ragip_madde_dogrula.sh", "ragip_yedek_temizle.sh"]:
     f = Path(hedef, "scripts", name)
     if f.exists():
         rel = str(f.relative_to(hedef))
@@ -233,7 +235,7 @@ echo "================================================"
 echo ""
 echo "  Agents:  5  (.claude/agents/ragip-*.md)"
 echo "  Skills:  19 (.claude/skills/ragip-*/SKILL.md)"
-echo "  Scripts: 10 (scripts/ragip_*.py + ragip_get_rates.sh + ragip_temizle.sh + ragip_cron.sh + ragip_madde_dogrula.sh)"
+echo "  Scripts: 11 (scripts/ragip_*.py + ragip_get_rates.sh + ragip_temizle.sh + ragip_cron.sh + ragip_madde_dogrula.sh + ragip_yedek_temizle.sh)"
 echo "  Config:  2  (config/ragip_aga.yaml + config/kanun_maddeleri.json)"
 echo "  Rules:   1  (.claude/rules/ragip_dispatch.md)"
 echo ""

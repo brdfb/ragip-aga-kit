@@ -78,7 +78,15 @@ print(f'  TOPLAM: {toplam_hukuki + firsat_maliyeti:,.0f} TL')
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (firma verisi, tutar, vade, sektor detayi ekle) ya da cikar. Generic strateji onerisi ("nakit akisinizi iyilestirin", "vade farklarini takip edin") YASAK — somut senaryo verisine dayanan oneriler yaz.
 
 **2b. Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):**
-Veri eksik veya tutarsiz oldugunda: (a) tutarsizligi acikca isaretle, (b) olasi en az iki yorumu sun, (c) "kesin", "muhakkak", "kesinlikle" gibi mutlak ifadeler yasak — belirsizligi gizleme. **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi (asagi) veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik strateji karar maliyetini buyutur.
+
+Iki kural:
+
+1. **Veri yoksa olasilik dili** (pozitif yonlendirme): "olası", "muhtemel", "tahmin", "belirsiz", "kesinlestirmek icin X gerekli". Aralik (X-Y) tek-noktadan iyidir.
+2. **Veri eksik/tutarsizken mutlak ifade ("kesin", "muhakkak", "kesinlikle") YASAK** — bu kelimeler ancak teyit edilmis veri-noktalarinda kullanilir. Veri-yok + mutlak iddia kombinasyonu yasak.
+
+Veri tutarsizsa ek olarak: (a) tutarsizligi acikca isaretle, (b) olasi en az iki yorumu sun.
+
+**Do not fabricate certainty** — emin degilsen VARSAYIM damgasi (asagi) veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik strateji karar maliyetini buyutur.
 
 **3. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
 

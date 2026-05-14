@@ -135,3 +135,28 @@ class TestKesinlikKalibi:
             f"{skill}: mutlak ifade yasagi yeterince acik degil "
             f"(beklenen >= 2 ornek kelime, bulundu: {eslesme})"
         )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_pozitif_olasilik_dili(self, skill_metinleri, skill):
+        """v2.17.1: pozitif yonlendirme — olasilik kelimeleri prompt'ta gosterilmeli."""
+        metin = skill_metinleri[skill]
+        olasilik_kelimeleri = ["olası", "muhtemel", "tahmin", "belirsiz"]
+        eslesme = sum(1 for k in olasilik_kelimeleri if k in metin)
+        assert eslesme >= 3, (
+            f"{skill}: pozitif olasilik dili yeterince acik degil "
+            f"(beklenen >= 3 ornek kelime, bulundu: {eslesme}). "
+            f"v2.17.1 pozitif yonlendirme kuralı."
+        )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_veri_yok_kosullu_yasak(self, skill_metinleri, skill):
+        """v2.17.1: mutlak ifade yasagi kosullu olmali — 'veri yok' / 'veri eksik' tetik ile."""
+        metin = skill_metinleri[skill]
+        # Yasagin kosulu (veri-yok durumu) acikca belirtilmeli
+        kosullar = ["veri yok", "veri eksik", "veri-yok"]
+        eslesme = sum(1 for k in kosullar if k.lower() in metin.lower())
+        assert eslesme >= 1, (
+            f"{skill}: mutlak ifade yasagi kosullu olarak belirtilmeli "
+            f"(veri-yok durumu tetik). Yoksa Turkce legitimate kullanim "
+            f"(orn: 'hukum kesinlesti') yakalanir."
+        )

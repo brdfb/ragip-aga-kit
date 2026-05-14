@@ -31,7 +31,10 @@ Bunu yakalayacak otomatik kontrol yok. Modelin elinde sayisal **veri tabani** (f
 
 ### Cherry-pick kaynagi
 
-gibibyte-cfo-agent v0.2 **K3 — Dokuman tutarlilik kontrolu**:
+**Kaynak:** gibibyte-cfo-agent v0.2 (cherry-pick tarihi: 2026-04-28)
+**Lokasyon:** O tarihte `C:\Users\bered\Documents\gecici\cfo` (lokal). Kit-tarafinda cherry-pick edildikten sonra **kaynak repo'nun yeri kararsiz** — `gibibyte-cfo-kit` yeni repo'ya tasinma karari beklenmektedir. Bu nedenle bu ADR sabit URL/yol referansi vermez; cherry-pick **disiplin pattern'i** seviyesinde alindi, kod dosyasi degil. Kaynak yeri degiserse ADR icerigi etkilenmez.
+
+**K3 — Dokuman tutarlilik kontrolu** (cherry-pick edilen kural):
 
 > Plan/tablo uretiminin son adimi: ayni dokumanda celisen mantik var mi tara. Celiski varsa duzelt sonra teslim et.
 

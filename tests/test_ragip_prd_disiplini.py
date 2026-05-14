@@ -132,3 +132,14 @@ class TestNonInteractiveFallback:
         assert "v2.17.0" in metin or "Patch #1" in metin, (
             "ADR-0017 fallback kararinin geldigi versiyonu belgelemeli"
         )
+
+    def test_v2_17_1_acik_sinyal_semantigi(self, ragip_aga_md):
+        """v2.17.1 sadelestirme: fallback ancak ACIK kullanici sinyali ile tetiklenir."""
+        # Belirsiz sessizlik heuristik'i yasak olmali (yanlis dispatch riski)
+        assert "acik" in ragip_aga_md.lower() and "sinyal" in ragip_aga_md.lower(), (
+            "PRD fallback 'acik sinyal' kavramini iceriyor olmali"
+        )
+        # CLI cozumune referans olmali (mevcut prompt-level cozumun sinirli oldugu kabul)
+        assert "kit-disi" in ragip_aga_md.lower() or "CLI" in ragip_aga_md, (
+            "Asil cozum kit-disi (CLI/harness) oldugu prompt'ta acikca belirtilmeli"
+        )

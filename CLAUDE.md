@@ -35,6 +35,7 @@ python -m pytest tests/test_ragip_kaynak_whitelist.py -v # Tier 2C kaynak domain
 python -m pytest tests/test_ragip_cikti_disiplini.py -v # Tier 3 cikti disiplini 3-satir + VARSAYIM (ADR-0016)
 python -m pytest tests/test_ragip_prd_disiplini.py -v   # Orchestrator PRD disiplini (ADR-0017)
 python -m pytest tests/test_ragip_tutarlilik.py -v     # Tier 4 dokuman tutarlilik kontrolu (ADR-0018)
+python -m pytest tests/test_ragip_yedek_temizle.py -v  # Yedek temizleme yardimcisi (v2.17.1)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v
@@ -80,6 +81,7 @@ Detayli kurallar `.claude/rules/` altinda:
 - **`scripts/ragip_rates.py`**: TCMB EVDS3 + CollectAPI. Standalone, stdlib only, 4 saat cache TTL.
 - **`scripts/ragip_get_rates.sh`**: Skill'ler icin TCMB oran helper. Fallback: API -> cache -> FALLBACK_RATES.
 - **`scripts/ragip_crud.py`**: CRUD skill'leri icin paylasimli helper (get_root, load/save, parse_kv, atomic_write) + ADR-0007 sema dogrulamasi (validate_fatura, validate_faturalar).
+- **`scripts/ragip_yedek_temizle.sh`**: v2.17.0 update.sh tutarsizligi sonrasi sahte `.kullanici-yedek-*` dosyalarini ayikla. Dry-run varsayilan; gercek kullanici ozellestirmelerini KORUR. (v2.17.1)
 
 ## Test Yapisi
 

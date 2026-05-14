@@ -139,7 +139,16 @@ Cevaplari yaz. Eger draft'in iddiasi cevapla celisiyorsa **draft yanlis** — ce
 
 Draft + verification cevaplari + Barnum filtresi (her cumle: "firma adini degistirsem hala gecerli mi?" → evet ise spesifiklestir veya cikar).
 
-**Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):** Veri eksik veya tutarsizsa: (a) tutarsizligi acikca isaretle ("Mart faturasi 4.368 USD vs guncel 142.593 USD"), (b) olasi en az iki yorumu sun, (c) "kesin", "muhakkak", "kesinlikle" gibi mutlak ifadeler yasak. **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik hukuki karar maliyetini buyutur (alacak bildirimi hatasi → hak kaybi).
+**Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):**
+
+Iki kural:
+
+1. **Veri yoksa olasilik dili** (pozitif yonlendirme): "olası", "muhtemel", "tahmin", "belirsiz", "kesinlestirmek icin X gerekli". Hukuki olaylarda kanit toplanmadan iddialar bu sekilde dilettir.
+2. **Veri eksik/tutarsizken mutlak ifade ("kesin", "muhakkak", "kesinlikle") YASAK** — bu kelimeler ancak (a) hukmun gercekten kesinlestigi (mahkeme karari, vade tarihi gecip itiraz edilmemis fatura) veya (b) teyit edilmis veri-noktasi durumunda kullanilir. Veri-yok + mutlak iddia kombinasyonu yasak.
+
+Veri tutarsizsa ek olarak: (a) tutarsizligi acikca isaretle ("Mart faturasi 4.368 USD vs guncel 142.593 USD"), (b) olasi en az iki yorumu sun.
+
+**Do not fabricate certainty** — emin degilsen VARSAYIM damgasi veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik hukuki karar maliyetini buyutur (alacak bildirimi hatasi → hak kaybi).
 
 **Cikti disiplini** — SONUC VE ONERI bolumunde **3-satir blok formati** zorunlu:
 ```
