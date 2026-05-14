@@ -34,7 +34,7 @@ description: >
 
   </example>
 model: sonnet
-maxTurns: 12
+maxTurns: 20
 memory: project
 skills:
   - ragip-analiz

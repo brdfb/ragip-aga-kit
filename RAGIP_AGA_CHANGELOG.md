@@ -6,6 +6,40 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.18.2] - 2026-05-15
+
+### Sub-agent maxTurns hard-cut fix (spot-patch)
+
+**Bulgu (15 Mayis 2026, v2.18.1 sonrasi Yontem 2B kosumu):** v2.18.1 koordinasyon fix dogru ama davranissal test edilemedi — sub-agent CoVe akisi (10 adim: Read+Bash+verification+sentez+dosya yaz+madde dogrula+Tier 4) 12 turn maxTurns limitine vuruyor, **dosya yazma adimina ulasmadan** kesiliyor. 16 tool use'a uzayan kosum stdout'ta cikti uretiyor ama disk'e yazmadan duruyor.
+
+**Asil sebep:** Adim 8 (final yaz + dosya kayit) skill akisinin 8/10'unda. CoVe disiplinli skill'lerde Adim 1-7 internal/Bash/Read agirligi 10-12 turn yiyor — Adim 8'e varilmiyor. Sub-agent ciktida "raporu yaziyorum" diyip kesiliyor.
+
+### Changed — maxTurns degerleri
+
+| Agent | Eski | Yeni | Sebep |
+|-------|-----:|-----:|-------|
+| `agents/ragip-hukuk.md:38` | 12 | **20** | CoVe + madde_dogrula + Tier 4 |
+| `agents/ragip-arastirma.md:37` | 12 | **20** | DRAFT + 3-senaryo + Tier 4 |
+| `agents/ragip-hesap.md` | 12 | 12 | Hesap motoru CoVe disiplinsiz, test patterni "5-12 turn" koruyor — degisme |
+| `agents/ragip-veri.md` | 12 | 12 | CRUD basit, degisme |
+| `agents/ragip-aga.md` | 20 | 20 | Orchestrator, degisme |
+
+### Etki
+
+- Sub-agent kosum maliyeti ~%30 artar (en kotu durum), ama davranissal disiplinin uygulanmasi icin gerekli mekanik alan acilir.
+- v2.18.1 fix (skill ↔ agent koordinasyon) bu spot-fix ile davranissal olarak test edilebilir hale gelir.
+- Adim 5 ve 8'in birlestirilmesi (DRAFT-as-final) gelecek calisma (v2.19.0+ — CoVe disiplini ile uyumlu mu degil mi degerlendirme gerek).
+
+### Tests
+
+Tum 697 test gecti (yapisal). Pre-commit hook calisti.
+
+### Davranissal test (manuel — workspace v2.18.2'de)
+
+3 senaryo (Guven Pres + Plastay + Demo stratejik) tekrar kosulmali. Bu sefer maxTurns artisi nedeniyle dosya yazma adimina ulasilmasi beklenir. Rubric grep ile yapisal eslesme hedef: **8+/13**.
+
+---
+
 ## [2.18.1] - 2026-05-14
 
 ### Tier 3/4 propagation fix — Skill ↔ Agent koordinasyon (audit-driven)
