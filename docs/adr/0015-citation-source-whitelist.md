@@ -48,6 +48,17 @@ WebSearch sonucu:
 
 WebSearch sorgusu `site:mevzuat.gov.tr` veya `site:resmigazete.gov.tr` filtresiyle baslamali — gurultuyu kaynaginda kes.
 
+### Tetik kosulu (reactive, v2.17.0 netlestirmesi)
+
+Tier 2C **reaktiftir**: WebSearch cagrildiginda whitelist devreye girer. Skill kendiliginden mevzuat sorgusu acmaz — tetik kullanicidan veya skill prosedurunden gelir:
+
+- **Kullanici tetigi:** "guncel mevzuat sorgula", "son ictihat var mi", "TTK m.X degisti mi" tipi acik istek.
+- **Skill prosedur tetigi:** ragip-degerlendirme adim listesinde "guncel mevzuat degisikligi kontrol et" varsa (skill prompt'una bagli).
+
+Bu yuzden gercek senaryo testinde Tier 2C ancak yukaridakilerden biri tetiklendiginde **gozlemlenir**. Tetik yoksa whitelist davranisi inactive — "bos koruma" izlenimi verir ama tasarim boyle. ragip-degerlendirme skill'inin her cagrida WebSearch yapmasi default davranis DEGIL (overhead + LLM cagri maliyeti).
+
+Tetik tasarim sorusu: Skill her zaman "son 6 ayda mevzuat degisikligi var mi" kontrolu yapmali mi (proactive)? Karar **hayir** — KOBi hukuki danismanlik senaryolarinin cogunda yeterli (deterministik kanun maddesi referansi yeterli, guncel ictihat secimliklidir). Proactive tetik gerekirse skill prompt'unda explicit eklenmeli.
+
 ### Kapsam
 
 | Skill | WebSearch kullanir mi | Tier 2C uygulanir mi |

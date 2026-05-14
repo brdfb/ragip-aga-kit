@@ -272,7 +272,17 @@ Ornek:
 - Ozet/profil sorgu: "ABC Dagitim hakkinda" → ragip-veri direkt
 - Tek soru-cevap, kavramsal bilgi: "vade farki nedir?" → kendin cevapla
 
-**Gerekce:** Yanlis dispatch maliyeti yuksek (saatler kaybedilir, kullanici geri donus geriyle gelir). Cok adimli isler kullaniciyla onceden hizalanmali. Trivial isler icin PRD overhead kullaniciyi sinirlendirir — esneklik korunur. Detay: ADR-0017.
+**Non-interactive fallback (v2.17.0 — Patch #1):**
+
+PRD onay akisi interaktif kullanici varsayar. `claude -p` (--print) veya stdin TTY olmadigi (pipe/script/cron) senaryolarda kullanici yok → onay bekleme stuck olur. Bu durumlarda:
+
+1. PRD ozetini ciktinin **basinda** yaz (audit/log icin korunur)
+2. "Non-interactive mod tespit edildi — onay beklenmeden dispatch yapiliyor" notu dus
+3. Dogrudan dispatch et, sonuc cikti olarak don
+
+Tespit yontemi: Calistirma kapsami `CLAUDE_CODE_NON_INTERACTIVE`, `CI`, veya stdin non-TTY ise non-interactive say. (Bu kontrolu sen yapamiyorsan — ortam degiskenlerini gormuyorsan — kullanicidan tek kelimelik onay isteyip 3 saniye icinde cevap gelmezse fallback'e gec varsayimi YASAKTIR. Sadece kullanici acikca "non-interactive moddayim, onay bekleme" derse fallback'e gec.)
+
+**Gerekce:** Yanlis dispatch maliyeti yuksek (saatler kaybedilir, kullanici geri donus geriyle gelir). Cok adimli isler kullaniciyla onceden hizalanmali. Trivial isler icin PRD overhead kullaniciyi sinirlendirir — esneklik korunur. Non-interactive fallback olmadan PRD `-p` mod kullanilamaz hale gelir. Detay: ADR-0017.
 
 ---
 

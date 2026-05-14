@@ -103,3 +103,32 @@ class TestAdr0017Mevcut:
         metin = (KIT_ROOT / "docs" / "adr" / "0017-orchestrator-prd-disiplini.md").read_text(encoding="utf-8")
         for kavram in ("PRD", "trivial", "tetik", "onay", "K4"):
             assert kavram in metin, f"ADR-0017: '{kavram}' kavrami eksik"
+
+
+class TestNonInteractiveFallback:
+    """v2.17.0 Patch #1 — PRD non-interactive modda stuck olmamali."""
+
+    def test_agent_promptunda_non_interactive_kelimesi(self, ragip_aga_md):
+        # Agent prompt non-interactive senaryoyu acikca ele almali
+        assert "non-interactive" in ragip_aga_md.lower() or "-p" in ragip_aga_md, (
+            "ragip-aga.md non-interactive PRD fallback'i belirtmeli"
+        )
+
+    def test_agent_promptunda_fallback_davranisi(self, ragip_aga_md):
+        # Fallback davranisi: PRD ozetini cikti olarak yaz + dispatch
+        # En az iki bilesen prompt'ta gecmeli
+        kavramlar = ["fallback", "dispatch", "cikti", "stuck", "onay beklemeden", "kullanici yok"]
+        eslesme = sum(1 for k in kavramlar if k.lower() in ragip_aga_md.lower())
+        assert eslesme >= 2, (
+            f"ragip-aga.md non-interactive fallback'i yetersiz tanimliyor "
+            f"(en az 2 kavram beklenir, bulundu: {eslesme})"
+        )
+
+    def test_adr_non_interactive_kapsami(self):
+        adr = KIT_ROOT / "docs" / "adr" / "0017-orchestrator-prd-disiplini.md"
+        metin = adr.read_text(encoding="utf-8")
+        # ADR Patch #1'i ve fallback kararini belgelemeli
+        assert "non-interactive" in metin.lower(), "ADR-0017 non-interactive fallback'i belgelemeli"
+        assert "v2.17.0" in metin or "Patch #1" in metin, (
+            "ADR-0017 fallback kararinin geldigi versiyonu belgelemeli"
+        )

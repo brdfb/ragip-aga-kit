@@ -595,6 +595,15 @@ class FinansalHesap:
         faturalar: list[dict] — ADR-0007 fatura semasi.
         bugun: date veya 'YYYY-MM-DD' str. None ise today().
         firma_id: None ise tum firmalar, deger verilirse sadece o firma.
+
+        Hesaplama tanimi (v2.17.0 Patch #4 netligi):
+        - `toplam_acik_alacak_tl` ve bucket tutarlari = `kalan` (toplam - odeme_tutari) toplami.
+          Kismi odenmis faturalar icin sadece kalan kismi sayilir, nominal degil.
+        - `nominal_acik_toplam_tl` (yeni) = ayni faturalarin `toplam` (kdv dahil fatura nominal)
+          alanlarinin toplami. Hukuki ihtar/alacak bildirim sirasinda nominal+kismi-odeme
+          ayriminin gerekli oldugu yerlerde bu rakam kullanilir.
+        - Iki rakam **birbirinden** farkli olabilir (kismi odeme varsa) — ihtar/bildirim
+          metninde hangi rakamin gectigi netlestirilmelidir (genelde: anapara = kalan).
         """
         if bugun is None:
             bugun = datetime.date.today()
@@ -608,7 +617,9 @@ class FinansalHesap:
             "b_90_plus": {"adet": 0, "tutar_tl": 0.0},
         }
         toplam_acik = 0.0
+        nominal_toplam = 0.0
         fatura_adedi = 0
+        kismi_odenmis_adet = 0
 
         for f in faturalar:
             if firma_id is not None and str(f.get("firma_id")) != str(firma_id):
@@ -621,7 +632,10 @@ class FinansalHesap:
             gecikme = (bugun - vade).days
             kalan = FinansalHesap._kalan_tutar(f)
             toplam_acik += kalan
+            nominal_toplam += f["toplam"]
             fatura_adedi += 1
+            if f.get("durum") == "kismi":
+                kismi_odenmis_adet += 1
 
             if gecikme <= 30:
                 buckets["b_0_30"]["adet"] += 1
@@ -642,7 +656,11 @@ class FinansalHesap:
         if fatura_adedi == 0:
             yorum = "Veri yok."
         else:
-            parts = [f"Toplam {fatura_adedi} acik alacak: {toplam_acik:,.2f} TL."]
+            parts = [f"Toplam {fatura_adedi} acik alacak: {toplam_acik:,.2f} TL kalan."]
+            if kismi_odenmis_adet > 0:
+                parts.append(
+                    f" ({kismi_odenmis_adet} kismi odenmis, nominal: {nominal_toplam:,.2f} TL.)"
+                )
             if buckets["b_90_plus"]["tutar_tl"] > 0:
                 parts.append(f" 90+ gun: {buckets['b_90_plus']['tutar_tl']:,.2f} TL — kritik.")
             elif buckets["b_61_90"]["tutar_tl"] > 0:
@@ -653,6 +671,8 @@ class FinansalHesap:
             "firma_id": firma_id if firma_id is not None else "tumu",
             "bugun": str(bugun),
             "toplam_acik_alacak_tl": round(toplam_acik, 2),
+            "nominal_acik_toplam_tl": round(nominal_toplam, 2),
+            "kismi_odenmis_adet": kismi_odenmis_adet,
             "fatura_adedi": fatura_adedi,
             "b_0_30": buckets["b_0_30"],
             "b_31_60": buckets["b_31_60"],

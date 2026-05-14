@@ -192,6 +192,9 @@ print(f'(AI tahmini — hukuki degerlendirme degildir)')
 **6. Barnum filtresi (ZORUNLU — raporu yazmadan once):**
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (sozlesme maddesi, tutar, vade, somut hesaplama ekle) ya da cikar. Generic tespitler ("sozlesmeyi dikkatli okuyun", "vade farki onemlidir") YASAK — belgenin kendisine dayanan spesifik bulgular yaz.
 
+**6b. Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):**
+Veri eksik veya tutarsiz oldugunda: (a) tutarsizligi acikca isaretle ("Mart faturalari ve sozlesme arasi tutar farki: X"), (b) olasi en az iki yorumu sun, (c) "kesin", "muhakkak", "kesinlikle" gibi mutlak ifadeler yasak — belirsizligi gizleme. **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi (asagi) veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik karar maliyeti yaratir.
+
 **7. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
 
 **3-satir blok formati** — KRITIK MADDELER, ELINDEKI KOZLAR, RISKLER bolumlerinde her bulgu icin:
@@ -206,6 +209,18 @@ Anlatim paragraflari (DOSYA OZETI, HUKUK NOTU) serbest kalabilir — 3-satir SAD
 - Veri yoksa cikti basina buyuk harfle "VARSAYIM:" + aralik (X-Y TRY) yaz, tek nokta yasak
 - "Bu varsayimdir, kesinlesmek icin [belge/veri] gerekli" cumlesi zorunlu
 - Belge gelince varsayim damgasi kaldirilir
+
+**7b. Tutarlilik denetimi (Tier 4, ADR-0018 — ZORUNLU son adim):**
+
+Raporu teslim etmeden once kendi ciktini tara:
+- **[SAYI]** Ayni rakam birden cok yerde gecti mi? Eslesiyor mu (anapara, faiz, vade)?
+- **[ETIKET]** Her sayisal iddianin tanimi acik mi (`toplam` vs `kalan` vs `nominal`)?
+- **[MANTIK]** Tavsiye ile gerekce ic-celiskili mi?
+- **[SENARYO]** 3-senaryo varsa rakamlar tutarli aralikta mi?
+
+Cikti'nin sonuna **kisa denetim notu** dus:
+- Celiski bulundu → "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]"
+- Bulunmadi → "Tutarlilik denetimi: temiz."
 
 **8. Analiz raporu yaz:**
 

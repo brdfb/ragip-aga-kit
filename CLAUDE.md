@@ -34,6 +34,7 @@ python -m pytest tests/test_ragip_prompt_caching.py -v # CLI prompt caching (Ant
 python -m pytest tests/test_ragip_kaynak_whitelist.py -v # Tier 2C kaynak domain whitelist (ADR-0015)
 python -m pytest tests/test_ragip_cikti_disiplini.py -v # Tier 3 cikti disiplini 3-satir + VARSAYIM (ADR-0016)
 python -m pytest tests/test_ragip_prd_disiplini.py -v   # Orchestrator PRD disiplini (ADR-0017)
+python -m pytest tests/test_ragip_tutarlilik.py -v     # Tier 4 dokuman tutarlilik kontrolu (ADR-0018)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

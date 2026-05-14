@@ -105,3 +105,33 @@ class TestAdr0016Mevcut:
         metin = (KIT_ROOT / "docs" / "adr" / "0016-cikti-disiplini-tier-3.md").read_text(encoding="utf-8")
         for kavram in ("TESPIT", "POZISYON", "GEREKCE", "VARSAYIM", "X5"):
             assert kavram in metin, f"ADR-0016: {kavram} kavrami eksik"
+
+
+class TestKesinlikKalibi:
+    """A5 — Tier 1 Barnum guclendirme: 'Do not fabricate certainty' tum LLM skill'lerinde."""
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_kesinlik_kalibi_kurali_var(self, skill_metinleri, skill):
+        metin = skill_metinleri[skill]
+        # Yeni alt-kural "Kesinlik kalibi" baslikla geciyor olmali
+        assert "Kesinlik kalibi" in metin, (
+            f"{skill}: 'Kesinlik kalibi' alt-kurali eksik"
+        )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_do_not_fabricate_certainty(self, skill_metinleri, skill):
+        metin = skill_metinleri[skill]
+        assert "Do not fabricate certainty" in metin, (
+            f"{skill}: 'Do not fabricate certainty' ifadesi eksik (Data Quality Rule)"
+        )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_belirsizlik_gizleme_uyarisi(self, skill_metinleri, skill):
+        metin = skill_metinleri[skill]
+        # Mutlak ifade yasagi acikca gecmeli — model "kesin/muhakkak/kesinlikle" yasagini gormeli
+        mutlak_kelimeler = ["kesin", "muhakkak", "kesinlikle"]
+        eslesme = sum(1 for k in mutlak_kelimeler if k in metin)
+        assert eslesme >= 2, (
+            f"{skill}: mutlak ifade yasagi yeterince acik degil "
+            f"(beklenen >= 2 ornek kelime, bulundu: {eslesme})"
+        )

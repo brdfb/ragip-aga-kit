@@ -131,7 +131,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (632 test)
+# Tam suite (667 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
@@ -150,6 +150,7 @@ python -m pytest tests/test_ragip_cron.py -v           # Zamanlanmis gorevler
 python -m pytest tests/test_ragip_kaynak_whitelist.py -v # Tier 2C kaynak whitelist
 python -m pytest tests/test_ragip_cikti_disiplini.py -v # Tier 3 cikti disiplini (3-satir + VARSAYIM)
 python -m pytest tests/test_ragip_prd_disiplini.py -v   # Orchestrator PRD disiplini (karmasik is onay)
+python -m pytest tests/test_ragip_tutarlilik.py -v      # Tier 4 dokuman tutarlilik kontrolu (ADR-0018)
 ```
 
 Testler 17 katmani kapsar:

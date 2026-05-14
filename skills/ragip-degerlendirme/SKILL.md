@@ -135,9 +135,11 @@ Cevaplari yaz. Eger draft'in iddiasi cevapla celisiyorsa **draft yanlis** — ce
 
 ### SENTEZ FAZI (8-9)
 
-**8. Final raporu yaz + Barnum filtresi + Cikti disiplini (Tier 3, ADR-0016):**
+**8. Final raporu yaz + Barnum filtresi + Kesinlik kalibi + Cikti disiplini (Tier 3, ADR-0016):**
 
 Draft + verification cevaplari + Barnum filtresi (her cumle: "firma adini degistirsem hala gecerli mi?" → evet ise spesifiklestir veya cikar).
+
+**Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):** Veri eksik veya tutarsizsa: (a) tutarsizligi acikca isaretle ("Mart faturasi 4.368 USD vs guncel 142.593 USD"), (b) olasi en az iki yorumu sun, (c) "kesin", "muhakkak", "kesinlikle" gibi mutlak ifadeler yasak. **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik hukuki karar maliyetini buyutur (alacak bildirimi hatasi → hak kaybi).
 
 **Cikti disiplini** — SONUC VE ONERI bolumunde **3-satir blok formati** zorunlu:
 ```
@@ -181,6 +183,18 @@ Davranis:
 - "Bilinmeyen kanun" (TCK, vb.) → kit scope'u disinda (ticari/borclar/icra/KVKK), referansi kaldir veya scope'a al.
 
 Bu adim **deterministik Tier 2A savunma** — Tier 1 (Barnum) ve CoVe (Tier 2B yapisal) ustune model halusinasyonunu yakalar.
+
+**10. Tutarlilik denetimi (Tier 4, ADR-0018 — ZORUNLU son adim, rapor dosyaya yazildiktan sonra):**
+
+Hukuki degerlendirme raporunu teslim etmeden once kendi ciktini tara:
+- **[SAYI]** Anapara, faiz, gecikme gun rakamlari raporda birden cok yerde gecti mi? Eslesiyor mu?
+- **[ETIKET]** "Anapara" → `toplam` mi `kalan` mi? "Borc" → vadesi gecmis mi tum mu? Tanim acik olsun.
+- **[MANTIK]** Tavsiye onerisi (ihtar/icra/dava) → mevcut hukuki durumla celiskili mi? (Orn: konkordato varsa icra durur — ihtar yine atilir mi netlestir)
+- **[KAYNAK]** Eski cikti karsilastirmasi varsa (Mart 2026 vs guncel), rakam farkinin sebebi raporda aciklanmis mi?
+
+Cikti'nin sonuna **kisa denetim notu** dus:
+- Celiski → "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]"
+- Temiz → "Tutarlilik denetimi: temiz."
 
 ## Cikti Formati
 

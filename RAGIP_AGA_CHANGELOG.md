@@ -6,6 +6,72 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.17.0] - 2026-05-14
+
+### Test bulgulari + disiplin guclendirme
+
+14 Mayis 2026 Guven Pres gercek senaryo testi (Yontem 2A/2B) bulgulari:
+- PRD orchestrator non-interactive modda stuck (Patch #1)
+- Tier 2C reactive nature belirsiz (Patch #3, belge)
+- Acik alacak tutar etiket netligi (Patch #4)
+- update.sh "yeni" dosya yedeksiz uzerine yazma bug (Patch #5)
+- Tier 3 cikti disiplini gercek davranisi zayif → Tier 4 (cherry-pick CFO K3, B1) ve Tier 1 ek (cherry-pick CFO K2, A5)
+
+### Added — Tier 4 dokuman tutarlilik kontrolu (B1, ADR-0018)
+
+Defense-in-depth dorduncu katman: ragip-analiz/strateji/degerlendirme cikti sentez fazinin son adimi olarak self-check. Sayisal/etiket/mantik/senaryo tutarliligi. Cherry-pick: gibibyte-cfo-agent v0.2 K3.
+
+- **skills/ragip-analiz/SKILL.md**, **skills/ragip-strateji/SKILL.md**, **skills/ragip-degerlendirme/SKILL.md**: "Tutarlilik denetimi (Tier 4)" alt-adimi eklendi. 4 kategori (SAYI/ETIKET/MANTIK/SENARYO), cikti notu formati.
+- **docs/adr/0018-tier-4-dokuman-tutarlilik.md**: Yeni ADR. Cherry-pick gerekce, kapsam tablosu, sinirlamalar (model self-check zayif olabilir), gelecek calisma (LLM-judge, programmatik check).
+- **tests/test_ragip_tutarlilik.py**: 18 test — prompt'larda Tier 4 terimi, ADR-0018 referansi, 4-kategori, denetim notu formati, deterministik skill'lerde uygulanmamis, ADR icerigi/cherry-pick kaynagi.
+
+### Added — Tier 1 Barnum 'Do not fabricate certainty' (A5)
+
+Veri eksik/tutarsizken mutlak ifade ("kesin", "muhakkak", "kesinlikle") yasagi. Cherry-pick: gibibyte-cfo-agent v0.2 K2 + AI CFO Assistant System Prompt Data Quality Rule.
+
+- **skills/ragip-analiz/SKILL.md** (6b), **skills/ragip-strateji/SKILL.md** (2b), **skills/ragip-degerlendirme/SKILL.md** (Adim 8): "Kesinlik kalibi" alt-kurali Barnum yanina eklendi.
+- **tests/test_ragip_cikti_disiplini.py**: TestKesinlikKalibi sinifi, 9 test (kurali var, "Do not fabricate certainty" ifadesi, mutlak ifade yasagi ornekleri).
+
+### Fixed — Patch #1: PRD non-interactive fallback
+
+ragip-aga orchestrator `claude -p` modunda kullanici girdisi olmadigi icin PRD onay sorusu sonsuza kadar bekledi (test bulgusu: 10 dk timeout). Fallback davranisi: PRD ozetini cikti basina yaz, otomatik dispatch.
+
+- **agents/ragip-aga.md**: PRD DISIPLINI bolumune "Non-interactive fallback" eklendi. Stuck olmaz, audit korunur (PRD ozeti cikti'da).
+- **docs/adr/0017-orchestrator-prd-disiplini.md**: Sinirlamalar listesine non-interactive notu, "Non-interactive fallback (v2.17.0)" alt-bolumu.
+- **tests/test_ragip_prd_disiplini.py**: TestNonInteractiveFallback sinifi, 3 test (agent prompt'unda non-interactive kelimesi, fallback kavramlari, ADR referansi).
+
+### Fixed — Patch #4: Acik alacak tutar etiket netligi
+
+`aging_raporu` doc string ve cikti dict'i netlestirildi. Kismi odeme varsa nominal vs kalan ayrimi acik (hukuki ihtar/alacak bildirim sirasinda kritik).
+
+- **scripts/ragip_aga.py:aging_raporu**: Doc string genisletildi (toplam vs kalan tanimi). Yeni cikti alanlari: `nominal_acik_toplam_tl`, `kismi_odenmis_adet`. Yorum metni kismi odeme varsa nominal+kalan ikisini de gosterir. Geriye uyumlu (mevcut `toplam_acik_alacak_tl` korundu).
+- **tests/test_ragip_fatura_analiz.py**: 3 yeni test (nominal vs kalan farki, kismi odeme yoksa nominal=kalan, yorum metni kismi uyarisi).
+
+### Fixed — Patch #5: update.sh "yeni" dosya yedeksiz uzerine yazma
+
+Manifest'te olmayan ama disk'te bulunan dosyalar (manuel sync senaryosu) yedeksiz uzerine yaziliyordu — kullanici ozellestirmesi varsa veri kaybi.
+
+- **update.sh**: `new_files` dongusu disk varligi kontrol eder. Hash ayni → skipped_unchanged. Hash farkli → conflicts (yedek + uzerine yaz).
+- **tests/test_ragip_install.py**: 2 yeni test (manifest dısı disk-ayni → yedek olmamali, manifest dısı disk-farkli → yedek olusmali).
+
+### Docs — Patch #3: Tier 2C reactive notu
+
+WebSearch tetiklenmedikce Tier 2C devreye girmez — "bos koruma" izlenimi vermesin diye reactive nature ADR'a yazildi.
+
+- **docs/adr/0015-citation-source-whitelist.md**: "Tetik kosulu (reactive, v2.17.0 netlestirmesi)" alt-bolumu. Proactive tetik tasarim karari (hayir — opt-in).
+
+### Why
+
+Gercek senaryo testi gostermistir ki v2.14.0-2.16.0 (Tier 2C/3/PRD) cherry-pick'leri tek baslarina yetmiyor — non-interactive senaryo, etiket belirsizligi, post-generation cross-check eksikligi gibi bosluklar var. v2.17.0 bu bosluklari sistemli kapatir: Tier 4 (dokuman tutarlilik), Tier 1 ek (kesinlik kalibi), Patch #1-5 (test-driven bugfix). Hepsi prompt-level, geri alinabilir, davranissal test ile dogrulanabilir.
+
+### Test toplam
+
+667 test (onceki 632 + 35 yeni: Patch #5 2 + Patch #1 3 + A5 9 + Patch #4 3 + B1 18).
+
+### Migration
+
+Workspace v2.16.0 → v2.17.0 update.sh ile gecirilebilir. Tier 4 prompt'lari skill'lere otomatik gelir. FinansalHesap.aging_raporu cikti dict'i geriye uyumlu (yeni alanlar eklendi, mevcut alanlar degismedi). update.sh new-file bug fix mevcut workspace'lerde sahte cakisma yedeklerini onler.
+
 ## [2.16.0] - 2026-05-13
 
 ### Added — Orchestrator PRD Disiplini (FEATURE_IDEAS #22, ADR-0017)

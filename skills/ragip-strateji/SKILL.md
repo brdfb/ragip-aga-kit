@@ -77,6 +77,9 @@ print(f'  TOPLAM: {toplam_hukuki + firsat_maliyeti:,.0f} TL')
 **2. Barnum filtresi (ZORUNLU — ciktiyi yazmadan once):**
 Her bulgu ve oneriyi su testle kontrol et: "Firma adini degistirsem bu cumle hala gecerli mi?" Evetse, ya spesifiklestir (firma verisi, tutar, vade, sektor detayi ekle) ya da cikar. Generic strateji onerisi ("nakit akisinizi iyilestirin", "vade farklarini takip edin") YASAK — somut senaryo verisine dayanan oneriler yaz.
 
+**2b. Kesinlik kalibi (ZORUNLU — Data Quality Rule, gibibyte-cfo-agent K2 turetimi, ADR-0010 Tier 1 ek):**
+Veri eksik veya tutarsiz oldugunda: (a) tutarsizligi acikca isaretle, (b) olasi en az iki yorumu sun, (c) "kesin", "muhakkak", "kesinlikle" gibi mutlak ifadeler yasak — belirsizligi gizleme. **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi (asagi) veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik strateji karar maliyetini buyutur.
+
 **3. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
 
 **3-satir blok formati** — RAGIP AGA'NIN TAVSIYESI ve BU HAFTA YAPILACAKLAR icin:
@@ -98,6 +101,18 @@ Strateji raporunda TBK m.117, IIK m.58 gibi yasal yol referansi gectiyse, dosyay
 bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
 ```
 Exit 2 = uydurma sanigi → raporu duzelt. Detay: ragip-degerlendirme skill'inde.
+
+**5. Tutarlilik denetimi (Tier 4, ADR-0018 — ZORUNLU son adim):**
+
+Strateji raporunu teslim etmeden once kendi ciktini tara:
+- **[SAYI]** 3 senaryonun rakam aralıklari tutarli mi? Hesaplama (Adim 1) sonuclari raporda dogru yerde gecti mi?
+- **[ETIKET]** Senaryo maliyet/yarar rakamlarinin tanimi acik mi (anapara, fırsat maliyeti, faiz)?
+- **[MANTIK]** "Bu hafta yapilacaklar" listesi secilen senaryo ile uyumlu mu?
+- **[SENARYO]** Iyimser/orta/kotumser sirasi mantikli mi (rakam ve risk yonu)?
+
+Cikti'nin sonuna **kisa denetim notu** dus:
+- Celiski → "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]"
+- Temiz → "Tutarlilik denetimi: temiz."
 
 ## Çıktı Formatı
 

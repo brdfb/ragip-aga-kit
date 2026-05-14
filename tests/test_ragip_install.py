@@ -70,7 +70,7 @@ class TestInstall:
             (temp_repo / "config" / ".ragip_manifest.json").read_text()
         )
         count = len(manifest["files"])
-        assert count == 53, f"Beklenen 53 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
+        assert count == 54, f"Beklenen 54 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
 
     def test_manifest_checksums_valid(self, temp_repo):
         """Her checksum sha256: prefix ile başlamalı ve 64 hex karakter olmalı"""
@@ -280,3 +280,49 @@ class TestUpdate:
         )
         assert len(backups) > 0, "Çakışma yedek dosyası oluşmalıydı"
         assert backups[0].read_text() == user_content
+
+    def test_manifest_missing_disk_same_no_backup(self, tmp_path):
+        """v2.17.0 fix: manifest'te yok ama disk'te kit ile AYNI ise yedek olusturma."""
+        repo = self._create_repo(tmp_path)
+        self._install_fresh(repo)
+        # Manifest'ten bir dosyayi cikar (manuel sync senaryosunu simule et)
+        manifest_path = repo / "config" / ".ragip_manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        target_rel = ".claude/skills/ragip-analiz/SKILL.md"
+        target_path = repo / target_rel
+        assert target_path.exists()
+        del manifest["files"][target_rel]
+        manifest_path.write_text(json.dumps(manifest))
+        # Force update — kit ile ayni icerik, yedek olmamali
+        result = self._run_update(repo, "--force")
+        assert result.returncode == 0
+        backups = list(target_path.parent.glob("*.kullanici-yedek*"))
+        assert len(backups) == 0, (
+            f"Disk'te ayni icerik vardi, yedek olusmamaliydi. Yedekler: {backups}"
+        )
+
+    def test_manifest_missing_disk_different_creates_backup(self, tmp_path):
+        """v2.17.0 fix: manifest'te yok ama disk'te FARKLI ise yedek olusturulmali."""
+        repo = self._create_repo(tmp_path)
+        self._install_fresh(repo)
+        # Manifest'ten cikar VE disk icerigini degistir (gercek kullanici ozellestirmesi)
+        manifest_path = repo / "config" / ".ragip_manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        target_rel = ".claude/skills/ragip-analiz/SKILL.md"
+        target_path = repo / target_rel
+        original_content = target_path.read_text()
+        modified_content = original_content + "\n# Manuel kullanici ozellestirmesi\n"
+        target_path.write_text(modified_content)
+        del manifest["files"][target_rel]
+        manifest_path.write_text(json.dumps(manifest))
+        # Force update — disk farkli, yedek olmali
+        result = self._run_update(repo, "--force")
+        assert result.returncode == 0
+        backups = list(target_path.parent.glob("*.kullanici-yedek*"))
+        assert len(backups) > 0, (
+            "Disk farkli icerikti, yedek olusmaliydi (veri kaybi engellendi)"
+        )
+        # Yedek kullanici icerigini saklamali
+        assert any(b.read_text() == modified_content for b in backups), (
+            "Yedek dosyasi kullanici icerigini icermeli"
+        )

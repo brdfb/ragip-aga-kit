@@ -177,7 +177,17 @@ for rel_path in all_paths:
         print(f"  {B}[i]{N} Yeni surumde kaldirildi (korunuyor): {rel_path}")
         continue
     if not in_old and in_new:
-        new_files.append(rel_path)
+        # Kit'te yeni eklenmis dosya. Disk'te zaten varsa kor uzerine yazma
+        # (manifest dısı manuel kopya — kullanici ozellestirmesi olabilir).
+        new_hash = kit_files[rel_path]["new_hash"]
+        if installed_path.exists():
+            installed_hash = sha256_file(installed_path)
+            if installed_hash == new_hash:
+                skipped_unchanged.append(rel_path)
+            else:
+                conflicts.append(rel_path)
+        else:
+            new_files.append(rel_path)
         continue
 
     manifest_hash = old_files[rel_path].replace("sha256:", "")

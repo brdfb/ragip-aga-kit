@@ -98,6 +98,15 @@ Kullanici tepkisi
 - Anahtar kelime listesi statik — yeni kalıp eklendiginde manuel guncelleme gerekir.
 - "Karmasik" tanimi yumusak — model yargisina bagli. Tetik listesi kati referans yapar.
 - Onay bekleme sub-agent dispatch latency'ye ekleme yapar (1-2 turn).
+- **Non-interactive (`-p` modu, cron, script) onay kanali yoktur** — bu durumlarda PRD stuck olur. v2.17.0 Patch #1 ile fallback eklendi (PRD ozeti cikti basina, otomatik dispatch).
+
+### Non-interactive fallback (v2.17.0)
+
+Test bulgusu (13-14 Mayis 2026): `claude --agent ragip-aga -p "...tam analiz..."` 10 dakika hicbir cikti uretmedi (timeout 600s SIGTERM). PRD onay sorusu sonsuza kadar bekledi cunku non-interactive modda kullanici yok.
+
+Karar: Orchestrator non-interactive mod tespit ederse PRD ozetini cikti basina yazar (audit korunur) ve onay beklemeden dispatch eder. Yapisal "onay" kontrolu PRD ozetinin cikti olarak yazilmasidir — kullanici cron loglarini okudugunda neyin neden yapildigini gorur. Sessizlik garantili dispatch DEGIL — PRD'siz dispatch karara bagli yapilir.
+
+Detayli prompt davranisi: `agents/ragip-aga.md` PRD DISIPLINI bolumu.
 
 ## Konsekvanslar
 

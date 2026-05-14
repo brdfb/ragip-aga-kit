@@ -191,6 +191,32 @@ class TestAgingRaporu:
         sonuc = FinansalHesap.aging_raporu(str_faturalar, firma_id=10)
         assert sonuc["fatura_adedi"] == 2
 
+    def test_nominal_vs_kalan_kismi(self):
+        """v2.17.0 Patch #4: kismi odeme varsa nominal vs kalan farkli olmali.
+
+        F-002: toplam=24000, odeme=8000, kalan=16000 (kismi)
+        F-001: toplam=12000, kalan=12000 (acik)
+        F-006: toplam=36000, kalan=36000 (acik)
+        kalan toplam: 64000, nominal toplam: 72000, kismi=1 adet
+        """
+        sonuc = FinansalHesap.aging_raporu(FATURALAR)
+        assert sonuc["toplam_acik_alacak_tl"] == 64000.0
+        assert sonuc["nominal_acik_toplam_tl"] == 72000.0
+        assert sonuc["kismi_odenmis_adet"] == 1
+
+    def test_nominal_eq_kalan_kismi_yoksa(self):
+        """Kismi odeme yoksa nominal = kalan."""
+        sadece_acik = [f for f in FATURALAR if f.get("durum") == "acik"]
+        sonuc = FinansalHesap.aging_raporu(sadece_acik)
+        assert sonuc["toplam_acik_alacak_tl"] == sonuc["nominal_acik_toplam_tl"]
+        assert sonuc["kismi_odenmis_adet"] == 0
+
+    def test_yorum_kismi_odeme_uyarisi(self):
+        """Kismi odeme varsa yorum metni iki rakami da gostermeli."""
+        sonuc = FinansalHesap.aging_raporu(FATURALAR)
+        assert "kismi" in sonuc["yorum"].lower()
+        assert "nominal" in sonuc["yorum"].lower()
+
 
 class TestDso:
     def test_dso_hesap(self):
