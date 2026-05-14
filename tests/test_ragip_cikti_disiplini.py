@@ -80,6 +80,86 @@ class TestSesKorundu:
         )
 
 
+class TestTier3V218Zenginlestirme:
+    """v2.18.0 — Lead With Insight + Quantify Impact + Action 5-bilesen + Etiket."""
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_a1_lead_with_insight_kurali(self, skill_metinleri, skill):
+        """A1: TESPIT yorum ile baslar, sayisal degil."""
+        metin = skill_metinleri[skill]
+        assert "Lead With the Insight" in metin or "Lead With Insight" in metin, (
+            f"{skill}: 'Lead With the Insight' (A1) referansi eksik"
+        )
+        # WRONG/CORRECT ornek skill prompt'ta few-shot olarak gosterilmeli
+        assert "WRONG" in metin and "CORRECT" in metin, (
+            f"{skill}: Few-shot WRONG/CORRECT ornek eksik (A1)"
+        )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_a2_quantify_impact_4bilesen(self, skill_metinleri, skill):
+        """A2: Etki satiri 4 bilesen ($/% /yon/horizon)."""
+        metin = skill_metinleri[skill]
+        assert "Etki:" in metin, f"{skill}: 'Etki:' satiri (Quantify) eksik"
+        assert "Quantify Impact" in metin, f"{skill}: 'Quantify Impact' (A2) referansi eksik"
+        # Yon sembolleri (artan/azalan/sabit)
+        yon_sembol = any(s in metin for s in ["↑", "↓", "⇄"])
+        assert yon_sembol, f"{skill}: trend yon sembolleri (↑↓⇄) eksik"
+        # Horizon referansi
+        horizon = any(h in metin.lower() for h in ["horizon", "gun", "kalici"])
+        assert horizon, f"{skill}: time horizon referansi eksik (gun/kalici)"
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_a4_action_5bilesen(self, skill_metinleri, skill):
+        """A4: POZISYON 5 bilesen (Action + Sahip + Zaman + Beklenen)."""
+        metin = skill_metinleri[skill]
+        # POZISYON satirinda inline bilesenler
+        for bilesen in ["Sahip:", "Zaman:", "Beklenen:"]:
+            assert bilesen in metin, f"{skill}: POZISYON 5-bilesen '{bilesen}' eksik"
+        assert "Action Format" in metin or "5-bilesen" in metin, (
+            f"{skill}: 'Action Format 5-bilesen' (A4) referansi eksik"
+        )
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_3_etiket_netligi(self, skill_metinleri, skill):
+        """#3: Sayisal iddialar etiketli (nominal vs kalan)."""
+        metin = skill_metinleri[skill]
+        # Etiket kavrami acikca gecmeli
+        etiket_terim = any(t in metin for t in ["ETIKET", "Etiket netligi", "etiket"])
+        assert etiket_terim, f"{skill}: etiket kurali eksik"
+        # Nominal ve kalan/anapara ornekleri
+        assert "nominal" in metin.lower(), f"{skill}: 'nominal' etiket ornegi eksik"
+        assert "kalan" in metin.lower(), f"{skill}: 'kalan' etiket ornegi eksik"
+
+    @pytest.mark.parametrize("skill", LLM_SKILLS_KAPSAM)
+    def test_cherry_pick_kaynagi_belirtilmis(self, skill_metinleri, skill):
+        """v2.18.0 cherry-pick kaynagi (AI CFO Assistant System Prompt v2.0)."""
+        metin = skill_metinleri[skill]
+        assert "AI CFO Assistant" in metin or "System Prompt v2.0" in metin, (
+            f"{skill}: v2.18.0 cherry-pick kaynagi (AI CFO Assistant System Prompt v2.0) belirtilmemis"
+        )
+
+
+class TestAdr0016V218Genisletme:
+    """ADR-0016 v2.18.0 genisletme belgesi tutarliligi."""
+
+    def test_adr_v218_bolumu(self):
+        adr = KIT_ROOT / "docs" / "adr" / "0016-cikti-disiplini-tier-3.md"
+        metin = adr.read_text(encoding="utf-8")
+        assert "v2.18.0 Genisletme" in metin or "v2.18.0" in metin, (
+            "ADR-0016 v2.18.0 genisletme bolumu eksik"
+        )
+        # 4 cherry-pick kategorisi belgelendi mi
+        for kategori in ["A1", "A2", "A4", "#3"]:
+            assert kategori in metin, f"ADR-0016 v2.18.0: {kategori} cherry-pick belgesi eksik"
+
+    def test_adr_yeni_format_ornegi(self):
+        adr = KIT_ROOT / "docs" / "adr" / "0016-cikti-disiplini-tier-3.md"
+        metin = adr.read_text(encoding="utf-8")
+        # Yeni format gorunmeli (Etki satiri, Sahip/Zaman/Beklenen)
+        for bilesen in ["Etki:", "Sahip:", "Zaman:", "Beklenen:"]:
+            assert bilesen in metin, f"ADR-0016 v2.18.0: yeni format '{bilesen}' eksik"
+
+
 class TestKapsamDisi:
     @pytest.mark.parametrize("skill", DETERMINISTIK_SKILLS)
     def test_deterministik_skiller_kapsamda_degil(self, skill):

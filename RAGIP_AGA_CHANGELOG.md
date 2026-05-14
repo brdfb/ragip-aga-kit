@@ -6,6 +6,69 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.18.0] - 2026-05-14
+
+### Tier 3 yeniden tasarim — Lead With Insight + Quantify Impact + Action 5-bilesen + Etiket
+
+**Cherry-pick:** AI CFO Assistant System Prompt v2.0 (Master Pack v2.0, Mayis 2026). Tier 3 cikti disiplini 4 yeni boyutla genisletildi. Mevcut TESPIT/POZISYON/GEREKCE iskeleti korundu, format **3-satir → 5-satir zenginlestirilmis** hale getirildi.
+
+### Changed — Tier 3 formati
+
+Yeni blok formati (3 LLM skill'inde):
+
+```
+TESPIT: <insight cumlesi — somut alıntı + madde + tutar + ETIKET>
+   Etki: <X TL/USD> (%<Y>) <↑↓⇄> <30/60/90 gun veya kalici>
+POZISYON: <fiil> · Sahip: <kim> · Zaman: <ne zaman> · Beklenen: <X>
+GEREKCE: <opsiyonel>
+```
+
+4 yeni boyut:
+1. **A1 Lead With the Insight** — TESPIT sayisal degil **yorum** ile baslar. WRONG/CORRECT ornek skill prompt'unda few-shot.
+2. **A2 Quantify Impact 4-bilesen** — Etki satiri: $ tutar / % etki / yon (↑↓⇄) / horizon (gun/kalici).
+3. **A4 Action Format 5-bilesen** — POZISYON inline: fiil + Sahip + Zaman + Beklenen.
+4. **#3 Etiket netligi** — Sayisal iddialar acik etiketli (`nominal` vs `kalan` vs `vade tutari`). Patch #4'un Tier 3 entegrasyonu.
+
+Her 3 skill icin domain-spesifik WRONG/CORRECT ornekler:
+- **ragip-analiz**: vade farki uygulanmamis sozlesme bulgu
+- **ragip-strateji**: Zeren-tarzi rakip pazarlik MCI+Float kozu
+- **ragip-degerlendirme**: Guven Pres alacak ihtari (konkordato bağlamı)
+
+### Files
+
+- **skills/ragip-analiz/SKILL.md**, **skills/ragip-strateji/SKILL.md**, **skills/ragip-degerlendirme/SKILL.md**: Tier 3 bolumu yeniden yazildi.
+- **docs/adr/0016-cikti-disiplini-tier-3.md**: v2.18.0 Genisletme bolumu eklendi. Cherry-pick gerekce, 4 boyut, davranissal beklenti, sinirlamalar.
+- **tests/test_ragip_cikti_disiplini.py**: TestTier3V218Zenginlestirme + TestAdr0016V218Genisletme sinifları. 17 yeni test (A1 ornek, A2 4-bilesen, A4 5-bilesen, #3 etiket, cherry-pick kaynagi, ADR v2.18.0 bolumu + yeni format ornegi).
+
+### Test toplam
+
+680 → **697** (+17 yeni). 0 regression.
+
+### Davranissal beklenti (henuz dogrulanmadi)
+
+v2.18.0 sonrasi Yontem 2B regresyon testi (Guven Pres veya benzeri):
+- Tier 3 5-satir blok ciktida gozlemlenebilir mi? Wrong/Correct few-shot ile davranissal uyum **artmali**.
+- Etki satiri ($/%/yon/horizon) cikti'da?
+- POZISYON 5-bilesen (Sahip/Zaman/Beklenen) acik?
+- Etiket (nominal/kalan) "anapara" bahislerinde?
+
+**Davranissal test altyapisi v2.19.0 LLM-judge ile gelir** — bu surumdeki yapisal degisiklikler few-shot prompting ile davranissal etkiyi artirmayi hedefler ama olcum sonraki release.
+
+### Migration
+
+Workspace tarafinda `bash <kit>/update.sh` ile gelir. Mevcut Tier 4 (ADR-0018) ve Tier 1 (A5) korunur — Tier 3 yeni format onlarla **uyumlu** (Tutarlilik denetimi etiketleri uygulanir, kesinlik kalibi yeni Etki satirina genisler).
+
+### Why
+
+v2.16.0/v2.17.0 davranissal regresyon testleri (Guven Pres, 14 Mayis 2026) gosterdi ki orijinal 3-satir blok format (TESPIT/POZISYON/GEREKCE) **prompt'ta var ama model uygulamiyor** — gozlem: cikti'da 0 esleme. Iki sebebi var:
+
+1. **Format yetersiz**: Sayisal etki/sahip/zaman/beklenen gibi karar verici icin kritik alanlar yok. Model "TESPIT ne anlama geliyor?" sorusunu kendi cevaplayabilirken bunu formata sigdiramiyor.
+2. **Few-shot yok**: Mevcut prompt sadece template tarif eder — Wrong/Correct gercekci ornek yok. Model formati anlamak icin orneklere bagimli.
+
+v2.18.0 ikisini de kapatir: zenginlestirilmis format **karar veriye dair tum boyutlari** yakalar, Wrong/Correct ornek **model davranissinin sekillenmesini** kolaylastir.
+
+Bu degisiklik kit kapsam genisletme **degildir** — mevcut LLM skill'lerinde Tier 3 prensibi gucturlur, yeni kavram eklenmez. AI CFO Assistant System Prompt v2.0 cherry-pick'i kit-disi bir urunun system prompt'undan **disiplin pattern'leri** turetir; o urunun mimari/kapsami farkli kalir.
+
 ## [2.17.1] - 2026-05-14
 
 ### Self-review duzeltmeleri

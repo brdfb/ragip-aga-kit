@@ -88,15 +88,43 @@ Veri tutarsizsa ek olarak: (a) tutarsizligi acikca isaretle, (b) olasi en az iki
 
 **Do not fabricate certainty** — emin degilsen VARSAYIM damgasi (asagi) veya "veri yetersiz" demek dogru cevaptir. Yanlis kesinlik strateji karar maliyetini buyutur.
 
-**3. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2, ADR-0016):**
+**3. Cikti disiplini (Tier 3 — kaynak: gibibyte-cfo-agent v0.2 K2 + AI CFO Assistant System Prompt v2.0 cherry-pick, ADR-0016 v2.18.0 genisletme):**
 
-**3-satir blok formati** — RAGIP AGA'NIN TAVSIYESI ve BU HAFTA YAPILACAKLAR icin:
+**3-satir zenginlestirilmis blok formati** — RAGIP AGA'NIN TAVSIYESI ve BU HAFTA YAPILACAKLAR icin:
+
 ```
-TESPIT: <1 cumle, somut durum + tutar/vade>
-POZISYON: <1 cumle, fiil ile baslar — hangi senaryo, hangi adim>
-GEREKCE: <opsiyonel; sorulursa veya kararı zora sokan boyut>
+TESPIT: <insight cumlesi — durum + somut tutar/vade + ETIKET (nominal/kalan/risk turu)>
+   Etki: <X TL/USD> (%<Y>) <↑↓⇄> <30/60/90 gun veya kalici>
+POZISYON: <fiil ile baslar — hangi senaryo, hangi adim> · Sahip: <kim> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y senaryo aktivasyonu>
+GEREKCE: <opsiyonel; karari zora sokan boyut>
 ```
-Senaryo aciklamalari (Koşul, Hedef, Hafta planı) serbest kalir — 3-satir SADECE final tavsiye + bu hafta adimlari icin.
+
+**Format kurallari (4 bilesen):**
+
+1. **Lead With the Insight (A1):** TESPIT sayisal degil **yorum** ile baslar.
+2. **Quantify Impact 4-bilesen (A2):** Etki satiri: $ tutar / % etki / yon / horizon.
+3. **Action Format 5-bilesen (A4):** POZISYON: fiil + Sahip + Zaman + Beklenen.
+4. **Etiket netligi (#3):** Strateji rakamlari etiketli olmali — `senaryo kayip` (orta-vade), `firsat maliyeti`, `nominal alacak`, `kalan tahsilat hedefi` vb.
+
+**WRONG (kullanma):**
+
+```
+TESPIT: Zeren ile pazarlik kritik.
+POZISYON: Pazarlikta direnci dusur.
+```
+
+Yetersiz: insight var ama somut tutar/zaman/sahip yok.
+
+**CORRECT (kullan):**
+
+```
+TESPIT: Zeren ile yenileme pazarliginda 5 rakibe karsi MCI+Float kozu masaya konulmadi — fiyat-disi farklilastirma kayip.
+   Etki: 8K TL/ay (firsat maliyeti) (%6 marja) ↑ rakip baski artiyor, 60gun deadline
+POZISYON: 21 Mayis goruşmesinde MCI+Float'i E7 Frontier ile birlestir sun. · Sahip: Bered · Zaman: 21 Mayis · Beklenen: %2 ek indirim kacinilir, $4K net kar korunur
+GEREKCE: Karşi taraf en ucuz oneriyi alacak; tek koz fiyat-disi (uzun donem deger).
+```
+
+Senaryo aciklamalari (Koşul, Hedef, Hafta planı) serbest kalir — 5-satir blok SADECE final tavsiye + bu hafta adimlari icin.
 
 **VARSAYIM damgasi** — senaryo maliyetinde firma/rakip/sektor verisi yoksa:
 - "VARSAYIM:" + aralik (X-Y TRY) — tek nokta yasak

@@ -154,6 +154,66 @@ Bu varsayimdir, kesinlesmek icin son 12 ay fatura datasi gerekli.
 - **Tamamlayici:** Tier 1 (Barnum) generic-bulgu filtre + Tier 3 (3-satir) yapisal sunum birbirini destekler.
 - **Sonraki:** ragip-delil ve ragip-rapor commentary'sine genisletme; semantic test pattern'i.
 
+---
+
+## v2.18.0 Genisletme — Lead With Insight + Quantify Impact + Action 5-bilesen + Etiket netligi
+
+**Tarih:** 2026-05-14
+**Cherry-pick:** AI CFO Assistant System Prompt v2.0 (Master Pack v2.0, Mayis 2026) — kaynak: `Gibibyte_AI_CFO_Assistant_System_Prompt_v2.md` (lokal/karar bekliyor)
+
+### Baglam
+
+v2.16.0 sonrasi Guven Pres gercek senaryo testi (Yontem 2B, 14 Mayis 2026) gosterdi ki orijinal 3-satir blok format (TESPIT/POZISYON/GEREKCE):
+
+- **Davranissal etki sifir** — model bu formati uygulamadi (cikti'da TESPIT/POZISYON 0 esleme)
+- **Format yetersiz** — sayisal etki (kac TL kayip), aksiyon sahibi (kim yapacak), zaman (ne zaman), beklenen sonuc (ne sonuclanir) gibi karar verici icin kritik alanlar eksik
+- **Etiket belirsizligi** — "anapara 142.593 USD" cumlesi ambigu (nominal mi kalan mi?), Patch #4'te bu problem tespit edildi
+
+AI CFO Assistant System Prompt v2.0 kaynagindan **4 cherry-pick** alindi:
+
+1. **A1 — Lead With the Insight:** TESPIT sayisal degil **yorum** ile baslar. Ornek:
+   - Wrong: "Gross margin was 36.5%."
+   - Correct: "Gross margin declined 520 basis points, primarily driven by $57,000 of emergency freight."
+2. **A2 — Quantify Impact (4-bilesen):** Her TESPIT'in Etki satiri: dollar impact / percentage impact / trend direction / time horizon.
+3. **A4 — Recommended Action Format (5-bilesen):** POZISYON inline: Action + Financial impact + Owner + Timing + Expected outcome.
+4. **#3 — Etiket netligi:** Sayisal iddialar etiketli (nominal/kalan/vade), Patch #4'un Tier 3 entegrasyonu.
+
+### Yeni Tier 3 formati (v2.18.0)
+
+```
+TESPIT: <insight cumlesi — yorum, somut alıntı + madde + tutar + ETIKET>
+   Etki: <X TL/USD> (%<Y>) <↑↓⇄> <30/60/90 gun veya kalici>
+POZISYON: <fiil> · Sahip: <kim> · Zaman: <ne zaman> · Beklenen: <X tahsilat / Y risk azalmasi>
+GEREKCE: <opsiyonel>
+```
+
+5 satir (TESPIT + Etki + POZISYON + bilesenler inline + GEREKCE). Etiket TESPIT cumlesinde acik (`anapara (kalan)` vs `anapara (nominal)`).
+
+### Skill prompt'larina entegre
+
+Her 3 LLM skill'inde (ragip-analiz, ragip-strateji, ragip-degerlendirme) Tier 3 bolumu yeniden yazildi:
+- Format aciklamasi (4 kural)
+- **WRONG ornek** (eski format — yetersiz)
+- **CORRECT ornek** (yeni format — model gercekci ornekle gorur)
+
+Few-shot prompting modelin yeni formati yapisi olarak ogrenmesini destekler.
+
+### Davranissal etki beklentisi
+
+v2.18.0 sonrasi gercek senaryo testi:
+- Tier 3 5-satir blok ciktida gozlemlenebilir mi? Wrong/Correct ornek (few-shot) ile davranissal uyum **artmali** (henuz dogrulanmadi).
+- Etki satiri ($/% /yon/horizon) cikti'da bulunabilir mi?
+- POZISYON 5-bilesen (Sahip/Zaman/Beklenen) acikca yazilabilir mi?
+- Etiket (nominal vs kalan) "anapara" bahislerinde yazilabilir mi?
+
+Bunlar **davranissal test** (v2.19.0 LLM-judge altyapisi) ile dogrulanacak. v2.18.0 yapisal degisiklik + few-shot guclendirme — gercek davranis olcum v2.19.0+ konusu.
+
+### Sinirlamalar (v2.18.0 spesifik)
+
+- **Cikti uzunlugu artar:** 3 satir → 5 satir. Iyi yapilandirilmis raporda fark hissedilmez, ama kucuk rapora overhead yaratir.
+- **Wrong/Correct ornek tutarli olmali:** 3 skill'de farkli ornek (analiz: vade farki, strateji: rakip pazarlik, degerlendirme: alacak ihtari) — generic ornek vermek yerine her skill'in **kendi domain'ine ait** ornek, daha guclu few-shot etki.
+- **A4 5-bilesen overhead:** Her POZISYON 4 ek bilgi ister (Sahip/Zaman/Beklenen). Trivial vaka icin overengineering — model serbest birakilmali (Tier 3 SADECE kritik bulgular icin).
+
 ## Kaynaklar
 
 - gibibyte-cfo-agent v0.2 (Nisan 2026) — 5 Operasyonel Kural (K2 + 3-satir TESPIT/POZISYON/GEREKCE)

@@ -3,7 +3,7 @@
 Canli deneyim, sohbetler ve sistematik kit critique'inden derlenen fikirler.
 Oncelik yok, siralama yok — acip bakip "simdi hangisi mantikli" diye degerlendirilecek liste.
 
-Guncelleme: 2026-05-14 (v2.17.1 — self-review duzeltmeleri: A5 pozitif yonlendirme + PRD prompt sadelestirme + ADR-0018 metadata + yedek temizleme yardimcisi)
+Guncelleme: 2026-05-14 (v2.18.0 — Tier 3 yeniden tasarim: A1 Lead With Insight + A2 Quantify Impact 4-bilesen + A4 Action 5-bilesen + #3 Etiket netligi, AI CFO Assistant System Prompt v2.0 cherry-pick)
 
 ---
 
