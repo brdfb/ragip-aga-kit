@@ -252,6 +252,21 @@ Cikti'nin sonuna **kisa denetim notu** dus:
 - Celiski → "Tutarlilik denetimi: X celiski bulundu, duzeltildi: [...]"
 - Temiz → "Tutarlilik denetimi: temiz."
 
+**11. FORMAT DOGRULAMA (Tier 5, ADR-0019 — ZORUNLU deterministic precheck, rapor dosyaya yazildiktan SONRA):**
+
+```bash
+bash scripts/ragip_format_dogrula.sh <cikti_dosya_yolu>
+```
+
+Davranis:
+- Exit 0 → Tier 3 blok + Tier 4 notu mevcut, rapor format-temiz.
+- Exit 2 → en az 1 zorunlu sinyal eksik (TESPIT/Etki/POZISYON/anapara etiket/Tutarlilik denetimi). Cikti listelenen eksik sinyalleri okuyun ve **raporu DUZELT**:
+  - TESPIT/Etki/POZISYON eksikse → SONUC VE ONERILER bolumundeki onerilerin 3-satir blok formatina cevir.
+  - Anapara etiket eksikse → "Anapara" gectigi her yere `(nominal)` veya `(kalan)` etiketi ekle.
+  - Tutarlilik denetimi notu eksikse → rapor sonuna "Tutarlilik denetimi: temiz." veya "X celiski bulundu" notu dus.
+
+Bu adim **deterministik Tier 5 savunma** — Tier 1-4 prompt-engineering katmaninin saglayamadigi format disiplinini yakalar (ADR-0019: prompt-engineering 0/13 esleme → script-enforcement %100).
+
 ## Cikti Formati
 
 ### HUKUKI DEGERLENDIRME

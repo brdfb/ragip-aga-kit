@@ -1,9 +1,30 @@
-# ADR-0019: Skill ↔ Agent Koordinasyon Disiplini
+# ADR-0019: Skill ↔ Agent Koordinasyon + Tier 5 Deterministic Format Enforcement
 
-**Tarih:** 2026-05-14
-**Durum:** Kabul edildi
+**Tarih:** 2026-05-14 (orijinal), 2026-05-16 (revize)
+**Durum:** Kabul edildi (revize edildi v2.19.0 — Tier 5 eklendi, H3 curutuldu)
 **Karar vericiler:** Kit gelistirici (audit-driven)
 **Iliski:** ADR-0016 (Tier 3 cikti disiplini), ADR-0017 (Orchestrator PRD), ADR-0018 (Tier 4 tutarlilik)
+
+## v2.19.0 REVIZE — Tier 5 deterministic enforcement eklendi
+
+**Bulgu (15 Mayis 2026 workspace prototyping):** Audit'in H3 hipotezi (few-shot block confusion) **curutuldu**. Agent system prompt'una Tier 3/4 spec'i v2.18.1 ile eklendi (audit aksiyon 1: skill ↔ agent koordinasyon), v2.18.2 ile maxTurns 12 → 20 yapildi. Buna ragmen 4. Yontem 2B kosumunda yapisal eslesme **yine 0/13**.
+
+**Sonuc:** Prompt-engineering (Tier 1-4) tek basina yetersiz. Skill ↔ agent koordinasyon **gerekli ama yeterli degil**. Deterministic post-write check (Tier 5) zorunlu.
+
+**Tier 5 implementation:** `scripts/ragip_format_dogrula.py` + `.sh` wrapper. 3 LLM skill'inde Adim X.b (FORMAT DOGRULAMA) zorunlu post-write adim. Exit 2 = blok eksik → LLM raporu duzeltmek zorunda.
+
+5 zorunlu sinyal:
+- [T3-1] TESPIT bullet
+- [T3-2] Etki: satiri
+- [T3-3] POZISYON 5-bilesen (Sahip/Zaman/Beklenen)
+- [T3-4] Anapara etiketi (nominal/kalan)
+- [T4] Tutarlilik denetimi notu
+
+Test: 22 yeni test (unit + CLI + bash + regression). Onceki 3 cikti (v2.16/v2.17/v2.18) hepsi Exit 2 — beklenen davranis (Tier 5 eksik kosumlar).
+
+---
+
+## Asil ADR (v2.18.1, audit-driven)
 
 ## Baglam
 

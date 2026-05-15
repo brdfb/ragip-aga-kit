@@ -155,7 +155,19 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 
 ---
 
-### 19. Davranissal QA Altyapisi (LLM-judge + Tier 3 v3) (KRITIK — v2.19.0 ADAYI)
+### 19. Davranissal QA Altyapisi (Tier 5 TAMAMLANDI v2.19.0, B2 LLM-judge backlog'da)
+
+**v2.19.0 GUNCELLEMESI (16 Mayis 2026):** B1 (a) skill-agent koordinasyon (v2.18.1) ve B1 mekanik alan (v2.18.2 maxTurns) tek baslarina yetersiz kaldi. 4. Yontem 2B kosumunda **audit'in H3 hipotezi curutuldu** — agent file Tier 3 spec icermesine ragmen davranis degismedi. Cozum: **Tier 5 deterministic enforcement** prototyped workspace'te → propagated kit'e.
+
+**Tier 5 (TAMAMLANDI, v2.19.0):**
+- `scripts/ragip_format_dogrula.sh` post-write regex check (5 sinyal)
+- Skill icinde Adim X.b zorunlu cagri, Exit 2 = blok eksik
+- 22 yeni test, 719 toplam test gecti
+- ADR-0019 revize (H3 curut + Tier 5 ekle)
+
+---
+
+### 19b. B2 LLM-judge altyapisi (Tier 5 meta-test)
 
 **Sorun:** v2.15.0/v2.17.0/v2.18.0 — uc ardisik Tier 3 / Tier 4 prompt-level disiplin enjeksiyonu **modele davranis olarak yansimadi.** 14 Mayis 2026 Yontem 2B regresyonunda v2.16.0 / v2.17.0 / v2.18.0 ciktilarinin tumu 0/13 yapisal eslesme verdi (TESPIT/POZISYON/GEREKCE blok, Etki satiri, Sahip/Zaman/Beklenen, anapara nominal/kalan etiketi, Tutarlilik denetimi notu, VARSAYIM damgasi). Yapisal pytest yesil ama gercek davranis kotu. Patch listesi `/tmp/ragip_v2.17.0_patch_listesi.md` ve bulgu raporu `/tmp/ragip_v2.18.0_yontem2b_bulgu.md`.
 

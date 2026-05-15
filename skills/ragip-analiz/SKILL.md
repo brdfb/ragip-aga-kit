@@ -284,6 +284,21 @@ bash scripts/ragip_madde_dogrula.sh <cikti_dosya_yolu>
 ```
 Exit 2 = uydurma sanigi → raporu duzelt. Detay: ragip-degerlendirme skill'inde aciklandi. Sozlesme analizi tipik olarak az madde referansi icerir; bu kontrol sadece hukuki argumana giriliyorsa kritiktir.
 
+**10. FORMAT DOGRULAMA (Tier 5, ADR-0019 — ZORUNLU deterministic precheck, rapor dosyaya yazildiktan SONRA):**
+
+```bash
+bash scripts/ragip_format_dogrula.sh <cikti_dosya_yolu>
+```
+
+Davranis:
+- Exit 0 → Tier 3 blok + Tier 4 notu mevcut, rapor format-temiz.
+- Exit 2 → en az 1 zorunlu sinyal eksik. Cikti listelenen eksik sinyalleri okuyun ve **raporu DUZELT**:
+  - TESPIT/Etki/POZISYON eksikse → KRITIK MADDELER, ELINDEKI KOZLAR, RISKLER bolumlerinde her bulguyu 3-satir blok formatina cevir.
+  - Anapara etiket eksikse → "Anapara" gectigi her yere `(nominal)` veya `(kalan)` etiketi ekle.
+  - Tutarlilik denetimi notu eksikse → rapor sonuna "Tutarlilik denetimi: temiz." veya "X celiski bulundu" notu dus.
+
+Bu adim **deterministik Tier 5 savunma** — Tier 1-4 prompt-engineering katmaninin saglayamadigi format disiplinini yakalar (ADR-0019).
+
 ## Çıktı Formatı
 
 ### 📋 DOSYA ÖZETİ

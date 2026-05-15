@@ -6,6 +6,67 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.19.0] - 2026-05-16
+
+### Tier 5 deterministic format enforcement (ADR-0019 revize)
+
+**Workspace prototyping → kit propagation.** 15 Mayis workspace'te audit H3 hipotezi (few-shot block confusion) **curutuldu** — agent system prompt'una Tier 3/4 spec'i v2.18.1 ile eklendi ama 4. Yontem 2B kosumunda **yine 0/13 esleme**. Prompt-engineering (Tier 1-4) yapisal sinira ulasti.
+
+Cozum: **Tier 5 deterministic regex post-write check.** LLM ciktisini script ile tarayip 5 zorunlu sinyali dogrular. Exit 2 = blok eksik → LLM raporu duzeltmek zorunda. Audit fallback secenegi (d) regenerate cycle'in basit hali.
+
+**5 zorunlu sinyal:**
+
+1. **[T3-1]** `TESPIT:` bullet (SONUC VE ONERILER icinde Tier 3 blok)
+2. **[T3-2]** `Etki:` satiri ($ tutar / % / yon ↑↓⇄ / horizon)
+3. **[T3-3]** `POZISYON:` 5-bilesen (fiil · Sahip · Zaman · Beklenen)
+4. **[T3-4]** Anapara etiketi `(nominal)` veya `(kalan)` — kelime gectiyse zorunlu
+5. **[T4]** `Tutarlilik denetimi:` kapanis notu (`temiz.` veya `X celiski bulundu`)
+
+### Added
+
+- `scripts/ragip_format_dogrula.py` (171 satir, regex-based detector) — 5 sinyal kontrol, Exit 0/1/2 kodlari, JSON ve text cikti
+- `scripts/ragip_format_dogrula.sh` (37 satir, venv-aware bash wrapper)
+- `tests/test_ragip_format_dogrula.py` (22 test: unit + CLI + bash + gercek cikti regression)
+
+### Changed — 3 LLM skill'inde Tier 5 Adim 11 eklendi
+
+- `skills/ragip-degerlendirme/SKILL.md` — Adim 11 FORMAT DOGRULAMA (Madde dogrula sonrasi, dosya yazildiktan sonra)
+- `skills/ragip-analiz/SKILL.md` — Adim 7c FORMAT DOGRULAMA
+- `skills/ragip-strateji/SKILL.md` — Adim 4b FORMAT DOGRULAMA
+
+Davranis: Skill rapor dosyasini yazdiktan sonra `bash scripts/ragip_format_dogrula.sh <cikti>` zorunlu calistirir. Exit 2 → eksik sinyalleri okuyup raporu duzeltir, tekrar dogrula. Exit 0 → temiz, devam.
+
+### ADR-0019 revize
+
+- **H3 (few-shot block confusion) curutuldu** — agent file `ragip-hukuk.md:182-211` v2.18.1 sonrasi Tier 3 spec icermesine ragmen 0 esleme. Block confusion ana sebep degildi.
+- **Tier 5 implementation log** eklendi — 5 sinyal kontrolu, prompt-engineering 0/13 → script-enforcement %100 (test edildi).
+- **Sonraki gelisim:** `scripts/ragip_blok_regenerate.py` (LLM self-correction loop) — maxTurns hard cut + Exit 2 sinyali iletisiminde gerekli olabilir.
+
+### Tests
+
+719 test gecti (697 onceki + 22 yeni `test_ragip_format_dogrula.py`).
+22 yeni test:
+- Unit (regex detector): TESPIT/Etki/POZISYON/Anapara/Tutarlilik kontrol
+- CLI: Exit kodlari, --json output, stdin input
+- Bash wrapper: venv detection, hata kodlari
+- Regression: 3 gercek cikti (Guven Pres v2.16.0, v2.17.0, v2.18.0) hepsi Exit 2 (Tier 5 eksik) — beklenen davranis
+
+### Davranissal test (manuel, workspace v2.19.0'da)
+
+3 senaryo (Guven Pres + Plastay + Demo stratejik) tekrar kosulmali. Bu sefer skill icinde Tier 5 dogrulamasi calisacak — LLM eksik bloklari gormeden raporu teslim edemez. Beklenti: yapisal eslesme 10+/13 (5 zorunlu sinyal + 3-5 niyet sinyali).
+
+### Sinirlar ve gelecek
+
+- **Tier 5 maxTurns'a duyarli:** Sub-agent rapor yazma + Exit 2 + duzeltme dongusu 3-4 turn yer. ragip-hukuk/arastirma maxTurns: 20 (v2.18.2) tampon saglar ama yetmezse `ragip_blok_regenerate.py` (LLM self-correction harici loop) gerekli olur.
+- **Sub-agent dispatch'te:** Sub-agent skill icinde Tier 5 cagrisi yapar. Orchestrator (ragip-aga) direkt yapmaz — sub-agent sorumluluk dagilimi korunur.
+- **B2 LLM-judge (FEATURE_IDEAS #19):** Tier 5'in meta-testi olarak hala backlog'da. Tier 5 deterministik ama "ruh"u olcmez (niyet sinyaller, etiket tutarliligi vb). B2 spirit + letter ikisi.
+
+### Memory
+
+`feedback_skill_agent_koordinasyon.md` update edilmeli (sonraki oturum) — H3 curutuldu, Tier 5 eklendi, prompt-engineering sinirina ulasildi yorumu.
+
+---
+
 ## [2.18.2] - 2026-05-15
 
 ### Sub-agent maxTurns hard-cut fix (spot-patch)
