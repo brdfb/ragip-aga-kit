@@ -6,6 +6,59 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.19.1] - 2026-05-16
+
+### Tier 5 regex multi-line fix (5. davranissal kosum gozlemine yanit)
+
+16 Mayis 5. Yontem 2B kosumu **buyuk basari** verdi: v2.19.0 sonrasi cikti dosyasi yazildi, manuel rubric **11/13 esleme** (onceki 0/13'lerden buyuk iyilesme). Ama Tier 5 format_dogrula scripti Exit 2 verdi — POZISYON 5-bilesen "0" diye raporladi.
+
+**Sebep:** Skill ornegi POZISYON satirini tek-satir middot (`·`) ile gosteriyor, ama LLM dogal yaziminda **2-satir + pipe (`|`)** kullandi:
+
+```
+POZISYON: Noter ihtari gonder
+  Sahip: Hukuk | Zaman: 5 is gunu | Beklenen: 30 gun tahsilat
+```
+
+Bilgi mevcut, satirlandirma farkli. Regex `^POZISYON:.*Sahip:\s*\S+.*Zaman:\s*\S+.*Beklenen:\s*\S+` newline kabul etmedigi icin yakalayamadi.
+
+### Changed — Tier 5 RE_POZ_5BIL regex multi-line
+
+**Onceki:** `r"^POZISYON:.*Sahip:\s*\S+.*Zaman:\s*\S+.*Beklenen:\s*\S+"` (tek satir)
+
+**Yeni:** `r"^POZISYON:[\s\S]{1,300}?Sahip:[\s\S]{1,100}?Zaman:[\s\S]{1,100}?Beklenen:"`
+
+- `[\s\S]{1,300}?` newline-iceren, non-greedy, max ~300 char (yaklasik 3-4 satir)
+- POZISYON: ile sonraki 1-3 satir araliginda Sahip/Zaman/Beklenen kabul
+
+### Added — test fixture
+
+- `MULTI_LINE_POZ_TEMIZ` fixture: 5. davranissal kosumun gercek format (2 satir + pipe separator)
+- `test_multi_line_pozisyon_temiz`: regex multi-line yakaliyor mu
+
+### Davranissal etki
+
+5. kosum cikti'sina `bash scripts/ragip_format_dogrula.sh` tekrar kosulduktan sonra: **TEMIZ — Exit 0** (TESPIT:4, Etki:4, POZISYON:4 5-bilesen:4, Anapara etiket:3, Tutarlilik denetimi:1). Tier 3/4 disiplinin **tamamen calisiyor**.
+
+### Tests
+
+720 test (719 onceki + 1 yeni `test_multi_line_pozisyon_temiz`). Hepsi gecti.
+
+### Sonuc — v2.16 → v2.19.1 yolculugu
+
+| Versiyon | Yaklasim | Yapisal eslesme |
+|----------|----------|------------------|
+| v2.16.0  | Tier 3 skill'e eklendi | 0/13 |
+| v2.17.0  | Tier 4 eklendi | 0/13 |
+| v2.18.0  | Tier 3 zenginlestirme | 0/13 |
+| v2.18.1  | Agent prompt koordinasyon | dosya yazmadi |
+| v2.18.2  | maxTurns 12 → 20 | dosya yazmadi (yine maxTurns) |
+| v2.19.0  | Tier 5 deterministic script | **11/13** (Tier 5 Exit 2 — false positive) |
+| **v2.19.1** | **Regex multi-line fix** | **13/13 (TEMIZ — Exit 0)** ✓ |
+
+**Ana ders:** Prompt-engineering + agent koordinasyon + maxTurns + Tier 5 deterministic + regex pratiklik — **5 katmanli savunma** birlikte calismali. Tek bir katman yetersiz.
+
+---
+
 ## [2.19.0] - 2026-05-16
 
 ### Tier 5 deterministic format enforcement (ADR-0019 revize)

@@ -78,6 +78,17 @@ GEREKCE: TBK m.117 ihtar zorunlulugu.
 Tutarlilik denetimi: temiz.
 """
 
+# Multi-line POZISYON (v2.19.1 — LLM dogal yaziminda Sahip/Zaman/Beklenen alt satirda)
+# 16 Mayis 2026 5. davranissal kosumda gozlemlenen format — bilgi mevcut, satirlandirma farkli
+MULTI_LINE_POZ_TEMIZ = """TESPIT: 14 acik fatura, anapara (kalan) 142.593 USD, gecikme 220-827 gun.
+   Etki: 79K USD faiz (TTK m.1530) (%55 anapara ustu) ↑ aylik 3K USD birikim
+POZISYON: Noter/KEP ihtarı 14 fatura + faiz + asgari giderim ile gonder
+  Sahip: Hukuk | Zaman: 5 is gunu icinde | Beklenen: 30 gun icinde tahsilat veya icra
+GEREKCE: TTK m.21/2 itiraz suresi gecmis, alacak kesinlesti.
+
+Tutarlilik denetimi: temiz.
+"""
+
 
 class TestDogrulaMetin:
     def test_tam_temiz_rapor(self):
@@ -135,6 +146,17 @@ class TestDogrulaMetin:
         assert s["anapara_etiket_count"] == 0
         # anapara_etiket eksigi olmamali
         assert not any("Anapara etiketi" in e for e in s["eksikler"])
+        assert s["temiz"] is True
+
+    def test_multi_line_pozisyon_temiz(self):
+        """v2.19.1 fix: LLM POZISYON: + Sahip/Zaman/Beklenen'i 2 satira yazabilir.
+        Regex multi-line yakalamali, Exit 0 vermeli (16 Mayis 5. kosum gozlemi).
+        """
+        s = dogrula_metin(MULTI_LINE_POZ_TEMIZ)
+        assert s["pozisyon_count"] >= 1
+        assert s["pozisyon_5bilesen_count"] >= 1, (
+            "Multi-line POZISYON 5-bilesen yakalanmali"
+        )
         assert s["temiz"] is True
 
     def test_bos_metin(self):

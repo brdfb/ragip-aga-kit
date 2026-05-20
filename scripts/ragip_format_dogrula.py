@@ -37,9 +37,13 @@ KIT_ROOT = Path(__file__).resolve().parents[1]
 RE_TESPIT = re.compile(r"^TESPIT:\s*\S+", re.MULTILINE)
 RE_ETKI = re.compile(r"^\s+Etki:\s*\S+", re.MULTILINE)
 RE_POZISYON = re.compile(r"^POZISYON:\s*\S+", re.MULTILINE)
-# POZISYON satirinda 5-bilesen (fiil + Sahip + Zaman + Beklenen). GEREKCE opsiyonel.
+# POZISYON 5-bilesen (fiil + Sahip + Zaman + Beklenen). GEREKCE opsiyonel.
+# Multi-line destegi (v2.19.1): LLM POZISYON: + Sahip/Zaman/Beklenen'i 2 ayri satira
+# yazabilir (16 Mayis 2026 5. davranissal kosum gozlemi). POZISYON: ile sonraki
+# 1-3 satir araliginda Sahip/Zaman/Beklenen ara. [\s\S]{1,300}? newline-iceren
+# non-greedy, max ~300 char (yaklasik 3-4 satir).
 RE_POZ_5BIL = re.compile(
-    r"^POZISYON:.*Sahip:\s*\S+.*Zaman:\s*\S+.*Beklenen:\s*\S+",
+    r"^POZISYON:[\s\S]{1,300}?Sahip:[\s\S]{1,100}?Zaman:[\s\S]{1,100}?Beklenen:",
     re.MULTILINE,
 )
 # Anapara etiketi — anapara/Anapara kelimesi gectikten sonra (nominal) veya (kalan)
