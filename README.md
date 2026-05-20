@@ -175,6 +175,7 @@ Testler 17 katmani kapsar:
 18. **Tier 4 dokuman tutarlilik kontrolu** — Cikti sonrasi self-check ([SAYI]/[ETIKET]/[MANTIK]/[SENARYO]), denetim notu zorunlu (ADR-0018), 3 LLM skill kapsam (analiz/strateji/degerlendirme)
 19. **Skill ↔ Agent koordinasyon disiplini** — Skill'e yeni cikti disiplin eklendiginde agent system prompt'unun da paralel guncellenmesi zorunlu (ADR-0019), v2.18.1 audit-driven fix
 20. **Tier 5 deterministic format enforcement** — `ragip_format_dogrula.sh` post-write regex check, 5 zorunlu sinyal (TESPIT/Etki/POZISYON 5-bilesen/Anapara etiket/Tutarlilik denetimi), Exit 2 = blok eksik (ADR-0019 revize, v2.19.0). Prompt-engineering (Tier 1-4) sinirina ulasilinca eklenen deterministik katman.
+21. **Tier 6 — LLM-judge Spirit olcumu** — `ragip_judge.sh` Sonnet 4.5 ile anlamsal kalite olcumu, 6 dimension rubric (TESPIT/ETKI/POZISYON/GEREKCE quality + ETIKET consistency + TUTARLILIK genuine), structured JSON output, cost guard (`--max-budget-usd 0.50` per call, `--max-cumulative-usd 5` haftalik) (ADR-0020, v2.20.0). Tier 5 HARFI, Tier 6 RUHU — komplemen.
 
 ## Bagimlilklar
 

@@ -65,12 +65,12 @@ class TestInstall:
         assert isinstance(manifest["files"], dict)
 
     def test_manifest_file_count(self, temp_repo):
-        """Manifest'te core dosyalar olmali (5 agent + 19 skill + 12 script + 2 config + 18 test = 56 → 57 with v2.19.0 Tier 5)"""
+        """Manifest'te core dosyalar olmali (5 agent + 19 skill + 15 script + 2 config + 21 test = 62 with v2.20.0)"""
         manifest = json.loads(
             (temp_repo / "config" / ".ragip_manifest.json").read_text()
         )
         count = len(manifest["files"])
-        assert count == 57, f"Beklenen 57 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
+        assert count == 62, f"Beklenen 62 dosya, bulunan {count}: {sorted(manifest['files'].keys())}"
 
     def test_manifest_checksums_valid(self, temp_repo):
         """Her checksum sha256: prefix ile başlamalı ve 64 hex karakter olmalı"""

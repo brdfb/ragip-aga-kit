@@ -167,7 +167,18 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 
 ---
 
-### 19b. B2 LLM-judge altyapisi (Tier 5 meta-test)
+### 19b. Tier 6 — LLM-judge Spirit olcumu (TAMAMLANDI v2.20.0)
+
+**v2.20.0 GUNCELLEMESI (20 Mayis 2026):** ADR-0020 ile `scripts/ragip_judge.py` eklendi. Sonnet 4.5 model, 6 dimension Boolean + reasoning JSON, cost guard ($0.50 per call / $5 haftalik), mock-only pytest (27 test). Tier 5 (regex HARF) + Tier 6 (LLM-judge RUH) komplemen.
+
+**Hala backlog:**
+- Paraphrase-pair stability test (JudgeSense arxiv 2604.23478)
+- Weekly cron integration (`scripts/ragip_cron.sh judge`)
+- Multi-model ensemble judge (Sonnet + Haiku ortak karar) — su an gerek yok
+
+---
+
+### 19c. Davranissal QA cadence (gelecek)
 
 **Sorun:** v2.15.0/v2.17.0/v2.18.0 — uc ardisik Tier 3 / Tier 4 prompt-level disiplin enjeksiyonu **modele davranis olarak yansimadi.** 14 Mayis 2026 Yontem 2B regresyonunda v2.16.0 / v2.17.0 / v2.18.0 ciktilarinin tumu 0/13 yapisal eslesme verdi (TESPIT/POZISYON/GEREKCE blok, Etki satiri, Sahip/Zaman/Beklenen, anapara nominal/kalan etiketi, Tutarlilik denetimi notu, VARSAYIM damgasi). Yapisal pytest yesil ama gercek davranis kotu. Patch listesi `/tmp/ragip_v2.17.0_patch_listesi.md` ve bulgu raporu `/tmp/ragip_v2.18.0_yontem2b_bulgu.md`.
 

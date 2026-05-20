@@ -37,6 +37,7 @@ python -m pytest tests/test_ragip_prd_disiplini.py -v   # Orchestrator PRD disip
 python -m pytest tests/test_ragip_tutarlilik.py -v     # Tier 4 dokuman tutarlilik kontrolu (ADR-0018)
 python -m pytest tests/test_ragip_yedek_temizle.py -v  # Yedek temizleme yardimcisi (v2.17.1)
 python -m pytest tests/test_ragip_format_dogrula.py -v # Tier 5 deterministic format enforcement (ADR-0019 revize, v2.19.0)
+python -m pytest tests/test_ragip_judge.py -v       # Tier 6 LLM-judge Spirit olcumu (ADR-0020, v2.20.0)
 
 # Tek test
 python -m pytest tests/test_ragip_finansal.py::TestVadeFarki::test_basit_hesap -v

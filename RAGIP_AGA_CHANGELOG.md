@@ -6,6 +6,73 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.20.0] - 2026-05-20
+
+### Tier 6 — LLM-judge Spirit (anlamsal kalite) olcumu (ADR-0020)
+
+v2.19.1 ile 5 katmanli savunma tamamlandi ve davranissal disiplin "harfi" calisti (TEMIZ — Exit 0). Bu surum **ruh** olcumunu ekler.
+
+**Felsefe:**
+- Tier 5 (`format_dogrula.py`) = HARF (regex pattern eslesme)
+- Tier 6 (`ragip_judge.py`) = RUH (anlamsal kalite)
+- **Komplemen, redundant degil.**
+
+### Added
+
+- `scripts/ragip_judge.py` (~370 satir) — LLM-judge Spirit olcumu. Sonnet 4.5 model, 6 dimension Boolean + reasoning JSON, structured output, cost guard
+- `scripts/ragip_judge.sh` (~40 satir) — venv-aware bash wrapper, .env'den ANTHROPIC_API_KEY otomatik yukler
+- `tests/test_ragip_judge.py` (~280 satir, 27 test) — mock-only, gercek API gerekmez
+
+### 6 Rubric Dimension (anlamsal)
+
+| Dim | Sorgu | Yapisal yakalar mi |
+|-----|-------|--------------------|
+| T3-1 TESPIT_quality | Insight cumlesi mi yoksa sayi tekrari mi? | Hayir |
+| T3-2 ETKI_quality | Tutar/yon/horizon mantikli mi? | Hayir |
+| T3-3 POZISYON_quality | Aksiyon spesifik, sahip net mi? | Hayir |
+| T3-4 GEREKCE_quality | Mevzuat referansi gercek mi, generic degil mi? | Hayir |
+| T3-5 ETIKET_consistency | Anapara etiketleri celiskisiz mi? | Kismi |
+| T4 TUTARLILIK_genuine | Denetim notu gercek mi, rubber-stamp mi? | Hayir |
+
+JSON output: `{T3_1_TESPIT_quality: {pass, reasoning}, ..., overall, spirit_score, notes}`.
+
+### Cost guard
+
+- **Pre-check:** tahmini token × fiyat, tek-cagri limitini asarsa abort
+- **Post-check:** gercek usage'dan cumulative state guncelle
+- **Default:** `--max-budget-usd 0.50` (tek cagri), `--max-cumulative-usd 5.0` (haftalik)
+- **State file:** `data/.judge_usage.json` (gitignored, kit ve workspace ayri)
+- **Anthropic prompt caching destegi:** cache_control ephemeral, cache hit %90 indirim ($0.30/1M token)
+
+Tipik judge cagrisi: ~$0.016 (3K input + 500 output). Cache hit ile ~$0.011. Haftalik $5 limit ~300 cagri kapasitesi.
+
+### Mimari kararlar (ADR-0020 detayli)
+
+- **Sonnet 4.5 default:** kit `call_llm()` ile uyumlu, judge != generator (Haiku self-enhancement bias)
+- **Minimal dict + manual validation:** Pydantic yeni bagimlilik gereksiz (kit requirements minimal 5 paket)
+- **Mock-only pytest:** gercek API gerekmez, hizli + ucretsiz + deterministic
+- **Manuel cadence:** haftalik (~10 cikti), CI auto degil
+
+### Changed
+
+- `tests/test_ragip_install.py:73` — manifest dosya sayisi 57 → 59 (judge.py + judge.sh + test eklenmesi nedeniyle)
+- `README.md` madde 21 — Tier 6 LLM-judge referansi
+- `CLAUDE.md` test listesi — `test_ragip_judge.py` eklendi
+- `docs/FEATURE_IDEAS.md` #19b — Tier 6 (B2 LLM-judge) tamamlandi notu
+
+### Sinirlamalar ve gelecek
+
+- **Judge prompt sensitivity** (JudgeSense arxiv 2604.23478) — paraphrase-pair stability test gelecek calisma
+- **Tahmini token guard** (1 token ~= 4 char) kaba, ama pre-check icin yeterli
+- **Manuel cadence** — otomatik tetik gelecek (`scripts/ragip_cron.sh judge` haftalik)
+- **Integration test** — `ANTHROPIC_API_KEY` env'de varsa manuel calistir (pytest'te degil)
+
+### Tests
+
+746 test (719 + 27 yeni `test_ragip_judge.py`). Mock-only, hepsi gecti, gercek API gerekmez.
+
+---
+
 ## [2.19.1] - 2026-05-16
 
 ### Tier 5 regex multi-line fix (5. davranissal kosum gozlemine yanit)
