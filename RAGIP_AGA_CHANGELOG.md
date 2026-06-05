@@ -6,6 +6,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.20.1] - 2026-05-21
+
+### Docs cleanup — yanlis yerdeki dokumanlar tasındı/silindi
+
+Memory'deki `project_doc_cleanup.md` planinin Faz A'si. Kit'te uzun suredir bekleyen 2 dokuman temizligi.
+
+### Changed
+
+- `docs/MCP_ENTEGRASYON_REHBERI.md` → **workspace/docs/** tasındı. Workspace MCP'leri burada calıstırır; kullanim rehberi kit'te degil orada olmali. Workspace tarafindaki commit: `d31d654`.
+
+### Removed
+
+- `docs/PROJE_GENEL_BAKIS.md` silindi. README + CHANGELOG ile buyuk olcude duplicate, v2.11.0'da donmus, yanıltıcı eski sayılar iceriyordu (533 test → su an 746, 15 skill → 19). Belge zaten kendi notunda "README.md'ye bakın" diyordu.
+- `README.md`'den ilgili tanıtım link satırı cıkarıldı.
+- Icerik git history'de korunuyor; gerekirse geri alınabilir.
+
+### Notlar
+
+- `docs/adr/0004-kit-mcp-ayrimi.md` MCP_ENTEGRASYON_REHBERI'ne referans veriyor — **dokunulmadi** (tarihli karar, gecmis referansı).
+- `docs/ECOSYSTEM_MAP.md` kit'te kalır. Karar gerekcesi: dev-internal repo haritası, knowledge-source'un formal RAG standardına (YAML frontmatter, RAG-ID, anchor) uymaz; gibibyte-coordinator'a yazma yasagi var; kit'in baslangıc dokumanı.
+- Faz B (`GIBIBYTE_DIJITAL_MIMARI`, `REKABET_ISTIHBARATI`, `URUN_YOL_HARITASI` → knowledge-source) **ayrı oturumlara** bırakıldı. Her biri formal RAG donusumu (frontmatter + RAG-ID + anchor + feature branch + rag-validate + PR + CI gate) gerektirir; bu kapsamı atomik bir docs-only patch'e sıgmaz.
+
+---
+
 ## [2.20.0] - 2026-05-20
 
 ### Tier 6 — LLM-judge Spirit (anlamsal kalite) olcumu (ADR-0020)

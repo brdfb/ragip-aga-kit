@@ -4,8 +4,6 @@ Claude Code icin nakit akisi yonetimi, vade muzakeresi ve sozlesme uyusmazliklar
 
 40 yillik piyasa tecrubesiyle: vade farki hesaplama, TCMB canli oranlar, sozlesme analizi, 3 senaryolu strateji, ihtar taslagi, firma/gorev takibi.
 
-> Proje tanitimi, deger onerisi ve mimari ozet: [docs/PROJE_GENEL_BAKIS.md](docs/PROJE_GENEL_BAKIS.md)
-
 ## Hizli Kurulum
 
 ```bash
@@ -47,7 +45,7 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 | Script | 10 | `scripts/ragip_*.py` + `ragip_get_rates.sh` + `ragip_temizle.sh` + `ragip_cron.sh` + `ragip_madde_dogrula.sh` |
 | Config | 2 | `config/ragip_aga.yaml` + `config/kanun_maddeleri.json` |
 | Manifest | 1 | `config/.ragip_manifest.json` |
-| Test | 17 | `tests/test_ragip_*.py` |
+| Test | 21 | `tests/test_ragip_*.py` |
 
 ## Kullanim
 
@@ -131,7 +129,7 @@ ragip-aga (orchestrator, sonnet)
 ## Test
 
 ```bash
-# Tam suite (697 test)
+# Tam suite (747 test)
 python -m pytest tests/ -v
 
 # Dosya bazli
