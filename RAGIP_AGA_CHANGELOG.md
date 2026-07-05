@@ -6,6 +6,28 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.20.2] - 2026-07-05
+
+### Docs cleanup Faz B — 3 sirket dokumanı knowledge-source + continuity-hub'a tasındı
+
+Memory'deki `project_doc_cleanup.md` planının **Faz B** kısmı tamamlandı. Kit'te "gibibyte" konulu 3 doküman doğru repolara taşındı, kit-side kaynak dosyalar silindi.
+
+### Removed
+
+- `docs/GIBIBYTE_DIJITAL_MIMARI.md` → **gibibyte-continuity-hub/docs/**. Doküman website + lead capture implementasyon mimarisi (Brevo/Vercel/D365 pipeline, deploy workflow, blog envanteri) — kit'te değil continuity-hub'da ait. Formal RAG donusumu gerekmedi (docs klasoru build/deploy'a girmez). PR#1 MERGED (`6030b2b6`).
+- `docs/REKABET_ISTIHBARATI.md` → **gibibyte-knowledge-source/core_docs/rag/knowledge/KB_COMPETITIVE_INTELLIGENCE.md**. Formal RAG donusumu: YAML frontmatter + 9 major section, her biri RAG-ID + explicit anchor. tool2 + rag-validate full suite PASSED.
+- `docs/URUN_YOL_HARITASI.md` → **gibibyte-knowledge-source/core_docs/rag/knowledge/KB_PRODUCT_ROADMAP.md**. Formal RAG donusumu: 7 major section. gb_business_plan.md §1.3+§1.4 ile tamamlayıcı (business_plan resmi/versiyonlu, roadmap operasyonel/çeyreklik). tool2 + rag-validate full suite PASSED.
+
+Knowledge-source PR#15 MERGED (2 KB dokumanı + inventory.json guncel, 65→67 doc).
+
+### Notlar
+
+- Kit-side 3 kaynak dokumanın icerigi git history'de korunuyor (v2.20.1'e checkout ile geri alinabilir).
+- Faz B planı `project_doc_cleanup.md` memory'sinde bitmis olarak isaretlendi.
+- Kit'te docs/ altinda su an sadece 3 dokuman kaldı: `ECOSYSTEM_MAP.md` (dev-internal repo haritası, kit'te kalır), `FEATURE_IDEAS.md` (kit-relevant backlog), ve `adr/` klasoru (mimari kararlar).
+
+---
+
 ## [2.20.1] - 2026-05-21
 
 ### Docs cleanup — yanlis yerdeki dokumanlar tasındı/silindi
