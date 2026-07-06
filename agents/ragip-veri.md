@@ -32,7 +32,6 @@ skills:
   - ragip-import
   - ragip-ozet
   - ragip-profil
-  - ragip-esles
 disallowedTools:
   - WebSearch
   - WebFetch

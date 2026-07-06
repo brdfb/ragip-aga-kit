@@ -6,6 +6,42 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.20.3] - 2026-07-06
+
+### Docs cleanup Faz C — 4 Gibibyte-spesifik skill kit'ten kaldırıldı (ADR-0004 uygulaması, ADR-0021)
+
+v2.20.2 sonrası kit özet kontrolünde "emin misin?" sorusu 4 Nisan 2026 commit `a968919`'un ADR-0004 kural ihlali içerdiğini ortaya çıkardı. **Faz C** bu ihlali düzeltir.
+
+### Removed
+
+- `skills/ragip-teklif/` (Ingram maliyet + MCI teşvik + mevduat float + 3 senaryolu fiyat modeli — Gibibyte satış ekibi)
+- `skills/ragip-maliyet/` (Ingram YA vs YM, NCE prim hesabı — Gibibyte satış)
+- `skills/ragip-yenileme/` (Lisans yenileme kit list değişim, SKU fark analizi — Gibibyte satış)
+- `skills/ragip-esles/` (Satış-alış fatura çapraz doğrulama, kaçak kontrolü — Gibibyte iç kontrol)
+
+Bilgi kaybı yok — bu 4 skill workspace'te identik olarak zaten var (diff -qr temiz). Kit-workspace kopyaları `install.sh` üzerinden her seferinde workspace'in üzerine yazılıyordu (silent duplicate/override).
+
+### Changed
+
+- `agents/ragip-hesap.md` frontmatter: `skills:` listesinden 3 satır çıkarıldı (`teklif`, `maliyet`, `yenileme`)
+- `agents/ragip-veri.md` frontmatter: `skills:` listesinden 1 satır çıkarıldı (`esles`)
+- `tests/test_ragip_subagents.py`: 3 skill dağılım set'i güncel (global expected + hesap + veri)
+- `README.md`: skill listesi (68-72), mimari tablo (95-114) ve rakam tablosu (44) güncel (19 → 15)
+- `install.sh`: hardcoded `Skills: 19` → `Skills: 15`
+- `docs/FEATURE_IDEAS.md`: `ragip-teklif Adim 3.5` referansına "**workspace-side skill (ADR-0021)**" notu
+
+### Added
+
+- `docs/adr/0021-gibibyte-spesifik-skiller-workspace.md` — Kural takviyesi: skill Gibibyte-spesifik terim/marka/program içeriyorsa workspace'e ait. "Başka bir MSP hedef repo'ya install edilse işe yarar mı?" sınav testi.
+
+### Notlar
+
+- Bu 3 aylık "unutulmuş kısa yol" (4 Nisan 2026 Zeren UAT acil ihtiyacı) v2.20.x doc cleanup silsilesi (Faz A-B-C) sırasında ortaya çıktı — cleanup silsilesinin dolaylı faydası.
+- Workspace tarafında dokunulmadı (workspace commit gerekmez — dosyalar zaten orada, olduğu yerde kalıyor).
+- Kit'te docs/adr/ 20 → 21, skills/ 19 → 15.
+
+---
+
 ## [2.20.2] - 2026-07-05
 
 ### Docs cleanup Faz B — 3 sirket dokumanı knowledge-source + continuity-hub'a tasındı

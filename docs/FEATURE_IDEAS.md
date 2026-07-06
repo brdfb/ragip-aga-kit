@@ -69,7 +69,7 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 
 **Bagli konular:**
 - piyasa_verileri.json'daki rekabet_maliyet_tahminleri (statik rakip tip bilgisi — tier 1)
-- ragip-teklif Adim 3.5 (rakip maliyet tahmini — tier 2, hesaplama)
+- ragip-teklif Adim 3.5 (rakip maliyet tahmini — tier 2, hesaplama) — **workspace-side skill (ADR-0021)**
 - ragip-dis-veri (WebSearch ile rakip arastirma — tier 3, canli)
 - D365 Competitor entity + Opportunity (hedef — tier 4, CRM entegrasyonu)
 

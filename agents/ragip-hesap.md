@@ -30,9 +30,6 @@ skills:
   - ragip-vade-farki
   - ragip-arbitraj
   - ragip-rapor
-  - ragip-teklif
-  - ragip-maliyet
-  - ragip-yenileme
 disallowedTools:
   - WebSearch
   - WebFetch

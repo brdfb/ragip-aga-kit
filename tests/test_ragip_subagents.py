@@ -112,10 +112,6 @@ EXPECTED_ALL_SKILLS = {
     "ragip-degerlendirme",
     "ragip-zamanasimi",
     "ragip-delil",
-    "ragip-teklif",
-    "ragip-maliyet",
-    "ragip-esles",
-    "ragip-yenileme",
 }
 
 
@@ -198,8 +194,7 @@ class TestSubAgentHesap:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        expected = {"ragip-vade-farki", "ragip-arbitraj", "ragip-rapor",
-                    "ragip-teklif", "ragip-maliyet", "ragip-yenileme"}
+        expected = {"ragip-vade-farki", "ragip-arbitraj", "ragip-rapor"}
         assert set(self.fm["skills"]) == expected
 
     def test_max_turns_kisa(self):
@@ -319,7 +314,7 @@ class TestSubAgentVeri:
         assert self.fm["model"] == "haiku"
 
     def test_skills(self):
-        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet", "ragip-profil", "ragip-esles"}
+        expected = {"ragip-firma", "ragip-gorev", "ragip-import", "ragip-ozet", "ragip-profil"}
         assert set(self.fm["skills"]) == expected
 
     def test_max_turns_kisa(self):
@@ -384,9 +379,9 @@ class TestSkillDagilimi:
         assert orch["skills"] == [], "Orchestrator'de skill olmamali"
 
     def test_toplam_skill_sayisi(self):
-        """Tam 19 skill olmali"""
+        """Tam 15 skill olmali (v2.20.3 sonrasi: Gibibyte-spesifik 4 skill workspace'e alindi, ADR-0021)"""
         total = sum(len(a["skills"]) for a in self.all_subagents)
-        assert total == 19, f"Beklenen 19 skill, bulunan {total}"
+        assert total == 15, f"Beklenen 15 skill, bulunan {total}"
 
 
 # --- Test: Skill disable-model-invocation tutarliligi ---
