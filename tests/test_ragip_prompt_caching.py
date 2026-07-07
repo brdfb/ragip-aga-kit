@@ -12,7 +12,7 @@ from ragip_aga import _build_messages  # noqa: E402
 
 class TestBuildMessagesAnthropic:
     def test_anthropic_provider_prefix(self):
-        m = _build_messages("anthropic/claude-sonnet-4-5-20250929", "SYS", "USR")
+        m = _build_messages("anthropic/claude-sonnet-5", "SYS", "USR")
         assert len(m) == 2
         assert m[0]["role"] == "system"
         assert isinstance(m[0]["content"], list)
@@ -26,7 +26,7 @@ class TestBuildMessagesAnthropic:
         assert m[0]["content"][0]["cache_control"] == {"type": "ephemeral"}
 
     def test_claude_sonnet_no_provider_prefix(self):
-        m = _build_messages("claude-sonnet-4-5", "Long sys prompt", "Short user")
+        m = _build_messages("claude-sonnet-5", "Long sys prompt", "Short user")
         assert m[0]["content"][0]["text"] == "Long sys prompt"
         assert m[0]["content"][0]["cache_control"]["type"] == "ephemeral"
 
@@ -50,17 +50,17 @@ class TestBuildMessagesNonAnthropic:
 
 class TestBuildMessagesContent:
     def test_user_prompt_unchanged(self):
-        m = _build_messages("anthropic/claude-sonnet-4-5", "SYS", "User question here")
+        m = _build_messages("anthropic/claude-sonnet-5", "SYS", "User question here")
         assert m[1]["content"] == "User question here"
         assert m[1]["role"] == "user"
 
     def test_multiline_system_prompt(self):
         sys_prompt = "Line 1\nLine 2\nLine 3"
-        m = _build_messages("anthropic/claude-sonnet-4-5", sys_prompt, "U")
+        m = _build_messages("anthropic/claude-sonnet-5", sys_prompt, "U")
         assert m[0]["content"][0]["text"] == sys_prompt
 
     def test_empty_system_prompt(self):
-        m = _build_messages("anthropic/claude-sonnet-4-5", "", "USR")
+        m = _build_messages("anthropic/claude-sonnet-5", "", "USR")
         # Bos system prompt'ta da cache_control eklenir — Anthropic cache min token siniri var,
         # ama format dogru olmali. Format hosting; min token Anthropic tarafinda kontrol edilir.
         assert m[0]["content"][0]["text"] == ""

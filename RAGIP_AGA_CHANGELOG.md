@@ -6,6 +6,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.21.0] - 2026-07-07
+
+### Sonnet 4.5 → Sonnet 5 model güncellemesi (ADR-0022)
+
+7 Temmuz 2026 sağlık kontrolunde hardcoded model referanslarının **10 aylık eski** olduğu tespit edildi (`anthropic/claude-sonnet-4-5-20250929`, Eylül 2025). Mevcut Claude 5 family (Sonnet 5, Opus 4.8, Haiku 4.5) için orchestrator + Tier 6 judge model'i güncellenir.
+
+### Changed
+
+- `config/ragip_aga.yaml` — orchestrator `model: "anthropic/claude-sonnet-4-5-20250929"` → `"anthropic/claude-sonnet-5"`
+- `scripts/ragip_judge.py` — Tier 6 judge `DEFAULT_MODEL` → `"anthropic/claude-sonnet-5"`
+- `tests/test_ragip_prompt_caching.py` — 5 test satirinda model string güncel (prefix mantigi test edildiği için davranissal etki yok, sadece tutarlı sürüm kaydı)
+- VERSION 2.20.3 → 2.21.0 (minor bump — kullanıcı görünür davranış değişikliği)
+
+### Notlar
+
+- **Agent frontmatter kısayolları (`model: sonnet`, `model: haiku`) korundu** — Claude Code otomatik en güncel sürüme resolv ediyor, hardcoded ID gerekmiyor.
+- **Fiyat sabitleri (`SONNET_*_USD_PER_MTOK`) dokunulmadı** — Sonnet 5 pricing Anthropic sayfasından teyit edilmediği için muhafazakâr tahmin olarak bırakıldı. Doğrulanınca ayrı patch ile güncellenecek. Cost guard bu nedenle fazla-tutucu tarafta ($0.50 tek/$5 haftalık limit korundu).
+- **Tier 6 judge davranissal etkisi ilk kez gerçek modelle** ölçülebilir hale gelir (workspace tarafında API key + litellm sonrası).
+
+### Added
+
+- `docs/adr/0022-model-guncelleme-sonnet-5.md` — Karar gerekçesi ve alternatifler (Opus 4.8 reddedildi, tarihli ID vs alias tercihi).
+
+---
+
 ## [2.20.3] - 2026-07-06
 
 ### Docs cleanup Faz C — 4 Gibibyte-spesifik skill kit'ten kaldırıldı (ADR-0004 uygulaması, ADR-0021)

@@ -51,7 +51,7 @@ SONNET_OUTPUT_USD_PER_MTOK = 15.0  # $/1M output tokens
 # Cache hit (Anthropic prompt caching): %90 indirim
 SONNET_CACHE_HIT_USD_PER_MTOK = 0.30
 
-DEFAULT_MODEL = "anthropic/claude-sonnet-4-5-20250929"
+DEFAULT_MODEL = "anthropic/claude-sonnet-5"
 DEFAULT_MAX_BUDGET_USD = 0.50      # Tek cagri max
 DEFAULT_MAX_CUMULATIVE_USD = 5.0   # Haftalik max
 USAGE_FILE = KIT_ROOT / "data" / ".judge_usage.json"
