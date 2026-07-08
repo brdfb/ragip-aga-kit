@@ -6,6 +6,30 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.22.1] - 2026-07-09
+
+### Musteri onboarding altyapisi (kurulum sonrasi bosluk kapatildi)
+
+v2.22.0 audit'i sonrasi tespit edildi: bir musteri `install.sh` calistirdiktan sonra ne yapacagini soyleyen belge yoktu. `.env.example` minimaldi (aciklama yok, nereden alinir bilgisi yok), `install.sh` sonu `.env` yonergesi vermiyordu, README kurulum bolumu `git clone → install.sh` ile bitiyordu. Kit "kurulur ama baslamaz" durumdaydi. Bu surum onboarding'i kapatir.
+
+### Added
+
+- `KURULUM_REHBERI.md` — Sifirdan calisir hale getirme rehberi (KOBI perspektifi, teknik minimum). 6 adim: Anthropic API key alma (workspace + budget limit), TCMB EVDS3 kayit, kit indirme, `.env` doldurma, ilk kullanim (`/ragip-profil kaydet` → `/ragip-firma ekle` → `/ragip-vade-farki`), cron kurulumu. Sorun giderme bolumu. Ayrica "musteri kit'i satin alirsa nasil kurar" self-hosted mimari aciklamasi.
+
+### Changed
+
+- `.env.example` — 14 satirdan 45 satira genisletildi. Her key icin: ne icin gerekli, nasil alinir (link + adim), zorunlu mu opsiyonel mi, alinamayinca ne olur. Anthropic icin workspace + budget limit onerisi vurgulandi.
+- `install.sh` — Kurulum sonunda `.env` yok ise **acik yonerge**: `cp .env.example .env` + iki key adi (ANTHROPIC + TCMB) + KURULUM_REHBERI link. `.env` varsa "kurulum tamam" mesaji.
+- `README.md` — "Hizli Kurulum" bolumunun altina `KURULUM_REHBERI.md` linki: "**Kurulum sonrasi:** ..."
+
+### Notlar
+
+- Runtime davranisi degismedi — sadece kurulum sonrasi yonlendirme + belgeler.
+- 746 pytest gecti + 1 skipped (regresyon yok).
+- Bu surum "self-hosted A modeli" (musteri kendi Anthropic + TCMB key'lerini alir, faturalar musteriye) icin gerekli minimum onboarding'i saglar. Kalan A-modeli borclari: fresh-install e2e test (henuz musteri gibi denenmedi), TCMB_API_KEY manuel test, Sonnet 5 gercek cagri.
+
+---
+
 ## [2.22.0] - 2026-07-08
 
 ### Audit-driven sunum + compliance genişlemesi

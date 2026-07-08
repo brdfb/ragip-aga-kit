@@ -20,6 +20,8 @@ bash /tmp/ragip-aga-kit/install.sh
 python -m pytest tests/test_ragip_subagents.py -v
 ```
 
+**Kurulum sonrasi:** [KURULUM_REHBERI.md](KURULUM_REHBERI.md) — API key alma, `.env` doldurma, ilk kullanim (KOBI perspektifi).
+
 ## Guncelleme
 
 Mevcut kurulumu guncellemek icin:

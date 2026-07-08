@@ -267,3 +267,18 @@ if [ -n "$MISSING_DEPS" ]; then
     echo "  pip install$MISSING_DEPS"
     echo ""
 fi
+
+# --- .env kontrolu ve yonlendirme ---
+if [ ! -f "$HEDEF/.env" ]; then
+    echo ""
+    warn "SIRADAKI ADIM: .env dosyasi olusturulmali."
+    echo "  1. cp \"$SCRIPT_DIR/.env.example\" \"$HEDEF/.env\""
+    echo "  2. \"$HEDEF/.env\" dosyasini ac ve API key'lerini doldur:"
+    echo "     - ANTHROPIC_API_KEY (zorunlu — Sonnet 5 cagirir)"
+    echo "     - TCMB_API_KEY (canli oranlar — yoksa fallback)"
+    echo "  3. Detay: $SCRIPT_DIR/KURULUM_REHBERI.md"
+    echo ""
+    info "Kit hazir ama .env olmadan model cagrilari calismaz."
+else
+    info ".env dosyasi mevcut. Kurulum tamam."
+fi
