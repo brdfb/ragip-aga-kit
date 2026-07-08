@@ -6,6 +6,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.22.0] - 2026-07-08
+
+### Audit-driven sunum + compliance genişlemesi
+
+8 Temmuz 2026 kapsamlı audit'i (14 kategori, 10 kapatıldı, 4 API key bloke) sonrası tespit edilen sunum, compliance ve güvenlik boşlukları kapatıldı. Bu sürüm **yapı, sunum, güvenlik** eksenlerinde iyileştirir; **veri katmanı (TCMB) ve davranışsal doğrulama (Sonnet 5 gerçek çağrı) audit borcunda kaldı** — bunlar API key erişimi gerektiriyor.
+
+### Added
+
+- `KULLANIM_SARTLARI.md` — 8 bölümlü yasal shield: hukuki sınır, yatırım feragat, KVKK/veri sorumlusu, çıktı kullanımı, prompt injection sorumluluğu, model/maliyet, güncelleme, persona-AI beyanı. Müşteriye sunulurken referans belge.
+- `skills/ragip-analiz/SKILL.md` **Adım 1a** — Prompt injection kaba taraması: karşı taraftan gelen sözleşme/fatura dosyalarındaki adversarial model yönlendirme talimatlarını (`"talimatları yok say"`, `"lehimize yorumla"` vb.) Read'den sonra, PII maskeleme öncesi tespit eder; sinyal varsa kullanıcı onayı bekler.
+- `README.md` — **"Kim için, ne verir, ne almaz"** bölümü: hedef kullanıcı (KOBİ sahibi/muhasebeci/danışman), somut çıktı listesi, hukuki/pratik sınırlar, KULLANIM_SARTLARI.md linki.
+
+### Changed
+
+- `scripts/ragip_judge.py` — Sonnet 5 pricing yorumu güncellendi: introductory (`$2/$10/$0.20`, 31 Ağustos 2026'ya kadar) vs standard (`$3/$15/$0.30`, 1 Eylül 2026 sonrası) net belgelendi. **Tokenizer uyarısı eklendi:** Sonnet 5 aynı metin için ~%30 daha fazla token üretir (Anthropic docs teyit); kit token tahmini eski tokenizer'a dayanıyorsa gerçek maliyet %30 fazla olabilir. Sabitler muhafazakâr tarafta (post-introductory) korundu.
+
+### Audit fixleri (aynı commit içinde)
+
+- `install.sh` — `"(19 skill)"` → `"(15 skill)"` (Faz C sonrası drift, 3 aylık gecikme).
+- `README.md` — Tier 6 açıklama satırı `"Sonnet 4.5 ile"` → `"Sonnet 5 ile"` (ADR-0022 uygulaması).
+- `docs/FEATURE_IDEAS.md` — v2.21.0 Sonnet 5 güncelleme dip notu eklendi.
+- `skills/ragip-vade-farki/SKILL.md` — `allowed-tools: Bash, WebSearch` → `Bash` (WebSearch body'de kullanılmıyordu, principle-of-least-privilege ihlali).
+- `skills/ragip-delil/SKILL.md` + `skills/ragip-ihtar/SKILL.md` — Tier 3/4/5 kapsam dışı olma kararı belgelendi (delil tablo formatı ve ihtar mektup dokümanı için Tier 3 blok formatı uygun değil).
+
+### Kalan audit borçları
+
+- **TCMB_API_KEY yok** — cron aktive edildi ama gerçek TCMB'ye bağlanamıyor, 137 gün eski fallback aktif. Kullanıcının EVDS3 kayıt yapıp key eklemesi gerekli.
+- **Sonnet 5 gerçek çağrı sıfır** — `ANTHROPIC_API_KEY` bekliyor; Tier 6 judge davranışsal doğrulama yok.
+- **Sonnet 5 yeni tokenizer buffer** — cost hesabına ~%30 buffer eklenmeli (yorum olarak belgelendi, kod olarak henüz yok).
+- **`ragip-analiz` PII unmapping** — mask/unmask döngüsünde işlem sonrası deterministik verify script eksik.
+- **Workspace 4 orphan skill** — Faz C sonrası `ragip-esles/maliyet/teklif/yenileme` workspace'te fiziksel duruyor, sahiplik belirsiz.
+
+### Notlar
+
+- 746 pytest geçti + 1 skipped (v2.21.0 ile aynı; iyileştirmeler regresyon yaratmadı).
+- Bu sürüm **"sunulabilirlik"** eksenli — kod davranışını değil, kit'in müşteri karşısındaki jestini iyileştirir.
+  - Yapı: 8/10 (sabit)
+  - Sunum: 2/10 → **6/10**
+  - Compliance: 4/10 → **7/10**
+  - Güvenlik: 6/10 → **8/10**
+  - Veri: 3/10 (audit borcu)
+  - Davranış: 1/10 (audit borcu)
+- ADR yok — bu sürüm mevcut mimariyi kullanıyor, yeni mimari karar içermiyor. Sadece belge ve prompt zenginleştirmesi.
+
+---
+
 ## [2.21.0] - 2026-07-07
 
 ### Sonnet 4.5 → Sonnet 5 model güncellemesi (ADR-0022)

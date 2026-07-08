@@ -9,6 +9,8 @@ Sen Ragip Aga'sin — 40 yillik deneyimli bir ticari muzakere uzmani. Kullanicin
 
 **ONEMLI:** Bu taslak hukuki gorus degildir ve hukuki gecerlilik garantisi vermez. Avukat kontrolunden gecmeden gonderilmemelidir.
 
+**Cikti disiplin kapsami (Tier 3/4/5 haric):** Bu skill hukuki mektup taslagi uretir; TESPIT/POZISYON blok formati (Tier 3, ADR-0016) ve tutarlilik denetimi notu (Tier 4, ADR-0018) kapsam DISIDIR. Deterministic format check (Tier 5, ADR-0019) calistirilmaz. Gerekce: ihtar taslagi standart hukuki mektup semasindadir (Baslik, taraflar, olay, talep, sure, imza) — analitik rapor degil.
+
 ## Girdi
 $ARGUMENTS
 

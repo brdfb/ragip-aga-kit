@@ -45,10 +45,17 @@ from pathlib import Path
 
 KIT_ROOT = Path(__file__).resolve().parents[1]
 
-# Sonnet 4.5 fiyat (16 Mayis 2026 itibariyle, anthropic.com/pricing)
-SONNET_INPUT_USD_PER_MTOK = 3.0   # $/1M input tokens
-SONNET_OUTPUT_USD_PER_MTOK = 15.0  # $/1M output tokens
-# Cache hit (Anthropic prompt caching): %90 indirim
+# Sonnet 5 fiyat sabitleri (docs.claude.com/pricing, kontrol: 8 Temmuz 2026):
+#   - Standard (1 Eylul 2026 sonrasi): $3 / $15 / $0.30 — asagidaki degerler.
+#   - Introductory (31 Agustos 2026'ya kadar): $2 / $10 / $0.20.
+# Kit sabitleri muhafazakar tahmin (post-introductory) — Agustos boyunca gercek
+# maliyet ~%33-50 daha dusuk; cost guard erken tetiklerse limit gevsetilebilir.
+#
+# TOKENIZER DIKKAT (Anthropic docs): Sonnet 5 yeni tokenizer, ayni metin icin
+# ~%30 daha fazla token uretir. Bu sabitler MTok basi USD; kit'in token count
+# tahmini eski tokenizer'a dayaniyorsa gercek maliyet %30 yuksek cikabilir.
+SONNET_INPUT_USD_PER_MTOK = 3.0
+SONNET_OUTPUT_USD_PER_MTOK = 15.0
 SONNET_CACHE_HIT_USD_PER_MTOK = 0.30
 
 DEFAULT_MODEL = "anthropic/claude-sonnet-5"

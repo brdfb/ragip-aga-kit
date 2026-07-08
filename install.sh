@@ -67,7 +67,7 @@ mkdir -p "$HEDEF/.claude/agents"
 cp "$SCRIPT_DIR"/agents/ragip-*.md "$HEDEF/.claude/agents/"
 
 # 2. Skills
-info "Skill dosyalari kopyalaniyor (19 skill)..."
+info "Skill dosyalari kopyalaniyor (15 skill)..."
 for skill_dir in "$SCRIPT_DIR"/skills/ragip-*/; do
     skill_name=$(basename "$skill_dir")
     mkdir -p "$HEDEF/.claude/skills/$skill_name"

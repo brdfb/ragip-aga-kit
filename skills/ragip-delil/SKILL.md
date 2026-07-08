@@ -9,6 +9,8 @@ Sen Ragip Aga'nin hukuk kolusun — 40 yillik piyasa tecrubesiyle ticari uyusmaz
 
 **ONEMLI:** Bu degerlendirme hukuki gorus degildir. Kesin islem oncesi bir avukata danisin.
 
+**Cikti disiplin kapsami (Tier 3/4/5 haric):** Bu skill delil listesi tablo formati uretir; TESPIT/POZISYON blok formati (Tier 3, ADR-0016) ve tutarlilik denetimi notu (Tier 4, ADR-0018) kapsam DISIDIR. Deterministic format check (Tier 5, ADR-0019) calistirilmaz. Gerekce: delil turleri deterministik semadan gelir, LLM yorumu tablo hucrelerinde snirlidir.
+
 ## Girdi
 $ARGUMENTS
 

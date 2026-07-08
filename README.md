@@ -47,6 +47,32 @@ Her kurulumda `config/.ragip_manifest.json` dosyasina 41 core dosyanin SHA-256 c
 | Manifest | 1 | `config/.ragip_manifest.json` |
 | Test | 21 | `tests/test_ragip_*.py` |
 
+## Kim icin, ne verir, ne almaz
+
+**Hedef kullanici:**
+- KOBI sahibi (nakit akisi, tahsilat/odeme dengesi)
+- Muhasebeci / mali musavir (vade farki dogrulama, aging, DSO/DPO)
+- Isletme icin danisman (sozlesme analizi, uyusmazlik pozisyonu, ihtar taslagi)
+
+Yani teknik degil ama Claude Code yuklu bir sistem uzerinde calisabilen bir kullanici.
+
+**Ne verir:**
+- **Hesaplama:** vade farki, TVM firsat maliyeti, iskonto, arbitraj, forward kur — TCMB canli oranlariyla (API key yoksa fallback).
+- **Analiz:** sozlesme/fatura maddeleri, hata tespiti, muzakere kozlari, risk skoru, KDV/hesap dogrulama.
+- **Strateji:** 3 senaryo plani (iyimser/gercekci/hukuki yol), haftalik aksiyon.
+- **Hukuki degerlendirme:** haklilik pozisyonu (GUCLU/ORTA/ZAYIF), mevzuat referansi (TBK/TTK/IIK/HMK/KVKK), zamanasimi hesabi, delil stratejisi, ihtar taslagi.
+- **Cikti disiplini:** 6 katmanli kalite savunmasi (Barnum filtresi, madde dogrulama, CoVe, kaynak whitelist, cikti format zorunlulugu, Tier 6 LLM-judge).
+
+**Ne almaz:**
+- **Hukuki gorus degildir.** Ihtar, dava, icra kararlari icin **avukat kontrolu zorunludur**. Her hukuki cikti bu uyariyi tasir.
+- **Yatirim/finansman tavsiyesi degildir.** Arbitraj hesaplari egitim amaclidir, gercek islem oncesi uzman gorusu gerekli.
+- **Ozel/tescilli bir muhasebe yazilimi degil.** Standart JSON semasi (ADR-0007) uzerinden ERP entegrasyonu MCP tarafinda yapilir; kit tek basina ERP degildir.
+- **Karsi taraf istihbarati SINIRLI:** Findeks, UYAP, KKB gibi yetki gerektiren kaynaklara erisemez — kullanici bu raporlari getirirse analiz yapar.
+- **Otomatik karar vermez.** Her tavsiye kullanicinin onayindan gecer; PRD disiplini (ADR-0017) karmasik islerde onay bekler.
+
+**Sinirlar ve sorumluluk:**
+Detay: [KULLANIM_SARTLARI.md](KULLANIM_SARTLARI.md)
+
 ## Kullanim
 
 ### Slash Komutlari (Skill)
@@ -165,7 +191,7 @@ Testler 17 katmani kapsar:
 18. **Tier 4 dokuman tutarlilik kontrolu** — Cikti sonrasi self-check ([SAYI]/[ETIKET]/[MANTIK]/[SENARYO]), denetim notu zorunlu (ADR-0018), 3 LLM skill kapsam (analiz/strateji/degerlendirme)
 19. **Skill ↔ Agent koordinasyon disiplini** — Skill'e yeni cikti disiplin eklendiginde agent system prompt'unun da paralel guncellenmesi zorunlu (ADR-0019), v2.18.1 audit-driven fix
 20. **Tier 5 deterministic format enforcement** — `ragip_format_dogrula.sh` post-write regex check, 5 zorunlu sinyal (TESPIT/Etki/POZISYON 5-bilesen/Anapara etiket/Tutarlilik denetimi), Exit 2 = blok eksik (ADR-0019 revize, v2.19.0). Prompt-engineering (Tier 1-4) sinirina ulasilinca eklenen deterministik katman.
-21. **Tier 6 — LLM-judge Spirit olcumu** — `ragip_judge.sh` Sonnet 4.5 ile anlamsal kalite olcumu, 6 dimension rubric (TESPIT/ETKI/POZISYON/GEREKCE quality + ETIKET consistency + TUTARLILIK genuine), structured JSON output, cost guard (`--max-budget-usd 0.50` per call, `--max-cumulative-usd 5` haftalik) (ADR-0020, v2.20.0). Tier 5 HARFI, Tier 6 RUHU — komplemen.
+21. **Tier 6 — LLM-judge Spirit olcumu** — `ragip_judge.sh` Sonnet 5 ile anlamsal kalite olcumu, 6 dimension rubric (TESPIT/ETKI/POZISYON/GEREKCE quality + ETIKET consistency + TUTARLILIK genuine), structured JSON output, cost guard (`--max-budget-usd 0.50` per call, `--max-cumulative-usd 5` haftalik) (ADR-0020 v2.20.0, ADR-0022 v2.21.0 model guncelleme). Tier 5 HARFI, Tier 6 RUHU — komplemen.
 
 ## Bagimlilklar
 

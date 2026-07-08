@@ -171,6 +171,8 @@ Satiscilar yazmaz → CRM bos kalir → analiz yapilamaz → kotu kararlar → k
 
 **v2.20.0 GUNCELLEMESI (20 Mayis 2026):** ADR-0020 ile `scripts/ragip_judge.py` eklendi. Sonnet 4.5 model, 6 dimension Boolean + reasoning JSON, cost guard ($0.50 per call / $5 haftalik), mock-only pytest (27 test). Tier 5 (regex HARF) + Tier 6 (LLM-judge RUH) komplemen.
 
+**v2.21.0 GUNCELLEMESI (7 Temmuz 2026):** ADR-0022 ile model `anthropic/claude-sonnet-5` alias'ina cekildi. Fiyat sabitleri muhafazakar tahmin (Sonnet 4.5 seviyesinde) — pricing teyit sonrasi minor patch. Gercek cagri dogrulamasi bekliyor.
+
 **Hala backlog:**
 - Paraphrase-pair stability test (JudgeSense arxiv 2604.23478)
 - Weekly cron integration (`scripts/ragip_cron.sh judge`)
